@@ -1,0 +1,157 @@
+{
+  "name": "AeroGuard C-UAS - SOAR Incident Response & AI Tactical Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aeroguard-incident",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "id": "node-webhook-1",
+      "name": "Webhook (FastAPI Alert)",
+      "webhookId": "aeroguard-incident-webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Analiza la siguiente intrusión de VANT (Dron) en espacio aéreo restringido:\n- Drone ID: {{$json.body.drone.drone_id}}\n- Altitud: {{$json.body.drone.altitude_m}} metros\n- Velocidad: {{$json.body.drone.speed_ms}} m/s\n- Coordenadas: Lat {{$json.body.drone.latitude}}, Lon {{$json.body.drone.longitude}}\n- Zona Restringida: {{$json.body.zone.name}} (Techo máximo permitido: {{$json.body.zone.max_allowed_altitude_m}}m)\n- Confianza IA visual: {{$json.body.drone.ai_confidence}}\n\nGenera un DICTAMEN TÁCTICO breve (máximo 3 oraciones, menos de 55 palabras) con tono militar profesional evaluando amenaza, comportamiento e instrucción operativa.",
+        "options": {
+          "systemMessage": "Eres el Oficial de Inteligencia Artificial C-UAS del sistema AeroGuard. Responde únicamente con el dictamen táctico en español, sin saludos ni preámbulos."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [480, 300],
+      "id": "node-ai-agent-1",
+      "name": "AI Agent (Tactical Threat Analyst)"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [480, 520],
+      "id": "node-openai-model-1",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/api/v1/alerts/ai-verdict",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"incident_id\": \"{{ $('Webhook (FastAPI Alert)').item.json.body.incident_id }}\",\n  \"ai_verdict\": \"{{ $json.output }}\",\n  \"drone_id\": \"{{ $('Webhook (FastAPI Alert)').item.json.body.drone.drone_id }}\",\n  \"threat_level\": \"CRITICAL\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 200],
+      "id": "node-http-callback-1",
+      "name": "HTTP Request (Callback to FastAPI)"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": "TU_CANAL_DE_TELEGRAM_O_CHAT_ID",
+        "text": "=🚨 **ALERTA CRÍTICA C-UAS - AEROGUARD** 🚨\n\n* **Incidente:** `{{ $('Webhook (FastAPI Alert)').item.json.body.incident_id }}`\n* **Dron:** `{{ $('Webhook (FastAPI Alert)').item.json.body.drone.drone_id }}`\n* **Altitud:** {{ $('Webhook (FastAPI Alert)').item.json.body.drone.altitude_m }}m (Límite: {{ $('Webhook (FastAPI Alert)').item.json.body.zone.max_allowed_altitude_m }}m)\n* **Zona:** {{$('Webhook (FastAPI Alert)').item.json.body.zone.name }}\n\n🤖 **Dictamen IA Táctico:**\n> *{{ $('AI Agent (Tactical Threat Analyst)').item.json.output }}*",
+        "otherOptions": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [780, 420],
+      "id": "node-telegram-1",
+      "name": "Telegram (Mando Operativo)",
+      "credentials": {
+        "telegramApi": {
+          "id": "TU_CREDENTIAL_ID_TELEGRAM",
+          "name": "Telegram Bot Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"message\": \"Incident processed by n8n SOAR pipeline\",\n  \"incident_id\": \"{{ $('Webhook (FastAPI Alert)').item.json.body.incident_id }}\",\n  \"ai_verdict\": \"{{ $('AI Agent (Tactical Threat Analyst)').item.json.output }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1020, 300],
+      "id": "node-respond-webhook-1",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook (FastAPI Alert)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Tactical Threat Analyst)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Tactical Threat Analyst)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Callback to FastAPI)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram (Mando Operativo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Tactical Threat Analyst)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Callback to FastAPI)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram (Mando Operativo)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,97 @@
+/* ============================================================
+   AeroGuard — Design System Variables
+   Paleta: Azul oscuro + Cian eléctrico + Rojo alerta
+   ============================================================ */
+
+:root {
+  /* === Colores base === */
+  --bg-primary:       #0a0e1a;
+  --bg-secondary:     #0f1628;
+  --bg-card:          #131c35;
+  --bg-card-hover:    #1a2545;
+  --bg-sidebar:       #0c1220;
+  --bg-topbar:        #0f1628;
+  --bg-input:         #1a2545;
+  --bg-modal:         #111827;
+
+  /* === Color de marca === */
+  --brand-primary:    #00d4ff;
+  --brand-secondary:  #0066ff;
+  --brand-gradient:   linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+  --brand-glow:       0 0 20px rgba(0, 212, 255, 0.4);
+
+  /* === Colores de estado === */
+  --success:          #00e676;
+  --success-bg:       rgba(0, 230, 118, 0.12);
+  --warning:          #ffb300;
+  --warning-bg:       rgba(255, 179, 0, 0.12);
+  --danger:           #ff1744;
+  --danger-bg:        rgba(255, 23, 68, 0.12);
+  --info:             #00d4ff;
+  --info-bg:          rgba(0, 212, 255, 0.12);
+  --neutral:          #546e7a;
+
+  /* === Texto === */
+  --text-primary:     #e8f0fe;
+  --text-secondary:   #8899bb;
+  --text-muted:       #546e7a;
+  --text-accent:      #00d4ff;
+
+  /* === Bordes === */
+  --border:           rgba(0, 212, 255, 0.12);
+  --border-focus:     rgba(0, 212, 255, 0.5);
+  --border-card:      rgba(255, 255, 255, 0.06);
+
+  /* === Glassmorphism === */
+  --glass-bg:         rgba(255, 255, 255, 0.04);
+  --glass-border:     rgba(255, 255, 255, 0.08);
+  --glass-blur:       backdrop-filter: blur(12px);
+
+  /* === Sidebar === */
+  --sidebar-width:    260px;
+  --sidebar-collapsed: 72px;
+  --topbar-height:    64px;
+
+  /* === Tipografía === */
+  --font-main:        'Inter', 'Outfit', system-ui, sans-serif;
+  --font-mono:        'JetBrains Mono', 'Fira Code', monospace;
+  --font-size-xs:     11px;
+  --font-size-sm:     13px;
+  --font-size-md:     15px;
+  --font-size-lg:     18px;
+  --font-size-xl:     22px;
+  --font-size-2xl:    28px;
+  --font-size-3xl:    36px;
+
+  /* === Espaciado === */
+  --spacing-xs:  4px;
+  --spacing-sm:  8px;
+  --spacing-md:  16px;
+  --spacing-lg:  24px;
+  --spacing-xl:  32px;
+  --spacing-2xl: 48px;
+
+  /* === Bordes redondeados === */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* === Sombras === */
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 30px rgba(0, 212, 255, 0.2);
+
+  /* === Transiciones === */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms ease;
+
+  /* === Alertas por severidad === */
+  --severity-critical: #ff1744;
+  --severity-high:     #ff6d00;
+  --severity-medium:   #ffb300;
+  --severity-low:      #00e676;
+}

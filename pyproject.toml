@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeroguard-cuas"
+version = "1.1.0"
+description = "AeroGuard C-UAS — Sistema de Detección y Neutralización de Drones"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "AeroGuard Team", email = "aeroguard@uts.edu.co" },
+]
+
+# ==============================================================================
+# Ruff Linter & Formatter Configuration
+# ==============================================================================
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = [
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "scratch",
+    "dist",
+    "build",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes (variables no utilizadas, imports rotos, sintaxis)
+    "I",   # isort (ordenamiento estandarizado de imports)
+    "B",   # flake8-bugbear (patrones propensos a bugs)
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade (modernización sintaxis Python 3.11+)
+]
+ignore = [
+    "E501",  # Longitud de línea (gestionada por el formateador)
+    "B008",  # Permitir Depends(...) y Query(...) en firmas de endpoints FastAPI
+    "B904",  # Permitir raise ... sin from en excepciones HTTP
+    "C408",  # Permitir llamadas dict() y tuple() tradicionales
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# ==============================================================================
+# Pytest Configuration
+# ==============================================================================
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["backend/tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["backend"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+

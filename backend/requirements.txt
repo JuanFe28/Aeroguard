@@ -1,0 +1,48 @@
+# AeroGuard — Backend Runtime Requirements
+# Python 3.11+
+# Dependencias de testing en requirements-dev.txt (no se instalan en la imagen de producción)
+
+# API Framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+
+# Database
+sqlalchemy==2.0.36
+alembic==1.13.3
+asyncpg==0.30.0
+aiosqlite==0.20.0   # Fallback SQLite cuando PostgreSQL no está disponible
+
+# Security (OAuth2 + JWT)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography==43.0.3
+
+# Messaging
+pika==1.3.2
+aio-pika==9.4.3
+
+# AI / Vision
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+pillow==11.0.0
+
+# Reports
+reportlab==4.2.5
+openpyxl==3.1.5
+jinja2==3.1.4
+
+# Utils
+python-dotenv==1.0.1
+pydantic==2.9.2
+pydantic-settings==2.6.0
+email-validator==2.2.0
+httpx==0.27.2
+websockets==13.1
+apscheduler==3.10.4
+celery==5.4.0
+redis==5.2.0
+
+# Logging & Monitoring
+structlog==24.4.0
+prometheus-fastapi-instrumentator==7.0.0

@@ -1,0 +1,106 @@
+# ==============================================================================
+# AeroGuard C-UAS — Git Ignore Configuration
+# ==============================================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
+.venv/
+venv/
+ENV/
+env/
+.env/
+env.bak/
+venv.bak/
+
+# --- Testing & Coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+htmlcov/
+.tox/
+.nox/
+
+# --- Node / Frontend ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Databases & Local Storage ---
+*.db
+*.sqlite
+*.sqlite3
+aeroguard.db
+*.db-journal
+postgres_data/
+rabbitmq_data/
+reports_data/
+tmp/
+/tmp/aeroguard/
+*.log
+
+# --- Generated Reports (Keep templates, ignore outputs) ---
+backend/reports/*.pdf
+backend/reports/*.xlsx
+reports/*.pdf
+reports/*.xlsx
+
+# --- Secrets & Environment Variables ---
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+# Permitir explícitamente el archivo de plantilla
+!.env.example
+
+# --- IDEs & OS Metadata ---
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# Mantener configuración útil de VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# --- Scratch & Archivos Temporales ---
+scratch/
+.system_generated/

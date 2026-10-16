@@ -1,0 +1,237 @@
+--------------------------------------------------------------------------------
+2. ARQUITECTURA TECNOLÓGICA (STACK)
+--------------------------------------------------------------------------------
+El sistema está construido bajo una arquitectura cliente-servidor desacoplada,
+reactiva y de alto rendimiento:
+
+A) FRONTEND (Cliente Web SPA):
+   - Arquitectura: Single Page Application (SPA) con patrón MVVM (Model-View-ViewModel).
+   - Tecnologías base: HTML5 semántico, JavaScript Vanilla (ES6+ modular), CSS3 moderno.
+   - Diseño visual: Tema oscuro táctico militar con efectos de Glassmorphism, diseño
+     completamente responsivo e indicadores de estado dinámicos.
+   - Mapas y Georreferenciación: Leaflet.js para representación geoespacial
+     en tiempo real con polígonos vectoriales y seguimiento de trayectorias.
+   - Gráficas y Métricas: Chart.js para telemetría, distribución de amenazas e histórico.
+
+B) BACKEND (API RESTful y Streaming):
+   - Framework: FastAPI (Python 3) con soporte totalmente asíncrono (async/await).
+   - Comunicación en Vivo: WebSockets bidireccionales (/ws/live) para transmisión
+     de telemetría de drones y alertas en milisegundos, complementado con un motor
+     de Polling de respaldo automático.
+   - Seguridad: OAuth 2.0 con tokens JWT, hashing de contraseñas con Bcrypt y
+     Control de Acceso Basado en Roles (RBAC).
+
+C) BASE DE DATOS:
+   - Motor: PostgreSQL 16 (con soporte de tipos JSONB para coordenadas de polígonos).
+   - ORM: SQLAlchemy 2.0 asíncrono con driver asyncpg.
+   - Trazabilidad: Registro automatizado de auditoría (logs de logins, creación/edición
+     de zonas y alertas generadas).
+
+D) MICROSERVICIOS DE SOPORTE:
+   - AI Service: Clasificación inteligente del nivel de amenaza según patrón de vuelo.
+   - Sensor Simulator: Generador de telemetría de radares, sensores RF y cámaras.
+
+
+--------------------------------------------------------------------------------
+3. MÓDULOS Y FUNCIONALIDADES PRINCIPALES
+--------------------------------------------------------------------------------
+1. DASHBOARD TÁCTICO EN TIEMPO REAL:
+   - Mapa central con radar de cobertura y marcadores de drones en vuelo activo.
+   - Panel de telemetría en vivo: altitud, velocidad, rumbo y nivel de amenaza.
+   - Indicador de conexión global en tiempo real (WebSocket activo).
+   - Tarjetas de métricas clave (drones detectados, alertas activas, zonas seguras).
+
+2. GESTIÓN DE ZONAS RESTRINGIDAS (GEOFENCING):
+   - Visualización y administración de polígonos de exclusión aérea persistidos en base de datos.
+   - Cobertura multirregional con botones de salto rápido:
+     * Bogotá: Aeropuerto El Dorado, Centro de Operaciones, Zona Norte.
+     * Bucaramanga: Aeropuerto Palonegro, Complejo Gubernamental Santander.
+     * Botón "Ver Todas" para encuadre nacional simultáneo.
+   - Herramienta interactiva para dibujar nuevos polígonos directamente en el mapa.
+   - Parámetros por zona: altitud mínima/máxima, nivel de severidad y activación/desactivación.
+
+3. SISTEMA DE ALERTAS E INCURSIONES:
+   - Detección automática cuando un dron cruza los límites 3D de una zona restringida.
+   - Clasificación por severidad (Crítica, Alta, Media, Baja).
+   - Notificaciones emergentes (Toasts) y tabla histórica de eventos con filtros.
+
+4. CONTROL DE ACCESO BASADO EN ROLES (RBAC):
+   - Administrador: Control total (creación/edición/eliminación de zonas, usuarios y configuración).
+   - Operador: Monitoreo operativo, gestión de alertas y visualización táctica.
+   - Analista: Acceso a reportes históricos, estadísticas y auditoría.
+
+5. RED DE SENSORES Y ESTADO DEL SISTEMA:
+   - Monitoreo del estado operativo de los sensores en tierra (Radar, RF, Óptico).
+   - Indicadores de cobertura, estado de batería y nivel de señal.
+
+
+--------------------------------------------------------------------------------
+4. GUION SUGERIDO PARA LA EXPOSICIÓN (5 A 7 MINUTOS)
+--------------------------------------------------------------------------------
+PASO 1: INTRODUCCIÓN (1 minuto)
+- Saludar y presentar el nombre del proyecto: "AeroGuard".
+- Explicar la problemática: la proliferación de drones no tripulados que invaden
+  espacios restringidos (aeropuertos, zonas militares, eventos masivos).
+- Presentar el propósito del proyecto: una solución C-UAS que integra hardware
+  simulado, inteligencia artificial, backend asíncrono y visualización web táctica.
+
+PASO 2: DEMOSTRACIÓN EN VIVO - LOGIN Y ROLES (1 minuto)
+- Mostrar la pantalla de inicio de sesión (`http://localhost:3000`).
+- Explicar la seguridad: uso de autenticación JWT y control de roles (RBAC).
+- Iniciar sesión con el usuario Administrador (`admin` / `Admin@12345`).
+
+PASO 3: DEMOSTRACIÓN EN VIVO - DASHBOARD Y RADAR (2 minutos)
+- Mostrar el Dashboard: resaltar la estética militar táctica oscura.
+- Señalar el indicador superior derecho "En Vivo" conectado mediante WebSockets.
+- Mostrar cómo el mapa ubica los drones en vuelo en tiempo real y cómo las
+  tarjetas de telemetría reflejan altitud, velocidad y nivel de amenaza instantáneo.
+
+PASO 4: DEMOSTRACIÓN EN VIVO - ZONAS RESTRINGIDAS (2 minutos)
+- Ir al módulo "Zonas Restringidas" (`#/zones`).
+- Mostrar las 5 zonas estratégicas cargadas desde PostgreSQL:
+  * Mostrar los botones rápidos: clic en "📍 Bogotá" (muestra El Dorado),
+    clic en "📍 Bucaramanga" (muestra Palonegro) y clic en "⛶ Ver Todas".
+- Explicar el concepto de Geofencing: cada zona tiene un polígono geográfico
+  delimitado con coordenadas precisas y límites de altitud máxima/mínima.
+- Mostrar cómo al hacer clic en una tarjeta de zona, el mapa vuela suavemente
+  hacia sus coordenadas.
+
+PASO 5: ARQUITECTURA Y CONCLUSIÓN (1 minuto)
+- Resumir el stack técnico: FastAPI en Python, PostgreSQL para persistencia de datos,
+  WebSockets para baja latencia y Vanilla JS con Leaflet en el cliente.
+- Resaltar el valor agregado: solución integral, modular, escalable y con capacidad
+  de despliegue real o en simulación.
+- Abrir espacio para preguntas del profesor o compañeros.
+
+
+--------------------------------------------------------------------------------
+5. CREDENCIALES Y DATOS DE ACCESO PARA LA DEMO
+--------------------------------------------------------------------------------
+Servidores locales activos:
+- Frontend: http://localhost:3000
+- Backend API (FastAPI): http://localhost:8000
+- Documentación Interactiva Swagger: http://localhost:8000/docs
+
+Usuarios registrados para pruebas:
+-------------------------------------------------------------------------------
+ROL            USUARIO              EMAIL                    CONTRASEÑA
+-------------------------------------------------------------------------------
+Administrador  admin                admin@aeroguard.co       Admin@12345
+Operador       operador             operador@aeroguard.co    Operator@12345
+Analista       analista             analista@aeroguard.co    Analyst@12345
+-------------------------------------------------------------------------------
+* Nota: El inicio de sesión acepta indistintamente el nombre de usuario o el email.
+
+
+--------------------------------------------------------------------------------
+6. UBIACIÓN DE ARCHIVOS CLAVE (MAPA DE RUTA DEL PROYECTO)
+--------------------------------------------------------------------------------
+
+A) BASE DE DATOS Y CONFIGURACIÓN:
+- Conexión PostgreSQL / SQLAlchemy: backend/app/core/database.py
+- Definición de Modelos (Tablas SQL): backend/app/models/models.py
+- Script de Inicialización / Seeds SQL: backend/init.sql
+- Configuración y Variables de Entorno: backend/app/core/config.py
+
+B) AUTENTICACIÓN Y SEGURIDAD (JWT & RBAC):
+- Hashing Bcrypt y Creación de Tokens: backend/app/core/security.py
+- Endpoint de Autenticación (/api/v1/auth/token): backend/app/api/v1/endpoints/auth.py
+- Servicio de Autenticación y HTTP en Frontend: frontend/src/services/api.service.js
+
+C) WEBSOCKETS Y TIEMPO REAL:
+- Endpoint WebSocket Backend (/ws/live): backend/app/api/v1/endpoints/websocket.py
+- Cliente Singleton y Polling Fallback: WebSocketService en frontend/src/services/api.service.js
+
+D) ENDPOINTS Y LÓGICA DE NEGOCIO (BACKEND):
+- Servidor Central FastAPI: backend/app/main.py
+- CRUD Zonas Restringidas: backend/app/api/v1/endpoints/zones.py
+- Detecciones y Telemetría: backend/app/api/v1/endpoints/detections.py
+- Alertas de Seguridad: backend/app/api/v1/endpoints/alerts.py
+
+E) FRONTEND Y VISTAS (PATRÓN MVVM):
+- Enrutador SPA y Shell Táctico: frontend/src/app.js & frontend/index.html
+- Vista de Zonas Restringidas y Leaflet: frontend/src/views/zones.view.js
+- ViewModel del Dashboard: frontend/src/viewmodels/dashboard.viewmodel.js
+- Modelos de Datos en Frontend: frontend/src/models/models.js
+
+F) SERVIDORES Y INFRAESTRUCTURA:
+- Servidor Frontend Anti-Caché: run_dev_server.py
+- Docker Compose (PostgreSQL, API, Nginx): docker-compose.yml
+
+
+--------------------------------------------------------------------------------
+7. ESTRUCTURA Y ÁRBOL DEL PROYECTO (CON FUNCIONALIDADES POR CARPETA)
+--------------------------------------------------------------------------------
+
+AeroguardClase/
+│
+├── backend/                             --> [Backend API & WebSockets (FastAPI / Python)]
+│   ├── app/                             --> Código fuente principal de la aplicación FastAPI
+│   │   ├── api/                         --> Definición de rutas y endpoints de la API (v1)
+│   │   │   └── v1/
+│   │   │       ├── endpoints/           --> Controladores por recurso
+│   │   │       │   ├── auth.py          --> Autenticación OAuth2/JWT y manejo de login/tokens
+│   │   │       │   ├── zones.py         --> CRUD de zonas restringidas y validación 3D
+│   │   │       │   ├── detections.py    --> Ingesta y consulta de detecciones de drones
+│   │   │       │   ├── alerts.py        --> Generación y gestión de alertas por incursión
+│   │   │       │   ├── users.py         --> Administración de usuarios y roles (RBAC)
+│   │   │       │   ├── sensors.py       --> Telemetría y estado de sensores en tierra
+│   │   │       │   ├── reports.py       --> Reportes estadísticos e historial forense
+│   │   │       │   └── websocket.py     --> Servidor WebSocket en tiempo real (/ws/live)
+│   │   │       └── api.py               --> Enrutador central que unifica todos los endpoints
+│   │   ├── core/                        --> Núcleo de configuración y utilidades globales
+│   │   │   ├── config.py                --> Variables de entorno (JWT Secret, DB URL, puertos)
+│   │   │   ├── database.py              --> Conexión PostgreSQL (asyncpg), ORM y seed inicial
+│   │   │   └── security.py              --> Encriptación Bcrypt y generación/verificación JWT
+│   │   ├── models/                      --> Modelos de datos del ORM (SQLAlchemy)
+│   │   │   └── models.py                --> Tablas SQL (users, restricted_zones, detections, etc.)
+│   │   ├── schemas/                     --> Esquemas de validación (Pydantic)
+│   │   │   └── schemas.py               --> Validación de entrada/salida de datos para la API REST
+│   │   ├── services/                    --> Lógica de negocio aislada
+│   │   │   ├── user_service.py          --> Lógica de autenticación e historial de logins
+│   │   │   ├── zone_service.py          --> Algoritmo geoespacial 3D para polígonos
+│   │   │   ├── detection_service.py     --> Procesamiento de trayectorias de drones
+│   │   │   ├── alert_service.py         --> Generación automatizada de alertas
+│   │   │   └── audit_service.py         --> Registro de auditoría de seguridad OWASP
+│   │   └── main.py                      --> Punto de entrada del backend, CORS y arranque Uvicorn
+│   ├── init.sql                         --> Script SQL para estructurar la BD e insertar semillas
+│   ├── Dockerfile                       --> Receta de contenedor Docker para el backend
+│   └── requirements.txt                 --> Lista de dependencias de Python (FastAPI, asyncpg, etc.)
+│
+├── frontend/                            --> [Cliente Web SPA en Vanilla JavaScript (ES6+)]
+│   ├── src/                             --> Código fuente modular del cliente
+│   │   ├── models/                      --> Clases modelo del cliente
+│   │   │   └── models.js                --> Clases RestrictedZoneModel, DetectionModel, AlertModel
+│   │   ├── services/                    --> Servicios de comunicación e integración
+│   │   │   └── api.service.js           --> Cliente HTTP (AuthService, ZoneService) y WebSocketService
+│   │   ├── viewmodels/                  --> Lógica de estado e interacción (Patrón MVVM)
+│   │   │   ├── dashboard.viewmodel.js   --> Consumo de eventos WebSocket y radar en vivo
+│   │   │   ├── login.viewmodel.js       --> Lógica del formulario de inicio de sesión
+│   │   │   └── zones.viewmodel.js       --> Lógica de dibujo y manipulación de polígonos
+│   │   ├── views/                       --> Renderizado de componentes e interfaz de usuario
+│   │   │   ├── dashboard.view.js        --> Tablero táctico central, mapa y estadísticas
+│   │   │   ├── zones.view.js            --> Módulo de zonas restringidas y mapa Leaflet.js
+│   │   │   ├── alerts.view.js           --> Centro de alertas de seguridad e incursiones
+│   │   │   ├── detections.view.js       --> Historial y tabla de detecciones de drones
+│   │   │   ├── login.view.js            --> Pantalla de autenticación y acceso
+│   │   │   ├── users.view.js            --> Gestión de usuarios y permisos (RBAC)
+│   │   │   ├── sensors.view.js          --> Red de sensores y estado operativo
+│   │   │   └── misc.views.js            --> Vistas secundarias (Configuración, Reportes, Ayuda)
+│   │   ├── app.js                       --> Enrutador SPA por hash, layout shell táctico e inicio socket
+│   │   └── main.js                      --> Punto de entrada JavaScript invocado por index.html
+│   ├── index.html                       --> Documento HTML principal contenedor de la SPA
+│   └── styles/                          --> Hojas de estilo CSS personalizadas
+│       └── main.css                     --> Sistema de diseño táctico (Glassmorphism, Tema Oscuro)
+│
+├── ai_service/                          --> [Microservicio de IA de Clasificación (Opcional)]
+│   └── app/                             --> Modelos de predicción e incursiones de amenazas UAV
+│
+├── sensor_simulator/                    --> [Microservicio Simulador de Sensores en Tierra]
+│   └── simulator.py                     --> Generador de telemetría continua de radares y sensores RF
+│
+├── run_dev_server.py                    --> Servidor web local de desarrollo Frontend con Anti-Caché
+├── docker-compose.yml                   --> Orquestador Docker (PostgreSQL 16, Backend API, Nginx)
+├── nginx.conf                           --> Configuración Nginx como Reverse Proxy para producción
+├── pyrightconfig.json                   --> Configuración de resolución de rutas para el IDE/Python
+└── INFORMACION_EXPOSICION_AEROGUARD.txt --> Ficha técnica completa y guion de exposición
+

@@ -1,0 +1,16 @@
+# Evita enviar artefactos locales al build context
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+.env.*
+*.db
+*.sqlite3
+tests/e2e_full_simulation.py
+Dockerfile
+.dockerignore

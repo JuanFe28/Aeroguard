@@ -1,0 +1,161 @@
+# ============================================================
+# AeroGuard — Docker Compose
+# Servicios: PostgreSQL, RabbitMQ, Backend, Frontend, AI Service, Simulator
+# ============================================================
+
+services:
+
+  # ====== PostgreSQL ======
+  postgres:
+    image: postgres:16-alpine
+    container_name: aeroguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       aeroguard
+      POSTGRES_USER:     aeroguard
+      POSTGRES_PASSWORD: aeroguard_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aeroguard -d aeroguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aeroguard-net
+
+  # ====== RabbitMQ ======
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: aeroguard-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: aeroguard
+      RABBITMQ_DEFAULT_PASS: aeroguard_pass
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI (http://localhost:15672)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - aeroguard-net
+
+  # ====== Backend (FastAPI) ======
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    image: aeroguard/backend:latest
+    container_name: aeroguard-backend
+    restart: unless-stopped
+    environment:
+      APP_ENV:            production
+      DATABASE_URL:       postgresql+asyncpg://aeroguard:aeroguard_pass@postgres:5432/aeroguard
+      RABBITMQ_URL:       amqp://aeroguard:aeroguard_pass@rabbitmq:5672/
+      SECRET_KEY:         ${SECRET_KEY:-CHANGE_THIS_IN_PRODUCTION_MIN_32_CHARS_REQUIRED}
+      AI_ENABLED:         "true"
+      ALERTS_ENABLED:     "true"
+      LOG_LEVEL:          INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - reports_data:/tmp/aeroguard/reports
+    networks:
+      - aeroguard-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ====== Frontend (Nginx) ======
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: runtime
+    image: aeroguard/frontend:latest
+    container_name: aeroguard-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - aeroguard-net
+
+  # ====== AI Service ======
+  ai-service:
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+      target: runtime
+    image: aeroguard/ai-service:latest
+    container_name: aeroguard-ai
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL:            amqp://aeroguard:aeroguard_pass@rabbitmq:5672/
+      QUEUE_AI_PROCESSING:     ai.processing
+      AI_CONFIDENCE_THRESHOLD: "0.70"
+      AI_USE_YOLO:             "false"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - aeroguard-net
+
+  # ====== Sensor Simulator ======
+  simulator:
+    build:
+      context: ./sensor_simulator
+      dockerfile: Dockerfile
+      target: runtime
+    image: aeroguard/simulator:latest
+    container_name: aeroguard-simulator
+    restart: unless-stopped
+    environment:
+      BACKEND_URL:      http://backend:8000/api/v1
+      SIMULATOR_TOKEN:  ""
+      INTERVAL_SEC:     "3"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - aeroguard-net
+
+# ============================================================
+# Volumes
+# ============================================================
+
+volumes:
+  postgres_data:
+    name: aeroguard_postgres_data
+  rabbitmq_data:
+    name: aeroguard_rabbitmq_data
+  reports_data:
+    name: aeroguard_reports_data
+
+# ============================================================
+# Networks
+# ============================================================
+
+networks:
+  aeroguard-net:
+    name: aeroguard_network
+    driver: bridge

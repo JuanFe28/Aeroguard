@@ -1,0 +1,36 @@
+{
+  "name": "aeroguard-cuas",
+  "version": "1.1.0",
+  "description": "AeroGuard C-UAS — Sistema de Detección, Monitoreo y Neutralización de Drones",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:syntax:py": "python scripts/check_python_syntax.py",
+    "check:syntax:js": "node scripts/check_js_syntax.js",
+    "check:syntax": "npm run check:syntax:js && npm run check:syntax:py",
+    "lint:js": "eslint frontend/src/",
+    "lint:js:fix": "eslint frontend/src/ --fix",
+    "lint:py": "python -m ruff check backend/ ai_service/ sensor_simulator/",
+    "lint:py:fix": "python -m ruff check --fix backend/ ai_service/ sensor_simulator/",
+    "format:check": "prettier --check \"frontend/src/**/*.{js,css}\"",
+    "format:write": "prettier --write \"frontend/src/**/*.{js,css}\"",
+    "lint": "npm run check:syntax",
+    "test:backend": "python -m pytest backend/tests -q"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.3"
+  },
+  "keywords": [
+    "c-uas",
+    "drones",
+    "fastapi",
+    "vanillajs",
+    "webaudio",
+    "postgis",
+    "yolo"
+  ],
+  "author": "AeroGuard Team (UTS)",
+  "license": "UNLICENSED"
+}

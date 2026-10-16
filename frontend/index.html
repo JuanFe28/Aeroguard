@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="AeroGuard — Sistema de detección, clasificación y monitoreo de drones no autorizados mediante visión artificial en tiempo real." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0a0e1a" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AeroGuard — Sistema de Monitoreo de Drones" />
+  <meta property="og:description" content="Prototipo académico para detección y monitoreo de drones no autorizados." />
+  <meta property="og:type" content="website" />
+
+  <title>AeroGuard — Sistema de Monitoreo</title>
+
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- AeroGuard CSS -->
+  <link rel="stylesheet" href="./src/assets/css/global.css" />
+  <link rel="stylesheet" href="./src/assets/css/pages.css" />
+
+  <!-- Favicon inline SVG -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+
+  <!-- Config (override before main.js) -->
+  <script>
+    // API configuration — change these to point to your backend
+    window.AEROGUARD_API_URL = 'http://localhost:8000/api/v1';
+    window.AEROGUARD_WS_URL = 'ws://localhost:8000/ws';
+    window.GOOGLE_MAPS_API_KEY = 'AIzaSyCE5ZGHU7pxBnCq7xHludUhl2sOGW7-sw4'; 
+    window.AEROGUARD_DEMO_MODE = true; // Set to true for local dev/demo
+  </script>
+</head>
+
+<body>
+  <!-- App Shell -->
+  <div id="app" role="application" aria-label="AeroGuard — Sistema de Monitoreo">
+    <!-- Splash Screen (shown while JS loads) -->
+    <div id="splash" style="
+      position:fixed;inset:0;
+      background:#0a0e1a;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      gap:24px;z-index:9999;
+      transition:opacity 0.5s ease;
+    " role="status" aria-label="Cargando AeroGuard">
+      <div style="
+        width:64px;height:64px;
+        background:linear-gradient(135deg,#0066ff 0%,#00d4ff 100%);
+        border-radius:16px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:36px;
+        animation:pulse-glow 2s infinite;
+        box-shadow:0 0 30px rgba(0,212,255,0.5);
+      " aria-hidden="true">🛡️</div>
+      <div style="text-align:center">
+        <div style="
+          font-family:'Inter',sans-serif;
+          font-size:28px;font-weight:800;
+          background:linear-gradient(135deg,#0066ff,#00d4ff);
+          -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+          letter-spacing:3px;
+        ">AEROGUARD</div>
+        <div
+          style="font-family:'Inter',sans-serif;font-size:12px;color:#546e7a;letter-spacing:2px;text-transform:uppercase;margin-top:4px">
+          Sistema de Monitoreo
+        </div>
+      </div>
+      <div style="display:flex;gap:8px" aria-hidden="true">
+        <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;animation:dot-bounce 1.2s infinite 0s">
+        </div>
+        <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;animation:dot-bounce 1.2s infinite 0.2s">
+        </div>
+        <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;animation:dot-bounce 1.2s infinite 0.4s">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+      }
+    }
+
+    @keyframes dot-bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(-8px);
+        opacity: 0.5;
+      }
+    }
+  </style>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- AeroGuard SPA -->
+  <script type="module" src="./src/main.js"></script>
+
+  <script>
+    // Remove splash once main module loads
+    window.addEventListener('load', () => {
+      const splash = document.getElementById('splash');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.remove(), 500);
+      }
+    });
+  </script>
+</body>
+
+</html>

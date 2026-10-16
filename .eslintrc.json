@@ -1,0 +1,40 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "globals": {
+    "L": "readonly",
+    "AEROGUARD_API_URL": "readonly",
+    "AEROGUARD_WS_URL": "readonly",
+    "AEROGUARD_DEMO_MODE": "readonly",
+    "GOOGLE_MAPS_API_KEY": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-undef": "error",
+    "no-const-assign": "error",
+    "no-dupe-keys": "error",
+    "no-unreachable": "warn",
+    "eqeqeq": ["warn", "smart"],
+    "no-var": "warn",
+    "prefer-const": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "backend/",
+    "ai_service/",
+    "sensor_simulator/",
+    "scratch/"
+  ]
+}

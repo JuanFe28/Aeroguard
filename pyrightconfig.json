@@ -1,0 +1,11 @@
+{
+  "include": [
+    "backend",
+    "ai_service",
+    "sensor_simulator",
+    "scratch"
+  ],
+  "extraPaths": [
+    "backend"
+  ]
+}

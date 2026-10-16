@@ -1,0 +1,7 @@
+# Root build context is only used by frontend/Dockerfile.
+# Allowlist: send just the SPA and the nginx config.
+*
+!frontend/
+!nginx.conf
+frontend/Dockerfile
+**/.DS_Store

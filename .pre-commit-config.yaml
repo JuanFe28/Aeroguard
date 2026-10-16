@@ -1,0 +1,52 @@
+# ==============================================================================
+# AeroGuard C-UAS — Configuración de Pre-Commit Hooks
+# ==============================================================================
+# Instalar:   pip install pre-commit && pre-commit install
+# Ejecutar:   pre-commit run --all-files
+# ==============================================================================
+
+repos:
+  # ------------------------------------------------------------
+  # Hooks generales de formato e integridad de archivos
+  # ------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(\.vscode/|scratch/)
+      - id: end-of-file-fixer
+        exclude: ^(\.vscode/|scratch/)
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=2048']
+
+  # ------------------------------------------------------------
+  # Ruff: Linter y Formatter ultrarrápido para Python
+  # ------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # ------------------------------------------------------------
+  # Hooks locales nativos (Python py_compile + Node V8 check)
+  # ------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: python-syntax-check
+        name: AeroGuard Python Syntax Checker (py_compile)
+        entry: python scripts/check_python_syntax.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: js-syntax-check
+        name: AeroGuard JavaScript Syntax Checker (Node V8)
+        entry: node scripts/check_js_syntax.js
+        language: system
+        pass_filenames: false
+        always_run: true
