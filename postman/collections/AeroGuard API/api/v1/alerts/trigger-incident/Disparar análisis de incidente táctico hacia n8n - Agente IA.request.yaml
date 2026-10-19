@@ -1,0 +1,141 @@
+$kind: http-request
+name: Disparar análisis de incidente táctico hacia n8n / Agente IA
+description: |-
+  Dispara el análisis táctico de un incidente aéreo:
+  - Despacha webhook hacia n8n SOAR
+  - Ejecuta motor táctico embebido si n8n no está disponible
+  - Retransmite el dictamen generado en tiempo real por WebSocket
+url: "{{baseUrl}}/api/v1/alerts/trigger-incident"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "event_type": null,
+      "incident_id": "string",
+      "drone": {
+        "drone_id": "UAV-HK-402",
+        "latitude": 7.1193,
+        "longitude": -73.1227,
+        "altitude_m": 145,
+        "speed_ms": 19.4,
+        "heading_deg": 182,
+        "ai_confidence": null
+      },
+      "zone": null
+    }
+  $type: |-
+    {
+      "title": "TriggerIncidentSchema",
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "title": "Event Type",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "incident_id": {
+          "title": "Incident Id",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "drone": {
+          "anyOf": [
+            {
+              "title": "DroneTelemetrySchema",
+              "type": "object",
+              "properties": {
+                "drone_id": {
+                  "type": "string",
+                  "title": "Drone Id"
+                },
+                "latitude": {
+                  "type": "number",
+                  "title": "Latitude"
+                },
+                "longitude": {
+                  "type": "number",
+                  "title": "Longitude"
+                },
+                "altitude_m": {
+                  "type": "number",
+                  "title": "Altitude M"
+                },
+                "speed_ms": {
+                  "type": "number",
+                  "title": "Speed Ms"
+                },
+                "heading_deg": {
+                  "type": "number",
+                  "title": "Heading Deg"
+                },
+                "ai_confidence": {
+                  "title": "Ai Confidence",
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "title": "ZoneInfoSchema",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "max_allowed_altitude_m": {
+                  "type": "number",
+                  "title": "Max Allowed Altitude M"
+                },
+                "restriction_type": {
+                  "title": "Restriction Type",
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+settings: {}
+examples: ./.resources/Disparar análisis de incidente táctico hacia n8n - Agente IA.resources/examples
+order: 1000

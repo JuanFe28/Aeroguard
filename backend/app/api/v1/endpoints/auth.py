@@ -8,15 +8,17 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 
 from app.core.security import (
     verify_password, create_access_token, create_refresh_token,
     create_reset_token, decode_token, get_current_user,
-    hash_password, validate_password_strength
+    hash_password, validate_password_strength, get_user_from_token
 )
 from app.core.config import settings
 
 router = APIRouter()
+logger = structlog.get_logger("AeroGuard-Auth")
 
 
 # ============================================================
@@ -101,8 +103,8 @@ async def login(
                         user_agent=request.headers.get("user-agent"),
                         details={"reason": "invalid_credentials"},
                     )
-                except Exception:
-                    pass
+                except Exception as audit_error:
+                    logger.warning("No se pudo registrar el intento de acceso fallido", error=str(audit_error))
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Credenciales incorrectas.",
@@ -162,7 +164,8 @@ async def refresh_token(body: RefreshRequest):
     payload = decode_token(body.refresh_token)
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=400, detail="Token de tipo incorrecto.")
-    new_token = create_access_token({"sub": payload["sub"], "role": payload.get("role")})
+    user = await get_user_from_token(body.refresh_token, expected_type="refresh")
+    new_token = create_access_token({"sub": user.username, "role": user.role})
     return {"access_token": new_token, "token_type": "bearer"}
 
 

@@ -7,6 +7,7 @@ Cumple con la especificación de HU-02 y los escenarios 3 y 4 de Gherkin.
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 import os
+import tempfile
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import Response, StreamingResponse
@@ -200,14 +201,14 @@ async def create_report(
         ext = "pdf"
 
     now = datetime.now(timezone.utc)
-    filename = f"{body.type.value}_{now.strftime('%Y%m%d_%H%M%S')}.{ext}"
-
-    # Guardar en disco si la carpeta existe
-    reports_dir = getattr(settings, "REPORTS_DIR", "/tmp/aeroguard/reports")
+    # Creación exclusiva: evita sobrescrituras y archivos precreados por terceros.
+    reports_dir = settings.REPORTS_DIR
     try:
-        os.makedirs(reports_dir, exist_ok=True)
-        file_path = os.path.join(reports_dir, filename)
-        with open(file_path, "wb") as f:
+        os.makedirs(reports_dir, mode=0o700, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="wb", prefix=f"{body.type.value}_", suffix=f".{ext}",
+            dir=reports_dir, delete=False,
+        ) as f:
             f.write(file_bytes)
     except Exception as e:
         logger.warning("No se pudo escribir en REPORTS_DIR, persistiendo en memoria", error=str(e))
@@ -286,8 +287,8 @@ async def get_report(
         report = result.scalar_one_or_none()
         if report:
             return report
-    except Exception:
-        pass
+    except Exception as error:
+        logger.warning("No se pudo consultar el reporte; se usará el descriptor de demostración", error=str(error))
 
     # Si no está en BD o BD offline, devolver descriptor de demo
     now = datetime.now(timezone.utc)

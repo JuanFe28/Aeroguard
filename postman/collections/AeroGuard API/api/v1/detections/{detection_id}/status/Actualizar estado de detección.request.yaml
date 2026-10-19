@@ -1,0 +1,59 @@
+$kind: http-request
+description: Cambia el estado de una detección (active, pending, resolved, discarded).
+url: "{{baseUrl}}/api/v1/detections/:detection_id/status?new_status=active"
+method: PATCH
+headers:
+  Accept: application/json
+queryParams:
+  - key: new_status
+    value: active
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "DetectionStatus",
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "resolved",
+              "discarded"
+            ]
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+pathVariables:
+  - key: detection_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Detection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Actualizar estado de detección.resources/examples
+order: 1000

@@ -1,0 +1,36 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/ai/analyze"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: multipart/form-data
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: <token>
+      description: "Added as a part of security scheme: oauth2"
+  body:
+    type: formdata
+    content:
+      - type: file
+        key: file
+        src: ""
+        description: ""
+      - type: text
+        key: sensor_id
+        value: string
+        description: ""
+      - type: text
+        key: zone_id
+        value: "2680"
+        description: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: ""
+order: 1000

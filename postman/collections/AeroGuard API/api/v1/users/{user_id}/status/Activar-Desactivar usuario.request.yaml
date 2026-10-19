@@ -1,0 +1,54 @@
+$kind: http-request
+name: Activar/Desactivar usuario
+description: Activa o desactiva la cuenta de un usuario.
+url: "{{baseUrl}}/api/v1/users/:user_id/status?active=true"
+method: PATCH
+headers:
+  Accept: application/json
+queryParams:
+  - key: active
+    value: "true"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+pathVariables:
+  - key: user_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Activar-Desactivar usuario.resources/examples
+order: 1000

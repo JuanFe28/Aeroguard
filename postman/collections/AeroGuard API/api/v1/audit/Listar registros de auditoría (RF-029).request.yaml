@@ -1,0 +1,63 @@
+$kind: http-request
+description: Lista eventos del sistema con sus hashes SHA-256 de integridad.
+url: "{{baseUrl}}/api/v1/audit?username=string&action=string&resource=string&skip=0&limit=50"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: username
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+  - key: action
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+  - key: resource
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+  - key: skip
+    value: "0"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Skip",
+            "type": "integer",
+            "default": 0
+          }
+        }
+      }
+  - key: limit
+    value: "50"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 50
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar registros de auditoría (RF-029).resources/examples
+order: 1000

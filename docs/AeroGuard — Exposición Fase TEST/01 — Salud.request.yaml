@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/health"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: pm.test('Backend saludable', function () { pm.expect(pm.response.json().status).to.eql('healthy'); });
+    language: text/javascript
+order: 1000

@@ -1,0 +1,22 @@
+$kind: collection
+description: "
+
+  \    **AeroGuard** — Sistema de detección, clasificación y monitoreo de drones no autorizados.
+
+
+  \    ## Autenticación
+
+  \    Usa OAuth 2.0 con JWT. Obtén un token en `/api/v1/auth/token` y úsalo como `Bearer <token>`.
+
+
+  \    ## Roles
+
+  \    - **admin**: Acceso completo al sistema
+
+  \    - **operator**: Monitoreo y gestión de alertas
+
+  \    - **analyst**: Consulta, reportes y auditoría
+
+  \    "
+variables:
+  baseUrl: http://127.0.0.1:8000

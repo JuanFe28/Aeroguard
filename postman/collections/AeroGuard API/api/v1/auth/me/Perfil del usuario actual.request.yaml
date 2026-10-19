@@ -1,0 +1,17 @@
+$kind: http-request
+description: Devuelve la información del usuario autenticado.
+url: "{{baseUrl}}/api/v1/auth/me"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Perfil del usuario actual.resources/examples
+order: 1000

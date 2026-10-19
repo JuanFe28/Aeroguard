@@ -1,0 +1,41 @@
+$kind: http-request
+description: Asigna la alerta al operador especificado o al usuario actual si no se provee ID.
+url: "{{baseUrl}}/api/v1/alerts/:alert_id/assign?user_id=string"
+method: PATCH
+headers:
+  Accept: application/json
+queryParams:
+  - key: user_id
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+pathVariables:
+  - key: alert_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Alert Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Asignar alerta a operador (RF-015).resources/examples
+order: 1000

@@ -1,0 +1,35 @@
+$kind: http-request
+name: Verificar integridad criptográfica de la cadena SHA-256 (RF-029)
+description: Verifica matemáticamente que la cadena de registros no haya sido alterada ni truncada.
+url: "{{baseUrl}}/api/v1/audit/verify?limit=100"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: limit
+    value: "100"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 100,
+            "maximum": 500
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Verificar integridad criptográfica de la cadena SHA-256 (RF-029.resources/examples
+order: 1000

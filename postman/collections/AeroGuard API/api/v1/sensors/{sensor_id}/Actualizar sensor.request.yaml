@@ -1,0 +1,141 @@
+$kind: http-request
+description: Actualiza configuración y parámetros del sensor.
+url: "{{baseUrl}}/api/v1/sensors/:sensor_id"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  - key: sensor_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Sensor Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "name": null,
+      "type": null,
+      "status": "maintenance",
+      "latitude": 8475.620238449967,
+      "longitude": null,
+      "altitude": 3599.383965966625,
+      "range_km": 765.2931938208308,
+      "config": null
+    }
+  $type: |-
+    {
+      "title": "SensorUpdateSchema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "title": "SensorType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "title": "SensorStatus"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latitude": {
+          "title": "Latitude",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "longitude": {
+          "title": "Longitude",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "altitude": {
+          "title": "Altitude",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "range_km": {
+          "title": "Range Km",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "config": {
+          "title": "Config",
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Actualizar sensor.resources/examples
+order: 2000

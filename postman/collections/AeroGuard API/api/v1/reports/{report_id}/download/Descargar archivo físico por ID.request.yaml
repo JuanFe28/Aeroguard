@@ -1,0 +1,35 @@
+$kind: http-request
+description: Descarga el binario físico del reporte identificado por report_id.
+url: "{{baseUrl}}/api/v1/reports/:report_id/download"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: report_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Report Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Descargar archivo físico por ID.resources/examples
+order: 1000

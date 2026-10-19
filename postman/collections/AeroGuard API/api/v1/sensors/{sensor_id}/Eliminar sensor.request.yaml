@@ -1,0 +1,35 @@
+$kind: http-request
+description: Elimina un sensor de la red.
+url: "{{baseUrl}}/api/v1/sensors/:sensor_id"
+method: DELETE
+headers:
+  Accept: application/json
+pathVariables:
+  - key: sensor_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Sensor Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Eliminar sensor.resources/examples
+order: 3000

@@ -1,0 +1,17 @@
+$kind: http-request
+description: |-
+  Registra el cierre de sesión en auditoría.
+  (En producción: añadir token a blacklist Redis)
+url: "{{baseUrl}}/api/v1/auth/logout"
+method: POST
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Cerrar Sesión.resources/examples
+order: 1000

@@ -1,0 +1,12 @@
+$kind: http-request
+description: Retorna el dictamen táctico más reciente emitido por el agente IA / SOAR.
+url: "{{baseUrl}}/api/v1/alerts/ai-verdict"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/Consultar último dictamen táctico de IA.resources/examples
+order: 1000

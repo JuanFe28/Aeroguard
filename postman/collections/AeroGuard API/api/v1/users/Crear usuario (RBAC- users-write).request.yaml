@@ -1,0 +1,71 @@
+$kind: http-request
+name: "Crear usuario (RBAC: users:write)"
+description: Crea un nuevo usuario en el sistema.
+url: "{{baseUrl}}/api/v1/users"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "string",
+      "email": "Mi-V@ECtYLRJcHxwwGeWUktqBzPCrWjX.hd",
+      "password": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "role": "analyst"
+    }
+  $type: |-
+    {
+      "title": "UserCreateSchema",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "format": "email"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password"
+        },
+        "first_name": {
+          "type": "string",
+          "title": "First Name"
+        },
+        "last_name": {
+          "type": "string",
+          "title": "Last Name"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "operator",
+            "analyst"
+          ],
+          "title": "UserRole"
+        }
+      },
+      "required": [
+        "username",
+        "email",
+        "password",
+        "first_name",
+        "last_name"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Crear usuario (RBAC- users-write).resources/examples
+order: 2000

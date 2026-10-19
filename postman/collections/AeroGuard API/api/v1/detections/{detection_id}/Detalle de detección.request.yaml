@@ -1,0 +1,35 @@
+$kind: http-request
+description: Obtiene el detalle completo de una detección.
+url: "{{baseUrl}}/api/v1/detections/:detection_id"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: detection_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Detection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Detalle de detección.resources/examples
+order: 1000

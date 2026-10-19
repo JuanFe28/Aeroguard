@@ -1,0 +1,61 @@
+$kind: http-request
+name: Registrar dictamen táctico de IA (n8n / Agente)
+description: Callback invocado por el workflow n8n o agente autónomo C-UAS.
+url: "{{baseUrl}}/api/v1/alerts/ai-verdict"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "incident_id": "string",
+      "ai_verdict": "string",
+      "drone_id": null,
+      "threat_level": null
+    }
+  $type: |-
+    {
+      "title": "AIVerdictSchema",
+      "type": "object",
+      "properties": {
+        "incident_id": {
+          "type": "string",
+          "title": "Incident Id"
+        },
+        "ai_verdict": {
+          "type": "string",
+          "title": "Ai Verdict"
+        },
+        "drone_id": {
+          "title": "Drone Id",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "threat_level": {
+          "title": "Threat Level",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "incident_id",
+        "ai_verdict"
+      ]
+    }
+settings: {}
+examples: ./.resources/Registrar dictamen táctico de IA (n8n - Agente).resources/examples
+order: 2000

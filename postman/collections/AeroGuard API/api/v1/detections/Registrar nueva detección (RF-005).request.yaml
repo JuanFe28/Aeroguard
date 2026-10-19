@@ -1,0 +1,140 @@
+$kind: http-request
+description: Crea un nuevo registro de detección y su primer punto de trayectoria.
+url: "{{baseUrl}}/api/v1/detections"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "latitude": 1983.3020229868525,
+      "longitude": 6628.740811107235,
+      "altitude": 8104.642176649467,
+      "speed": 2352.9378759187234,
+      "heading": 7506.044538401625,
+      "sensor_id": "string",
+      "threat_level": "medium",
+      "ai_analyzed": false,
+      "ai_confidence": 182.25721561729523,
+      "is_drone": false,
+      "image_url": "string",
+      "zone_id": "string",
+      "notes": "string"
+    }
+  $type: |-
+    {
+      "title": "DetectionCreateSchema",
+      "type": "object",
+      "properties": {
+        "sensor_id": {
+          "title": "Sensor Id",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latitude": {
+          "type": "number",
+          "title": "Latitude"
+        },
+        "longitude": {
+          "type": "number",
+          "title": "Longitude"
+        },
+        "altitude": {
+          "type": "number",
+          "title": "Altitude"
+        },
+        "speed": {
+          "type": "number",
+          "title": "Speed"
+        },
+        "heading": {
+          "type": "number",
+          "title": "Heading"
+        },
+        "threat_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "ThreatLevel"
+        },
+        "ai_analyzed": {
+          "type": "boolean",
+          "title": "Ai Analyzed"
+        },
+        "ai_confidence": {
+          "title": "Ai Confidence",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_drone": {
+          "type": "boolean",
+          "title": "Is Drone"
+        },
+        "image_url": {
+          "title": "Image Url",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zone_id": {
+          "title": "Zone Id",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "title": "Notes",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "altitude",
+        "speed",
+        "heading"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Registrar nueva detección (RF-005).resources/examples
+order: 2000

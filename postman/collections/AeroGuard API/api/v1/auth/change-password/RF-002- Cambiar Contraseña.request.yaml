@@ -1,0 +1,42 @@
+$kind: http-request
+name: "RF-002: Cambiar Contraseña"
+description: Cambia la contraseña del usuario autenticado.
+url: "{{baseUrl}}/api/v1/auth/change-password"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "current_password": "string",
+      "new_password": "string"
+    }
+  $type: |-
+    {
+      "title": "ChangePasswordRequest",
+      "type": "object",
+      "properties": {
+        "current_password": {
+          "type": "string",
+          "title": "Current Password"
+        },
+        "new_password": {
+          "type": "string",
+          "title": "New Password"
+        }
+      },
+      "required": [
+        "current_password",
+        "new_password"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/RF-002- Cambiar Contraseña.resources/examples
+order: 1000

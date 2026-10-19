@@ -1,0 +1,39 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/zones"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: <token>
+      description: "Added as a part of security scheme: oauth2"
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "description": "string",
+        "threat_level": null,
+        "severity": null,
+        "color": "string",
+        "max_altitude": 500,
+        "min_altitude": 0,
+        "coordinates": [
+          "",
+          ""
+        ],
+        "polygon": null,
+        "is_active": true
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,39 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/detections"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: <token>
+      description: "Added as a part of security scheme: oauth2"
+  body:
+    type: json
+    content: |-
+      {
+        "latitude": 1983.3020229868525,
+        "longitude": 6628.740811107235,
+        "altitude": 8104.642176649467,
+        "speed": 2352.9378759187234,
+        "heading": 7506.044538401625,
+        "sensor_id": "string",
+        "threat_level": "medium",
+        "ai_analyzed": false,
+        "ai_confidence": 182.25721561729523,
+        "is_drone": false,
+        "image_url": "string",
+        "zone_id": "string",
+        "notes": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: ""
+order: 1000

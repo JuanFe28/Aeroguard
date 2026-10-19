@@ -98,15 +98,17 @@ def create_reset_token(email: str) -> str:
 
 def decode_token(token: str) -> dict:
     """Decode and validate a JWT token. Raises HTTPException on failure."""
-    if token and token.startswith("mock_token_"):
-        user_id = token.replace("mock_token_", "") or "admin"
-        return {"sub": user_id, "type": "access", "role": user_id}
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Token inválido o expirado.",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if token and token.startswith("mock_token_"):
+        if settings.APP_ENV != "development" or not settings.DEBUG:
+            raise credentials_exception
+        user_id = token.removeprefix("mock_token_") or "admin"
+        return {"sub": user_id, "type": "access", "role": user_id}
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
@@ -183,7 +185,7 @@ def has_permission(role, permission: str) -> bool:
 # FastAPI dependency: get current user from JWT
 # ============================================================
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_user_from_token(token: str, expected_type: str = "access"):
     """
     FastAPI dependency to extract and validate the current user from JWT.
     Import from app.models.user to avoid circular imports.
@@ -195,7 +197,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     username: Optional[str] = payload.get("sub")
     token_type: Optional[str] = payload.get("type")
 
-    if not username or token_type != "access":
+    if not username or token_type != expected_type:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido.",
@@ -210,6 +212,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         user = None
 
     if not user:
+        if settings.APP_ENV != "development" or not settings.DEBUG:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado.")
         role_claim = payload.get("role") or ("admin" if username == "admin" else "operator")
         from app.models.models import User, UserRole
         try:
@@ -230,6 +234,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuario desactivado.")
 
     return user
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Resuelve un usuario activo usando exclusivamente un token de acceso."""
+    return await get_user_from_token(token)
+
 
 def require_role(*roles: str):
     """FastAPI dependency factory to restrict access by role."""

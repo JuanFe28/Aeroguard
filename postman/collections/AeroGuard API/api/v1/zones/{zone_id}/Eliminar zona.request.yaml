@@ -1,0 +1,35 @@
+$kind: http-request
+description: Elimina una zona restringida.
+url: "{{baseUrl}}/api/v1/zones/:zone_id"
+method: DELETE
+headers:
+  Accept: application/json
+pathVariables:
+  - key: zone_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Zone Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Eliminar zona.resources/examples
+order: 3000

@@ -1,0 +1,33 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/alerts/trigger-incident"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "event_type": null,
+        "incident_id": "string",
+        "drone": {
+          "drone_id": "UAV-HK-402",
+          "latitude": 7.1193,
+          "longitude": -73.1227,
+          "altitude_m": 145,
+          "speed_ms": 19.4,
+          "heading_deg": 182,
+          "ai_confidence": null
+        },
+        "zone": null
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: ""
+order: 1000

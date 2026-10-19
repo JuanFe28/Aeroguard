@@ -143,8 +143,8 @@ class AITacticalAgentService:
                 "threat_level": verdict_data["threat_level"],
                 "drone_id": verdict_data["drone_id"],
             }
-        except Exception:
-            pass
+        except Exception as error:
+            logger.warning("No se pudo actualizar el estado local del dictamen", error=str(error))
 
         try:
             from app.api.v1.endpoints.websocket import manager

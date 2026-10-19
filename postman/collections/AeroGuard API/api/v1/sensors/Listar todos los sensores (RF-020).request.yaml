@@ -1,0 +1,17 @@
+$kind: http-request
+description: Lista todos los sensores registrados con su estado y estadísticas.
+url: "{{baseUrl}}/api/v1/sensors"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar todos los sensores (RF-020).resources/examples
+order: 1000

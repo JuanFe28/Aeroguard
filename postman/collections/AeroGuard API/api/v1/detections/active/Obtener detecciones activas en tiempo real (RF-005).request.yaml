@@ -1,0 +1,17 @@
+$kind: http-request
+description: Retorna únicamente las detecciones activas para el mapa del Dashboard.
+url: "{{baseUrl}}/api/v1/detections/active"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Obtener detecciones activas en tiempo real (RF-005).resources/examples
+order: 1000

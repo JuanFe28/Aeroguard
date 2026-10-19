@@ -1,0 +1,170 @@
+$kind: http-request
+description: Actualiza los parámetros o polígono de una zona.
+url: "{{baseUrl}}/api/v1/zones/:zone_id"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  - key: zone_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Zone Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "name": null,
+      "description": "string",
+      "threat_level": "high",
+      "severity": null,
+      "color": "string",
+      "max_altitude": 6728.393943437827,
+      "min_altitude": null,
+      "coordinates": [
+        "",
+        ""
+      ],
+      "polygon": null,
+      "is_active": false
+    }
+  $type: |-
+    {
+      "title": "ZoneUpdateSchema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "title": "Description",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "threat_level": {
+          "anyOf": [
+            {
+              "type": "string",
+              "title": "ThreatLevel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "title": "Severity",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "color": {
+          "title": "Color",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_altitude": {
+          "title": "Max Altitude",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "min_altitude": {
+          "title": "Min Altitude",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coordinates": {
+          "title": "Coordinates",
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "polygon": {
+          "title": "Polygon",
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_active": {
+          "title": "Is Active",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Actualizar zona restringida.resources/examples
+order: 2000

@@ -1,0 +1,61 @@
+$kind: http-request
+description: Endpoint unificado POST para exportar PDF o Excel según parámetros del cliente.
+url: "{{baseUrl}}/api/v1/reports/export"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "format": "pdf",
+      "type": "detections",
+      "date_from": "string",
+      "date_to": "string"
+    }
+  $type: |-
+    {
+      "title": "ReportExportRequestSchema",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "title": "Format"
+        },
+        "type": {
+          "type": "string",
+          "title": "Type"
+        },
+        "date_from": {
+          "title": "Date From",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_to": {
+          "title": "Date To",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Exportar reporte genérico (POST).resources/examples
+order: 3000

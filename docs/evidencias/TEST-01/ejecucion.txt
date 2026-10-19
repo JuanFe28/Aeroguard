@@ -1,0 +1,118 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-8.3.3, pluggy-1.7.0 -- C:\AeroGuard\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\AeroGuard
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-0.24.0, cov-5.0.0
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 64 items
+
+backend/tests/test_ai_endpoint.py::test_ai_analyze_valid_jpeg_success PASSED [  1%]
+backend/tests/test_ai_endpoint.py::test_ai_analyze_invalid_file_type_rejected PASSED [  3%]
+backend/tests/test_ai_endpoint.py::test_ai_analyze_empty_file_rejected PASSED [  4%]
+backend/tests/test_ai_endpoint.py::test_ai_analyze_unauthorized_access PASSED [  6%]
+backend/tests/test_ai_tactical_agent.py::test_embedded_ai_tactical_agent_verdict_rules PASSED [  7%]
+backend/tests/test_ai_tactical_agent.py::test_trigger_incident_endpoint_success PASSED [  9%]
+backend/tests/test_alerts_verdict.py::test_get_ai_verdict_success PASSED [ 10%]
+backend/tests/test_alerts_verdict.py::test_post_ai_verdict_broadcast PASSED [ 12%]
+backend/tests/test_auth.py::test_login_success PASSED                    [ 14%]
+backend/tests/test_auth.py::test_access_denied_without_token PASSED      [ 15%]
+backend/tests/test_auth.py::test_rbac_operator_cannot_access_users PASSED [ 17%]
+backend/tests/test_auth.py::test_rbac_analyst_cannot_access_users PASSED [ 18%]
+backend/tests/test_auth.py::test_rbac_analyst_cannot_create_zones PASSED [ 20%]
+backend/tests/test_auth.py::test_rbac_analyst_can_view_history PASSED    [ 21%]
+backend/tests/test_auth.py::test_rbac_analyst_can_generate_reports PASSED [ 23%]
+backend/tests/test_exposicion_lunes.py::test_01_health_and_status PASSED [ 25%]
+backend/tests/test_exposicion_lunes.py::test_02_auth_login_jwt PASSED    [ 26%]
+backend/tests/test_exposicion_lunes.py::test_03_ai_drone_detection_real PASSED [ 28%]
+backend/tests/test_exposicion_lunes.py::test_04_ai_invalid_file_rejected PASSED [ 29%]
+backend/tests/test_exposicion_lunes.py::test_05_report_pdf_sha256 PASSED [ 31%]
+backend/tests/test_exposicion_lunes.py::test_06_report_excel_export PASSED [ 32%]
+backend/tests/test_geospatial.py::test_ray_casting_convex_polygon PASSED [ 34%]
+backend/tests/test_geospatial.py::test_ray_casting_concave_polygon PASSED [ 35%]
+backend/tests/test_geospatial.py::test_ray_casting_closed_ring_tolerance PASSED [ 37%]
+backend/tests/test_geospatial.py::test_wkt_and_geojson_generation PASSED [ 39%]
+backend/tests/test_geospatial.py::test_wkt_invalid_polygon_raises_error PASSED [ 40%]
+backend/tests/test_geospatial.py::test_postgis_sql_clause_builders PASSED [ 42%]
+backend/tests/test_geospatial.py::test_haversine_distance PASSED         [ 43%]
+backend/tests/test_geospatial.py::test_evaluate_zone_breach_3d PASSED    [ 45%]
+backend/tests/test_geospatial.py::test_api_check_breach_active_zones PASSED [ 46%]
+backend/tests/test_geospatial.py::test_api_check_breach_outside_all_zones PASSED [ 48%]
+backend/tests/test_geospatial.py::test_api_check_breach_unauthorized PASSED [ 50%]
+backend/tests/test_geospatial.py::test_sensor_telemetry_triggers_geospatial_breach PASSED [ 51%]
+backend/tests/test_local_config.py::test_env_example_can_be_loaded_by_backend PASSED [ 53%]
+backend/tests/test_reports_export.py::test_export_pdf_report_success PASSED [ 54%]
+backend/tests/test_reports_export.py::test_export_excel_report_success PASSED [ 56%]
+backend/tests/test_reports_export.py::test_reports_rbac_operator_denied PASSED [ 57%]
+backend/tests/test_reports_export.py::test_reports_post_export_unified PASSED [ 59%]
+backend/tests/test_security_regressions.py::test_default_reports_directory_is_private_to_current_user PASSED [ 60%]
+backend/tests/test_security_regressions.py::test_reports_created_in_same_second_do_not_overwrite PASSED [ 62%]
+backend/tests/test_security_regressions.py::test_unsigned_demo_token_rejected_outside_local_debug[production-True] PASSED [ 64%]
+backend/tests/test_security_regressions.py::test_unsigned_demo_token_rejected_outside_local_debug[staging-True] PASSED [ 65%]
+backend/tests/test_security_regressions.py::test_unsigned_demo_token_rejected_outside_local_debug[development-False] PASSED [ 67%]
+backend/tests/test_security_regressions.py::test_local_debug_demo_token_remains_supported PASSED [ 68%]
+backend/tests/test_security_regressions.py::test_production_http_rejects_unsigned_demo_token PASSED [ 70%]
+backend/tests/test_security_regressions.py::test_production_websocket_rejects_unsigned_demo_token PASSED [ 71%]
+backend/tests/test_security_regressions.py::test_websocket_requires_access_token_and_subject[refresh] PASSED [ 73%]
+backend/tests/test_security_regressions.py::test_websocket_requires_access_token_and_subject[reset] PASSED [ 75%]
+backend/tests/test_security_regressions.py::test_websocket_requires_access_token_and_subject[missing_subject] PASSED [ 76%]
+backend/tests/test_security_regressions.py::test_production_real_jwt_still_authorizes_http_and_websocket PASSED [ 78%]
+backend/tests/test_security_regressions.py::test_production_does_not_invent_deleted_users PASSED [ 79%]
+backend/tests/test_security_regressions.py::test_production_database_failure_does_not_grant_access PASSED [ 81%]
+backend/tests/test_security_regressions.py::test_launcher_rejects_unsupported_targets_before_opening_a_connection[http://example.invalid/] PASSED [ 82%]
+backend/tests/test_security_regressions.py::test_launcher_rejects_unsupported_targets_before_opening_a_connection[https://127.0.0.1:8000/health] PASSED [ 84%]
+backend/tests/test_security_regressions.py::test_production_websocket_rejects_unavailable_accounts[missing] PASSED [ 85%]
+backend/tests/test_security_regressions.py::test_production_websocket_rejects_unavailable_accounts[disabled] PASSED [ 87%]
+backend/tests/test_security_regressions.py::test_production_refresh_requires_active_account[active-200] PASSED [ 89%]
+backend/tests/test_security_regressions.py::test_production_refresh_requires_active_account[missing-401] PASSED [ 90%]
+backend/tests/test_security_regressions.py::test_production_refresh_requires_active_account[disabled-403] PASSED [ 92%]
+backend/tests/test_security_regressions.py::test_failed_login_keeps_401_when_audit_is_unavailable PASSED [ 93%]
+backend/tests/test_security_regressions.py::test_verdict_still_returns_success_when_broadcast_fails PASSED [ 95%]
+backend/tests/test_websocket.py::test_websocket_invalid_token_rejected PASSED [ 96%]
+backend/tests/test_websocket.py::test_websocket_connect_and_heartbeat_ping_pong PASSED [ 98%]
+backend/tests/test_websocket.py::test_websocket_broadcast_detection_and_alert PASSED [100%]
+
+----- generated xml file: C:\AeroGuard\docs\evidencias\TEST-01\pytest.xml -----
+
+---------- coverage: platform win32, python 3.12.14-final-0 ----------
+Name                                                Stmts   Miss  Cover
+-----------------------------------------------------------------------
+backend\app\__init__.py                                 0      0   100%
+backend\app\api\__init__.py                             0      0   100%
+backend\app\api\v1\__init__.py                          0      0   100%
+backend\app\api\v1\endpoints\__init__.py                0      0   100%
+backend\app\api\v1\endpoints\ai.py                     18      0   100%
+backend\app\api\v1\endpoints\alerts.py                107     37    65%
+backend\app\api\v1\endpoints\audit.py                  24     11    54%
+backend\app\api\v1\endpoints\auth.py                  118     59    50%
+backend\app\api\v1\endpoints\config.py                 27      9    67%
+backend\app\api\v1\endpoints\detections.py             79     43    46%
+backend\app\api\v1\endpoints\reports.py               106     30    72%
+backend\app\api\v1\endpoints\sensors.py               116     59    49%
+backend\app\api\v1\endpoints\users.py                  52     17    67%
+backend\app\api\v1\endpoints\websocket.py              95     26    73%
+backend\app\api\v1\endpoints\zones.py                 137     80    42%
+backend\app\core\__init__.py                            0      0   100%
+backend\app\core\config.py                             48      0   100%
+backend\app\core\database.py                           57     25    56%
+backend\app\core\security.py                          113     23    80%
+backend\app\main.py                                    57      5    91%
+backend\app\models\__init__.py                          0      0   100%
+backend\app\models\models.py                          239     11    95%
+backend\app\schemas\__init__.py                         0      0   100%
+backend\app\services\__init__.py                        0      0   100%
+backend\app\services\ai_tactical_agent_service.py      77     17    78%
+backend\app\services\ai_vision_service.py              98     41    58%
+backend\app\services\audit_service.py                  38     25    34%
+backend\app\services\email_service.py                  28     28     0%
+backend\app\services\geospatial_service.py            139     11    92%
+backend\app\services\report_generator_service.py      163      1    99%
+backend\app\services\user_service.py                   58     36    38%
+backend\app\workers\__init__.py                         0      0   100%
+-----------------------------------------------------------------------
+TOTAL                                                1994    594    70%
+Coverage HTML written to dir docs/evidencias/TEST-01/htmlcov
+Coverage XML written to file docs/evidencias/TEST-01/coverage.xml
+Coverage JSON written to file docs/evidencias/TEST-01/coverage.json
+
+============================= 64 passed in 9.47s ==============================

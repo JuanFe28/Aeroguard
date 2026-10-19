@@ -1,0 +1,4 @@
+Backend ya disponible: http://127.0.0.1:8000/health
+Frontend ya disponible: http://127.0.0.1:3000/
+Frontend: http://127.0.0.1:3000 | API: http://127.0.0.1:8000/docs
+Logs: C:\AeroGuard\tmp\expo

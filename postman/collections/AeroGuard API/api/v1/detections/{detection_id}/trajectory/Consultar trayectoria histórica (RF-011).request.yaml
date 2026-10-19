@@ -1,0 +1,35 @@
+$kind: http-request
+description: Retorna los puntos de trayectoria para reconstrucción de vuelo en 2D/3D.
+url: "{{baseUrl}}/api/v1/detections/:detection_id/trajectory"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: detection_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Detection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Consultar trayectoria histórica (RF-011).resources/examples
+order: 1000

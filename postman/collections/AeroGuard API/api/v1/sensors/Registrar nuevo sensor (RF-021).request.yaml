@@ -1,0 +1,85 @@
+$kind: http-request
+description: Registra un nuevo sensor en la red de defensa.
+url: "{{baseUrl}}/api/v1/sensors"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "latitude": 8677.534607559226,
+      "longitude": 6381.619514172672,
+      "type": "optical",
+      "status": "calibrating",
+      "altitude": 0,
+      "range_km": 5,
+      "config": {}
+    }
+  $type: |-
+    {
+      "title": "SensorCreateSchema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "radar",
+            "acoustic",
+            "rf",
+            "optical",
+            "thermal"
+          ],
+          "title": "SensorType"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive",
+            "maintenance",
+            "calibrating"
+          ],
+          "title": "SensorStatus"
+        },
+        "latitude": {
+          "type": "number",
+          "title": "Latitude"
+        },
+        "longitude": {
+          "type": "number",
+          "title": "Longitude"
+        },
+        "altitude": {
+          "type": "number",
+          "title": "Altitude"
+        },
+        "range_km": {
+          "type": "number",
+          "title": "Range Km"
+        },
+        "config": {
+          "type": "object",
+          "title": "Config"
+        }
+      },
+      "required": [
+        "name",
+        "latitude",
+        "longitude"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Registrar nuevo sensor (RF-021).resources/examples
+order: 2000

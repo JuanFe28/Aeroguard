@@ -1,0 +1,127 @@
+$kind: http-request
+description: Crea una nueva zona geográfica restringida con polígono de coordenadas.
+url: "{{baseUrl}}/api/v1/zones"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "description": "string",
+      "threat_level": null,
+      "severity": null,
+      "color": "string",
+      "max_altitude": 500,
+      "min_altitude": 0,
+      "coordinates": [
+        "",
+        ""
+      ],
+      "polygon": null,
+      "is_active": true
+    }
+  $type: |-
+    {
+      "title": "ZoneCreateSchema",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "description": {
+          "title": "Description",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "threat_level": {
+          "anyOf": [
+            {
+              "type": "string",
+              "title": "ThreatLevel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "title": "Severity",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "color": {
+          "title": "Color",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_altitude": {
+          "type": "number",
+          "title": "Max Altitude"
+        },
+        "min_altitude": {
+          "type": "number",
+          "title": "Min Altitude"
+        },
+        "coordinates": {
+          "title": "Coordinates",
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "polygon": {
+          "title": "Polygon",
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Crear zona restringida (RF-017).resources/examples
+order: 2000

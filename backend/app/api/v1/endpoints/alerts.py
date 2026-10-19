@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
+import structlog
 
 from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
@@ -16,6 +17,7 @@ from app.models.models import Alert, AlertStatus, AlertSeverity, AlertType
 from app.services.audit_service import log_audit
 
 router = APIRouter()
+logger = structlog.get_logger("AeroGuard-Alerts")
 
 
 class AlertCreateSchema(BaseModel):
@@ -186,8 +188,8 @@ async def register_ai_verdict(body: AIVerdictSchema):
             "type": "ai_verdict",
             "data": _latest_verdict
         })
-    except Exception:
-        pass
+    except Exception as error:
+        logger.warning("No se pudo retransmitir el dictamen por WebSocket", error=str(error))
 
     return {"status": "success", "message": "Dictamen registrado", "data": _latest_verdict}
 

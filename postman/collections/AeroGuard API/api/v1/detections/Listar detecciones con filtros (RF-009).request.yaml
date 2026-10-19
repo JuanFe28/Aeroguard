@@ -1,0 +1,93 @@
+$kind: http-request
+description: Lista detecciones ordenadas por fecha más reciente.
+url: "{{baseUrl}}/api/v1/detections?status=active&threat_level=low&is_drone=false&skip=0&limit=50"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: status
+    value: active
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "DetectionStatus",
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "resolved",
+              "discarded"
+            ]
+          }
+        }
+      }
+  - key: threat_level
+    value: low
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "ThreatLevel",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          }
+        }
+      }
+  - key: is_drone
+    value: "false"
+    disabled: false
+    description: ""
+    $type: boolean
+  - key: skip
+    value: "0"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Skip",
+            "type": "integer",
+            "default": 0
+          }
+        }
+      }
+  - key: limit
+    value: "50"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 50
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar detecciones con filtros (RF-009).resources/examples
+order: 1000

@@ -1,0 +1,70 @@
+$kind: http-request
+description: |-
+  Evalúa la posición 3D (latitud, longitud, altitud) contra zonas de exclusión aéreas.
+  Utiliza el motor geoespacial de alta precisión (PostGIS ST_Contains / Ray-Casting Algorithm).
+url: "{{baseUrl}}/api/v1/zones/check-breach"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "latitude": 61.91357477035393,
+      "longitude": -132.68591091993082,
+      "altitude": 0,
+      "zone_id": "string"
+    }
+  $type: |-
+    {
+      "title": "ZoneBreachCheckRequest",
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "title": "Latitude",
+          "description": "Latitud WGS84"
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "title": "Longitude",
+          "description": "Longitud WGS84"
+        },
+        "altitude": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15000,
+          "title": "Altitude",
+          "description": "Altitud en metros sobre el nivel del suelo"
+        },
+        "zone_id": {
+          "title": "Zone Id",
+          "description": "ID opcional para evaluar una zona puntual",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Verificación geoespacial de invasión de zona (RF-012, RF-017).resources/examples
+order: 1000

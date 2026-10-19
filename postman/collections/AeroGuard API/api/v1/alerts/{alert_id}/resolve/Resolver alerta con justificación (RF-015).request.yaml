@@ -1,0 +1,53 @@
+$kind: http-request
+description: Marca la alerta como resuelta e incluye notas de resolución obligatorias.
+url: "{{baseUrl}}/api/v1/alerts/:alert_id/resolve"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  - key: alert_id
+    value: string
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Alert Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "notes": "string"
+    }
+  $type: |-
+    {
+      "title": "AlertResolveSchema",
+      "type": "object",
+      "properties": {
+        "notes": {
+          "type": "string",
+          "title": "Notes"
+        }
+      },
+      "required": [
+        "notes"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Resolver alerta con justificación (RF-015).resources/examples
+order: 1000

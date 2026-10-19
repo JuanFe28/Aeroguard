@@ -1,0 +1,49 @@
+$kind: http-request
+name: Descargar telemetría histórica en Excel (.xlsx) (HU-02 / Escenario 4)
+description: |-
+  Genera físicamente una hoja de cálculo Excel binaria (.xlsx) con OpenPyXL.
+  Incluye:
+  - Hoja 1: Telemetría e Incursiones tabuladas con formato táctico militar.
+  - Hoja 2: Resumen ejecutivo y registro de auditoría con firma SHA-256.
+url: "{{baseUrl}}/api/v1/reports/export/excel?type=detections&date_from=string&date_to=string"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: type
+    value: detections
+    disabled: false
+    description: Tipo de reporte
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "Tipo de reporte",
+            "title": "Type",
+            "type": "string",
+            "default": "detections"
+          }
+        }
+      }
+  - key: date_from
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+  - key: date_to
+    value: string
+    disabled: false
+    description: ""
+    $type: string
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Descargar telemetría histórica en Excel (.xlsx) (HU-02 - Escen.resources/examples
+order: 1000

@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/auth/token"
+method: POST
+body:
+  type: urlencoded
+  content:
+    username: "{{username}}"
+    password: "{{password}}"
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 200) { pm.collectionVariables.set('access_token', pm.response.json().access_token); } else { pm.collectionVariables.unset('access_token'); }
+      pm.test('Recibe JWT bearer', function () { const body = pm.response.json(); pm.expect(body.token_type).to.eql('bearer'); pm.expect(body.access_token.split('.')).to.have.lengthOf(3); });
+    language: text/javascript
+order: 2000

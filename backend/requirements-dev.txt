@@ -1,13 +1,9 @@
 # AeroGuard — Backend Dev/Test Requirements
 # Uso local:  pip install -r requirements-dev.txt
 # Uso Docker: stage "test" del Dockerfile multi-stage
--r requirements.txt
+-r requirements-expo.txt
 
-pytest==8.3.3
-pytest-asyncio==0.24.0
-pytest-cov==5.0.0
 factory-boy==3.3.1
 faker==30.8.1
 ruff>=0.7.0
-flake8>=7.1.0
 

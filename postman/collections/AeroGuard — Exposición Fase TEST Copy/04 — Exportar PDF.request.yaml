@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/reports/export/pdf?type=detections"
+method: GET
+queryParams:
+  type: detections
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Contenido PDF', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'); pm.expect(pm.response.text().slice(0, 5)).to.eql('%PDF-'); });
+      pm.test('Huella SHA-256 de los datos', function () { pm.expect(pm.response.headers.get('X-Report-SHA256')).to.match(/^[a-f0-9]{64}$/); });
+    language: text/javascript
+order: 4000

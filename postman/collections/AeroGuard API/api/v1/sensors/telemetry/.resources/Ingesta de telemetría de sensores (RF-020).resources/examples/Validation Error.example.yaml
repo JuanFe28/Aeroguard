@@ -1,0 +1,93 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/sensors/telemetry"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "sensor_id": "string",
+        "latitude": 1561.0709214576857,
+        "longitude": 9584.270584395395,
+        "altitude": 9251.557694965659,
+        "speed": 3581.0833262549936,
+        "heading": 3718.020276240358,
+        "timestamp": "string",
+        "signal_strength": null
+      }
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              5077,
+              "string"
+            ],
+            "msg": "string",
+            "type": "string"
+          },
+          {
+            "loc": [
+              "string",
+              4973
+            ],
+            "msg": "string",
+            "type": "string"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "title": "Detail",
+            "items": {
+              "title": "ValidationError",
+              "type": "object",
+              "properties": {
+                "loc": {
+                  "type": "array",
+                  "title": "Location",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                },
+                "msg": {
+                  "type": "string",
+                  "title": "Message"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Error Type"
+                }
+              },
+              "required": [
+                "loc",
+                "msg",
+                "type"
+              ]
+            }
+          }
+        }
+      }
+order: 2000

@@ -1,0 +1,160 @@
+[
+  {
+    "source": "regresiones_antes.xml",
+    "cases": [
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_default_reports_directory_is_private_to_current_user",
+        "result": "FAILED",
+        "seconds": 0.969
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_reports_created_in_same_second_do_not_overwrite",
+        "result": "FAILED",
+        "seconds": 0.171
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_unsigned_demo_token_rejected_outside_local_debug[production-True]",
+        "result": "FAILED",
+        "seconds": 0.002
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_unsigned_demo_token_rejected_outside_local_debug[staging-True]",
+        "result": "FAILED",
+        "seconds": 0.002
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_unsigned_demo_token_rejected_outside_local_debug[development-False]",
+        "result": "FAILED",
+        "seconds": 0.002
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_local_debug_demo_token_remains_supported",
+        "result": "PASSED",
+        "seconds": 0.003
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_http_rejects_unsigned_demo_token",
+        "result": "FAILED",
+        "seconds": 0.026
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_websocket_rejects_unsigned_demo_token",
+        "result": "FAILED",
+        "seconds": 0.006
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_websocket_requires_access_token_and_subject[refresh]",
+        "result": "FAILED",
+        "seconds": 0.007
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_websocket_requires_access_token_and_subject[reset]",
+        "result": "FAILED",
+        "seconds": 0.006
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_websocket_requires_access_token_and_subject[missing_subject]",
+        "result": "FAILED",
+        "seconds": 0.006
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_real_jwt_still_authorizes_http_and_websocket",
+        "result": "PASSED",
+        "seconds": 0.03
+      }
+    ]
+  },
+  {
+    "source": "lanzador_antes.xml",
+    "cases": [
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_launcher_rejects_unsupported_targets_before_opening_a_connection[http://example.invalid/]",
+        "result": "FAILED",
+        "seconds": 0.972
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_launcher_rejects_unsupported_targets_before_opening_a_connection[https://127.0.0.1:8000/health]",
+        "result": "FAILED",
+        "seconds": 0.006
+      }
+    ]
+  },
+  {
+    "source": "identidades_antes.xml",
+    "cases": [
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_does_not_invent_deleted_users",
+        "result": "FAILED",
+        "seconds": 0.976
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_database_failure_does_not_grant_access",
+        "result": "FAILED",
+        "seconds": 0.018
+      }
+    ]
+  },
+  {
+    "source": "revision_antes.xml",
+    "cases": [
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_websocket_rejects_unavailable_accounts[missing]",
+        "result": "FAILED",
+        "seconds": 0.951
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_websocket_rejects_unavailable_accounts[disabled]",
+        "result": "FAILED",
+        "seconds": 0.004
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_refresh_requires_active_account[active-200]",
+        "result": "PASSED",
+        "seconds": 0.005
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_refresh_requires_active_account[missing-401]",
+        "result": "FAILED",
+        "seconds": 0.006
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_production_refresh_requires_active_account[disabled-403]",
+        "result": "FAILED",
+        "seconds": 0.005
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_failed_login_keeps_401_when_audit_is_unavailable",
+        "result": "FAILED",
+        "seconds": 1.767
+      },
+      {
+        "module": "backend.tests.test_security_regressions",
+        "test": "test_verdict_still_returns_success_when_broadcast_fails",
+        "result": "FAILED",
+        "seconds": 1.52
+      }
+    ]
+  }
+]

@@ -1,0 +1,74 @@
+$kind: http-request
+description: Crea una nueva alerta de seguridad.
+url: "{{baseUrl}}/api/v1/alerts"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "message": "string",
+      "detection_id": null,
+      "type": "anomalous_behavior",
+      "severity": "medium"
+    }
+  $type: |-
+    {
+      "title": "AlertCreateSchema",
+      "type": "object",
+      "properties": {
+        "detection_id": {
+          "title": "Detection Id",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "restricted_zone",
+            "anomalous_behavior",
+            "system"
+          ],
+          "title": "AlertType"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "AlertSeverity"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "title",
+        "message"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Generar alerta (RF-013).resources/examples
+order: 2000

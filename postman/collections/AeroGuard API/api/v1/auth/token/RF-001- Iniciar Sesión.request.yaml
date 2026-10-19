@@ -1,0 +1,20 @@
+$kind: http-request
+name: "RF-001: Iniciar Sesión"
+description: OAuth 2.0 Password Flow. Devuelve access_token y refresh_token JWT.
+url: "{{baseUrl}}/api/v1/auth/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+  Accept: application/json
+body:
+  type: urlencoded
+  content:
+    username: string
+    password: string
+    grant_type: password
+    scope: ""
+    client_id: string
+    client_secret: string
+settings: {}
+examples: ./.resources/RF-001- Iniciar Sesión.resources/examples
+order: 1000

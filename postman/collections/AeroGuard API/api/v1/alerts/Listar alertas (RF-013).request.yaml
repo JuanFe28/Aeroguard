@@ -1,0 +1,88 @@
+$kind: http-request
+description: Lista alertas del sistema ordenadas cronológicamente inverso.
+url: "{{baseUrl}}/api/v1/alerts?status=assigned&severity=medium&skip=0&limit=50"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: status
+    value: assigned
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "AlertStatus",
+            "type": "string",
+            "enum": [
+              "open",
+              "assigned",
+              "resolved",
+              "closed"
+            ]
+          }
+        }
+      }
+  - key: severity
+    value: medium
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "AlertSeverity",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          }
+        }
+      }
+  - key: skip
+    value: "0"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Skip",
+            "type": "integer",
+            "default": 0
+          }
+        }
+      }
+  - key: limit
+    value: "50"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 50
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar alertas (RF-013).resources/examples
+order: 1000

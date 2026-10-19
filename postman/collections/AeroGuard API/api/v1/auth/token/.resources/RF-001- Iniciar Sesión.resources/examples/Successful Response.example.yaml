@@ -1,0 +1,64 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/auth/token"
+  method: POST
+  headers:
+    Content-Type: application/x-www-form-urlencoded
+    Accept: application/json
+  body:
+    type: urlencoded
+    content:
+      username: string
+      password: string
+      grant_type: password
+      scope: ""
+      client_id: string
+      client_secret: string
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "access_token": "string",
+        "refresh_token": "string",
+        "user": {},
+        "token_type": "bearer",
+        "expires_in": 3600
+      }
+    $type: |-
+      {
+        "title": "TokenResponse",
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "user": {
+            "type": "object",
+            "title": "User"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "user"
+        ]
+      }
+order: 1000

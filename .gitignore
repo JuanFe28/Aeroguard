@@ -104,3 +104,13 @@ desktop.ini
 # --- Scratch & Archivos Temporales ---
 scratch/
 .system_generated/
+.wdm/
+
+# --- Estado personal de Postman ---
+.postman/
+postman/globals/
+postman/collections/New Collection/
+
+# --- Trazas locales de fallos previos (se publica antes_resumen.json) ---
+docs/evidencias/TEST-03/*_antes.txt
+docs/evidencias/TEST-03/*_antes.xml

@@ -1,0 +1,17 @@
+$kind: http-request
+description: Lista todas las zonas restringidas configuradas con representaciones geoespaciales WKT y GeoJSON.
+url: "{{baseUrl}}/api/v1/zones"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar zonas restringidas (RF-017).resources/examples
+order: 1000

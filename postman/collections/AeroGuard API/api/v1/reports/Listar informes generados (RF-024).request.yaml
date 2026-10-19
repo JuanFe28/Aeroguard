@@ -1,0 +1,48 @@
+$kind: http-request
+description: Lista todos los reportes solicitados con su estado y enlace de descarga.
+url: "{{baseUrl}}/api/v1/reports?skip=0&limit=50"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: skip
+    value: "0"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Skip",
+            "type": "integer",
+            "default": 0
+          }
+        }
+      }
+  - key: limit
+    value: "50"
+    disabled: false
+    description: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 50
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Listar informes generados (RF-024).resources/examples
+order: 2000

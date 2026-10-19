@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+import structlog
 
 from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
@@ -16,6 +17,7 @@ from app.models.models import RestrictedZone, ThreatLevel
 from app.services.geospatial_service import geospatial_service
 
 router = APIRouter()
+logger = structlog.get_logger("AeroGuard-Zones")
 
 
 def _normalize_coordinates(raw_coords: Any) -> list:
@@ -46,8 +48,8 @@ def _serialize_zone(z: RestrictedZone) -> Dict[str, Any]:
         if len(coords) >= 3:
             wkt_polygon = geospatial_service.to_wkt_polygon(coords)
             geojson_polygon = geospatial_service.to_geojson_polygon(coords)
-    except Exception:
-        pass
+    except Exception as error:
+        logger.warning("No se pudieron serializar las coordenadas de la zona", error=str(error))
 
     threat_str = z.threat_level.value if hasattr(z.threat_level, "value") else str(z.threat_level)
 

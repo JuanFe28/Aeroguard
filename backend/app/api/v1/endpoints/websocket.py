@@ -10,7 +10,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 
-from app.core.security import decode_token
+from app.core.security import get_current_user
 
 router = APIRouter()
 
@@ -89,11 +89,10 @@ async def websocket_live(websocket: WebSocket, token: str = Query(...)):
     """
     # Validar JWT o token de demostración
     try:
-        if token and token.startswith("mock_token_"):
-            user_id = token.replace("mock_token_", "") or "admin"
-        else:
-            payload = decode_token(token)
-            user_id = payload.get("sub", "anonymous")
+        current_user = await get_current_user(token)
+        user_id = current_user.username
+        if not isinstance(user_id, str) or not user_id.strip():
+            raise ValueError("Se requiere un token de acceso con usuario válido")
     except Exception:
         await websocket.close(code=4001, reason="Token inválido o expirado")
         return

@@ -1,0 +1,97 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/v1/alerts/trigger-incident"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "event_type": null,
+        "incident_id": "string",
+        "drone": {
+          "drone_id": "UAV-HK-402",
+          "latitude": 7.1193,
+          "longitude": -73.1227,
+          "altitude_m": 145,
+          "speed_ms": 19.4,
+          "heading_deg": 182,
+          "ai_confidence": null
+        },
+        "zone": null
+      }
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              5077,
+              "string"
+            ],
+            "msg": "string",
+            "type": "string"
+          },
+          {
+            "loc": [
+              "string",
+              4973
+            ],
+            "msg": "string",
+            "type": "string"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "title": "Detail",
+            "items": {
+              "title": "ValidationError",
+              "type": "object",
+              "properties": {
+                "loc": {
+                  "type": "array",
+                  "title": "Location",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                },
+                "msg": {
+                  "type": "string",
+                  "title": "Message"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Error Type"
+                }
+              },
+              "required": [
+                "loc",
+                "msg",
+                "type"
+              ]
+            }
+          }
+        }
+      }
+order: 2000

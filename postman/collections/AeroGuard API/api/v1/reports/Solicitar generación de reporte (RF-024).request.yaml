@@ -1,0 +1,87 @@
+$kind: http-request
+description: Crea un reporte físico y persiste su metadata.
+url: "{{baseUrl}}/api/v1/reports"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "type": "detections",
+      "format": "csv",
+      "date_from": "1969-05-08T06:06:31.190Z",
+      "date_to": null,
+      "params": {}
+    }
+  $type: |-
+    {
+      "title": "ReportCreateSchema",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "detections",
+            "alerts",
+            "audit",
+            "summary"
+          ],
+          "title": "ReportType"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "pdf",
+            "csv",
+            "excel"
+          ],
+          "title": "ReportFormat"
+        },
+        "date_from": {
+          "title": "Date From",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_to": {
+          "title": "Date To",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "params": {
+          "type": "object",
+          "title": "Params"
+        }
+      },
+      "required": [
+        "title"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Solicitar generación de reporte (RF-024).resources/examples
+order: 3000

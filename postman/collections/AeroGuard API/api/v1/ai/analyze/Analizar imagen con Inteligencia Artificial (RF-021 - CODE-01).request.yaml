@@ -1,0 +1,37 @@
+$kind: http-request
+name: Analizar imagen con Inteligencia Artificial (RF-021 / CODE-01)
+description: |-
+  Recibe un fotograma (imagen) capturado por un sensor óptico o cámara C-UAS
+  y lo procesa utilizando el motor real de visión artificial (OpenCV + YOLOv8).
+
+  - Valida formatos permitidos (JPEG, PNG, WEBP).
+  - Detecta objetos aéreos tipo dron, calculando bounding_box, nivel de confianza y tiempo de inferencia.
+  - Cumple estrictamente con el contrato JSON estipulado en la Planificación v1.1.
+url: "{{baseUrl}}/api/v1/ai/analyze"
+method: POST
+headers:
+  Content-Type: multipart/form-data
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: ""
+      description: ""
+    - type: text
+      key: sensor_id
+      value: string
+      description: ""
+    - type: text
+      key: zone_id
+      value: "2680"
+      description: ""
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Analizar imagen con Inteligencia Artificial (RF-021 - CODE-01).resources/examples
+order: 1000

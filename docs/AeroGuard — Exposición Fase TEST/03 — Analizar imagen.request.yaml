@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/ai/analyze"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: "{{image_path}}"
+    - type: text
+      key: sensor_id
+      value: CAM-EXPO-01
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Confianza y bounding box válidos', function () { const d = pm.response.json().detection; pm.expect(d.confidence).to.be.within(0, 1); pm.expect(d.bounding_box.width).to.be.above(0); pm.expect(d.bounding_box.height).to.be.above(0); });
+      pm.test('Motor de visión identificado', function () { pm.expect(pm.response.json().engine).to.be.a('string').and.not.empty; });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,71 @@
+$kind: http-request
+description: Ajusta en tiempo real los umbrales de detección y confianza de IA.
+url: "{{baseUrl}}/api/v1/config"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "detection_max_altitude": 1613.708114481076,
+      "detection_min_speed": 7907.9796062018595,
+      "detection_max_speed": 3610.429464650098,
+      "ai_confidence_threshold": 1359.7892064941009,
+      "ai_enabled": false,
+      "anomaly_threshold": 3348.432770391542,
+      "alerts_enabled": true
+    }
+  $type: |-
+    {
+      "title": "SystemConfigSchema",
+      "type": "object",
+      "properties": {
+        "detection_max_altitude": {
+          "type": "number",
+          "title": "Detection Max Altitude"
+        },
+        "detection_min_speed": {
+          "type": "number",
+          "title": "Detection Min Speed"
+        },
+        "detection_max_speed": {
+          "type": "number",
+          "title": "Detection Max Speed"
+        },
+        "ai_confidence_threshold": {
+          "type": "number",
+          "title": "Ai Confidence Threshold"
+        },
+        "ai_enabled": {
+          "type": "boolean",
+          "title": "Ai Enabled"
+        },
+        "anomaly_threshold": {
+          "type": "number",
+          "title": "Anomaly Threshold"
+        },
+        "alerts_enabled": {
+          "type": "boolean",
+          "title": "Alerts Enabled"
+        }
+      },
+      "required": [
+        "detection_max_altitude",
+        "detection_min_speed",
+        "detection_max_speed",
+        "ai_confidence_threshold",
+        "ai_enabled",
+        "anomaly_threshold",
+        "alerts_enabled"
+      ]
+    }
+auth:
+  type: oauth2
+  credentials:
+    accessTokenUrl: /api/v1/auth/token
+    grant_type: password_credentials
+settings: {}
+examples: ./.resources/Actualizar parámetros operativos (RF-028).resources/examples
+order: 2000
