@@ -4,6 +4,19 @@ Este registro describe el código y la preparación local. No prueba que haya ve
 
 ## [Unreleased]
 
+### Candidata de trabajo 1.2.0 — 21-10-2026
+
+- Actualizadas las dependencias vulnerables y reemplazados python-jose/Passlib por PyJWT/bcrypt directo. El entorno auditado ya no presenta vulnerabilidades conocidas; restricciones reproducibles en `constraints.txt`.
+- Revocación persistente de sesiones y WebSockets, recuperación de contraseña de un solo uso y límites atómicos de intentos. Sin tokens en logs ni credenciales de demostración sembradas por SQL en producción.
+- Reportes consultados en BD, archivos originales recuperables por ID, verificación de integridad, exportación CSV real, protección de celdas y programación UTC persistente.
+- Telemetría enlazada con sensores y objetos, trayectoria acumulada y alertas activas sin duplicados. Configuración validada, persistida y aplicada en las operaciones.
+- PostGIS con geometría mantenida por trigger, índice GiST y selección espacial mediante ST_Covers. Worker RabbitMQ idempotente, con reintento de red y cola de errores.
+- Corregidos login real, rutas y formatos esperados por el frontend; errores visibles, escape de texto/atributos y ausencia de resultados ficticios de respaldo en modo real.
+- Producción sin fallback silencioso a SQLite. Métricas autenticadas, Prometheus y Grafana provisionados, disponibilidad y alerta por sensor vencido.
+- Construidas las cuatro imágenes y ejecutadas pruebas en Linux, integración PostgreSQL/PostGIS/RabbitMQ, navegador y restauración en una base nueva. Manifiestos y evidencias en `docs/correcciones-2026-10-21`.
+
+Las notas que siguen corresponden a la preparación anterior. Sus pendientes de dependencias, construcción y recuperación fueron resueltos por esta candidata; aceptación académica, CI remoto, publicación de imágenes y VM externa siguen pendientes. Todavía no existe una release oficial 1.2.0.
+
 ### Corregido
 
 - Se exigen autenticación y permisos en telemetría y dictámenes operativos.

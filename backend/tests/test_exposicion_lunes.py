@@ -4,7 +4,7 @@ import io
 import re
 
 import pytest
-from jose import jwt
+import jwt
 from openpyxl import load_workbook
 from PIL import Image, ImageDraw
 

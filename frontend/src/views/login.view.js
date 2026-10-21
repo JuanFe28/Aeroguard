@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Login View (MVVM - View Layer)
  * Renderiza la pantalla de inicio de sesión.
@@ -160,8 +161,8 @@ export class LoginView {
         <div class="demo-credentials" role="region" aria-label="Credenciales de demostración">
           <div class="demo-credentials-title">🧪 Demo — Haz clic para rellenar</div>
           ${creds.map(c => `
-            <div class="demo-cred-item" data-username="${c.username}" data-password="${c.password}" role="button" tabindex="0" aria-label="Usar credenciales de ${c.role}">
-              <span><strong>${c.username}</strong> / ${c.password}</span>
+            <div class="demo-cred-item" data-username="${escapeHtml(c.username)}" data-password="${c.password}" role="button" tabindex="0" aria-label="Usar credenciales de ${c.role}">
+              <span><strong>${escapeHtml(c.username)}</strong> / ${c.password}</span>
               <span class="demo-cred-role">${c.role}</span>
             </div>
           `).join('')}

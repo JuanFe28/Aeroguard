@@ -34,9 +34,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Solo requirements primero → la capa de dependencias se cachea
 # mientras requirements.txt no cambie.
 COPY backend/requirements.txt .
+COPY constraints.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip wheel \
-    && pip install -r requirements.txt
+    && pip install -c constraints.txt -r requirements.txt
 
 # ------------------------------------------------------------
 # Stage 2: test (quality gate — no se publica)
@@ -46,7 +47,7 @@ FROM builder AS test
 WORKDIR /workspace/backend
 COPY backend/requirements*.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements-dev.txt
+    pip install -c /constraints.txt -r requirements-dev.txt
 
 COPY backend/app ./app
 COPY backend/tests ./tests

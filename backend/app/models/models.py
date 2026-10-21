@@ -378,3 +378,33 @@ class SystemConfig(Base):
     category   = Column(String(64), nullable=True)
     updated_by = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=True)
     updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
+class AuthState(Base):
+    """Revocación por usuario y recuperación de un solo uso, persistente entre reinicios."""
+    __tablename__ = "auth_state"
+    user_id = Column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    version = Column(Integer, nullable=False, default=0)
+    reset_digest = Column(String(64), nullable=True)
+    reset_expires_at = Column(DateTime(timezone=True), nullable=True)
+
+
+class AuthAttempt(Base):
+    __tablename__ = "auth_attempts"
+    key = Column(String(64), primary_key=True)
+    bucket = Column(Integer, primary_key=True)
+    count = Column(Integer, nullable=False, default=1)
+
+
+class AuditCheckpoint(Base):
+    __tablename__ = "audit_checkpoint"
+    id = Column(Integer, primary_key=True)
+    head = Column(String(64), nullable=False)
+    records = Column(Integer, nullable=False, default=0)
+
+
+class SensorTrack(Base):
+    __tablename__ = "sensor_tracks"
+    sensor_id = Column(UUID(as_uuid=False), ForeignKey("sensors.id", ondelete="CASCADE"), primary_key=True)
+    object_key = Column(String(128), primary_key=True)
+    detection_id = Column(UUID(as_uuid=False), ForeignKey("detections.id", ondelete="CASCADE"), nullable=False)

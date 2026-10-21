@@ -21,7 +21,7 @@ from app.core.security import create_access_token
 
 REPORT_DIR = Path(os.environ.get(
     "AEROGUARD_LOAD_REPORT_DIR",
-    str(Path(__file__).resolve().parents[2] / "docs" / "evidencias" / "TEST-02"),
+    str(Path(__file__).resolve().parents[2] / "tmp" / "websocket-load"),
 ))
 PING_ROUNDS = 50
 BROADCAST_ROUNDS = 10

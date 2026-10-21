@@ -4,7 +4,7 @@ Centraliza todas las variables de entorno y configuraciones del sistema.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, model_validator
 from pathlib import Path
 from typing import List
 
@@ -19,9 +19,19 @@ class Settings(BaseSettings):
 
     # ====== App ======
     APP_NAME: str = "AeroGuard"
-    APP_VERSION: str = "1.1.0"
+    APP_VERSION: str = "1.2.0"
     APP_ENV: str = "development"
     DEBUG: bool = True
+    ALLOW_DEMO_TOKENS: bool = False
+    SEED_DEMO_DATA: bool = False
+    ALLOW_SQLITE_FALLBACK: bool = False
+    PUBLIC_FRONTEND_URL: str = "http://127.0.0.1:3000"
+    AUTH_RATE_LIMIT: int = Field(default=20, ge=1)
+    AUTH_RATE_WINDOW_SECONDS: int = Field(default=60, ge=1)
+    REPORT_SCHEDULER_ENABLED: bool = True
+    SENSOR_STALE_SECONDS: int = 120
+    METRICS_BEARER_TOKEN: str = ""
+    BOOTSTRAP_ADMIN_PASSWORD: str = ""
 
     # ====== API ======
     API_V1_PREFIX: str = "/api/v1"
@@ -84,7 +94,17 @@ class Settings(BaseSettings):
     # ====== SOAR / n8n Webhook & AI Tactical Agent ======
     N8N_WEBHOOK_URL: str = "http://localhost:5678/webhook/aeroguard-incident"
     N8N_WEBHOOK_TIMEOUT: float = 3.5
-    SOAR_AI_AGENT_ENABLED: bool = True
+    SOAR_AI_AGENT_ENABLED: bool = False
+
+    @model_validator(mode="after")
+    def validate_production(self):
+        if self.APP_ENV == "production":
+            weak = (len(self.SECRET_KEY) < 32 or self.SECRET_KEY.startswith(("CHANGE_", "AEROGUARD_SECURE_DEV")))
+            if weak:
+                raise ValueError("Producción requiere SECRET_KEY propia de al menos 32 caracteres.")
+            if self.DEBUG or self.ALLOW_DEMO_TOKENS or self.SEED_DEMO_DATA or self.ALLOW_SQLITE_FALLBACK:
+                raise ValueError("Producción no permite DEBUG, datos/tokens demo ni fallback de base de datos.")
+        return self
 
 
 # Singleton

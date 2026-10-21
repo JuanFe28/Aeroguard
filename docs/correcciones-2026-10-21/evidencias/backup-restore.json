@@ -1,0 +1,18 @@
+{
+  "created_utc": "2026-10-21T16:32:15.875580+00:00",
+  "sha256": "608cfaf1c88313f243ba657ee5867a73c359ae4b69fc2662c24816857cf2913e",
+  "bytes": 46890,
+  "format": "pg_dump custom",
+  "restore_verified": true,
+  "restored_database": "aeroguard_restore_c043c06fba53",
+  "row_counts": {
+    "users": 2,
+    "sensors": 1,
+    "detections": 1,
+    "audit_logs": 10,
+    "reports": 1
+  },
+  "report_files": {
+    "77985aeb-1130-433e-918f-bca984859762.pdf": "6f8b68aaaec6943c06a63eb97c5a98dd35caef182f6eb65a05e75cb195e149e9"
+  }
+}

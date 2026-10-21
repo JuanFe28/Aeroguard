@@ -9,8 +9,8 @@ from typing import Optional, Union
 import hashlib
 import secrets
 
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+import jwt
+from jwt import InvalidTokenError as JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
@@ -24,14 +24,16 @@ import bcrypt
 
 def hash_password(plain_password: str) -> str:
     """Hash a password securely using bcrypt."""
-    pw_bytes = plain_password.encode('utf-8')[:72]
+    pw_bytes = plain_password.encode('utf-8')
+    if len(pw_bytes) > 72:
+        raise ValueError("La contraseña supera el límite de 72 bytes UTF-8.")
     salt = bcrypt.gensalt(rounds=12)
     return bcrypt.hashpw(pw_bytes, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
     try:
-        pw_bytes = plain_password.encode('utf-8')[:72]
+        pw_bytes = plain_password.encode('utf-8')
         hash_bytes = hashed_password.encode('utf-8')
         return bcrypt.checkpw(pw_bytes, hash_bytes)
     except Exception:
@@ -46,7 +48,7 @@ def validate_password_strength(password: str) -> bool:
     - At least 1 digit
     - At least 1 special character
     """
-    if len(password) < settings.MIN_PASSWORD_LENGTH:
+    if len(password) < settings.MIN_PASSWORD_LENGTH or len(password.encode('utf-8')) > 72:
         return False
     has_upper   = any(c.isupper() for c in password)
     has_lower   = any(c.islower() for c in password)
@@ -67,6 +69,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     to_encode.update({
+        "jti": secrets.token_urlsafe(24),
+        "ver": data.get("ver", 0),
         "exp": expire,
         "iat": datetime.now(timezone.utc),
         "type": "access",
@@ -79,19 +83,21 @@ def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({
+        "jti": secrets.token_urlsafe(24),
+        "ver": data.get("ver", 0),
         "exp": expire,
         "iat": datetime.now(timezone.utc),
         "type": "refresh",
     })
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-def create_reset_token(email: str) -> str:
+def create_reset_token(email: str, version: int = 0) -> str:
     """Create a password reset token."""
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
     )
     return jwt.encode(
-        {"sub": email, "exp": expire, "type": "reset"},
+        {"sub": email, "exp": expire, "type": "reset", "jti": secrets.token_urlsafe(24), "ver": version},
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
@@ -104,7 +110,7 @@ def decode_token(token: str) -> dict:
         headers={"WWW-Authenticate": "Bearer"},
     )
     if token and token.startswith("mock_token_"):
-        if settings.APP_ENV != "development" or not settings.DEBUG:
+        if settings.APP_ENV != "development" or not settings.DEBUG or not settings.ALLOW_DEMO_TOKENS:
             raise credentials_exception
         user_id = token.removeprefix("mock_token_") or "admin"
         return {"sub": user_id, "type": "access", "role": user_id}
@@ -208,11 +214,19 @@ async def get_user_from_token(token: str, expected_type: str = "access"):
     try:
         async with AsyncSessionLocal() as db:
             user = await get_user_by_username(db, username)
+            if user and user.id:
+                from app.models.models import AuthState
+                state = await db.get(AuthState, user.id)
+                version = state.version if state else 0
+                if payload.get("ver", 0) != version:
+                    raise HTTPException(status_code=401, detail="Sesión revocada.")
+    except HTTPException:
+        raise
     except Exception:
         user = None
 
     if not user:
-        if settings.APP_ENV != "development" or not settings.DEBUG:
+        if settings.APP_ENV != "development" or not settings.DEBUG or not settings.ALLOW_DEMO_TOKENS:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado.")
         role_claim = payload.get("role") or ("admin" if username == "admin" else "operator")
         from app.models.models import User, UserRole

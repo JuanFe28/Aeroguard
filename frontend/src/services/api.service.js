@@ -50,7 +50,7 @@ class HttpClient {
   }
 
   async get(path, params = {}) {
-    const url = new URL(`${this.baseUrl}${path}`);
+    const url = new URL(`${this.baseUrl}${path}`, location.origin);
     Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, v); });
     const res = await fetch(url.toString(), { headers: this._getHeaders() });
     return this._handleResponse(res);
@@ -189,13 +189,13 @@ export const DetectionService = {
     return http.get(`/detections/${id}/ai-analysis`);
   },
   async updateStatus(id, status) {
-    return http.patch(`/detections/${id}/status`, { status });
+    return http.patch(`/detections/${id}/status?new_status=${encodeURIComponent(status)}`);
   },
   async verifyIntegrity(id) {
     return http.get(`/detections/${id}/integrity`);
   },
   async getHistory(params = {}) {
-    return http.get('/detections/history', params);
+    return http.get('/detections', params);
   },
   async stats(params = {}) {
     return http.get('/detections/stats', params);
@@ -223,10 +223,10 @@ export const SensorService = {
     return http.delete(`/sensors/${id}`);
   },
   async activate(id) {
-    return http.post(`/sensors/${id}/activate`);
+    return http.put(`/sensors/${id}`, {status: 'active'});
   },
   async deactivate(id) {
-    return http.post(`/sensors/${id}/deactivate`);
+    return http.put(`/sensors/${id}`, {status: 'inactive'});
   },
   async getTelemetry(id, params = {}) {
     return http.get(`/sensors/${id}/telemetry`, params);
@@ -248,13 +248,13 @@ export const AlertService = {
     return http.patch(`/alerts/${id}/status`, { status });
   },
   async assign(id, userId) {
-    return http.patch(`/alerts/${id}/assign`, { user_id: userId });
+    return http.patch(`/alerts/${id}/assign${userId ? `?user_id=${encodeURIComponent(userId)}` : ''}`);
   },
   async addComment(id, comment) {
     return http.post(`/alerts/${id}/comments`, { comment });
   },
   async resolve(id, notes) {
-    return http.post(`/alerts/${id}/resolve`, { resolution_notes: notes });
+    return http.patch(`/alerts/${id}/resolve`, { notes });
   },
   async stats() {
     return http.get('/alerts/stats');
@@ -269,17 +269,7 @@ export const AlertService = {
         drone_id: "UAV-HK-402"
       };
     }
-    try {
-      return await http.get('/alerts/ai-verdict');
-    } catch {
-      return {
-        incident_id: "INC-2026-0891",
-        timestamp: new Date().toISOString(),
-        ai_verdict: "UAV-402 mantiene rumbo norte a 145m (supera techo de 120m) hacia Zona Crítica BGA. Acción: Iniciando protocolo perimetral.",
-        threat_level: "CRITICAL",
-        drone_id: "UAV-HK-402"
-      };
-    }
+    return http.get('/alerts/ai-verdict');
   },
   async triggerIncident(payload = {}) {
     if (MockService.enabled) {
@@ -297,21 +287,7 @@ export const AlertService = {
       WebSocketService._emit('ai_verdict', verdict);
       return { status: "success", data: verdict };
     }
-    try {
-      return await http.post('/alerts/trigger-incident', payload);
-    } catch (e) {
-      console.warn('Fallback trigger incident error:', e);
-      return {
-        status: "success",
-        data: {
-          incident_id: payload.incident_id || "INC-2026-FALLBACK",
-          timestamp: new Date().toISOString(),
-          ai_verdict: "DEMO: incidente simulado. Verificar visualmente y avisar al responsable de seguridad.",
-          threat_level: "CRITICAL",
-          drone_id: payload.drone?.drone_id || "UAV-HK-402"
-        }
-      };
-    }
+    return http.post('/alerts/trigger-incident', payload);
   },
 };
 
@@ -336,7 +312,7 @@ export const ZoneService = {
     return http.delete(`/zones/${id}`);
   },
   async checkIntersection(lat, lng, alt) {
-    return http.post('/zones/check', { latitude: lat, longitude: lng, altitude: alt });
+    return http.post('/zones/check-breach', { latitude: lat, longitude: lng, altitude: alt });
   },
 };
 
@@ -358,13 +334,13 @@ export const UserService = {
     return http.put(`/users/${id}`, data);
   },
   async activate(id) {
-    return http.patch(`/users/${id}/activate`);
+    return http.patch(`/users/${id}/status?active=true`);
   },
   async deactivate(id) {
-    return http.patch(`/users/${id}/deactivate`);
+    return http.patch(`/users/${id}/status?active=false`);
   },
   async updateRole(id, role) {
-    return http.patch(`/users/${id}/role`, { role });
+    return http.put(`/users/${id}`, { role });
   },
   async delete(id) {
     return http.delete(`/users/${id}`);
@@ -380,7 +356,7 @@ export const ReportService = {
     return http.get('/reports', params);
   },
   async generate(params) {
-    return http.post('/reports/generate', params);
+    return http.post('/reports', params);
   },
   async getSchedules() {
     return http.get('/reports/schedules');
@@ -409,8 +385,8 @@ export const ReportService = {
     const token = AuthService.getToken();
     const url = new URL(`${API_BASE}/reports/export/pdf`);
     url.searchParams.set('type', type);
-    if (dateFrom) url.searchParams.set('date_from', dateFrom);
-    if (dateTo) url.searchParams.set('date_to', dateTo);
+    if (dateFrom) url.searchParams.set('date_from', dateFrom.length === 10 ? `${dateFrom}T00:00:00Z` : dateFrom);
+    if (dateTo) url.searchParams.set('date_to', dateTo.length === 10 ? `${dateTo}T23:59:59.999999Z` : dateTo);
 
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -418,7 +394,7 @@ export const ReportService = {
     const res = await fetch(url.toString(), { headers });
     if (!res.ok) throw new Error('Error al generar el reporte PDF en el backend.');
     const blob = await res.blob();
-    const sha256 = res.headers.get('X-Report-SHA256') || 'SHA256-OK';
+    const sha256 = res.headers.get('X-Content-SHA256') || '';
     const cd = res.headers.get('Content-Disposition');
     const match = cd?.match(/filename="?([^"]+)"?/);
     const filename = match?.[1] || `reporte_aeroguard_${type}.pdf`;
@@ -439,8 +415,8 @@ export const ReportService = {
     const token = AuthService.getToken();
     const url = new URL(`${API_BASE}/reports/export/excel`);
     url.searchParams.set('type', type);
-    if (dateFrom) url.searchParams.set('date_from', dateFrom);
-    if (dateTo) url.searchParams.set('date_to', dateTo);
+    if (dateFrom) url.searchParams.set('date_from', dateFrom.length === 10 ? `${dateFrom}T00:00:00Z` : dateFrom);
+    if (dateTo) url.searchParams.set('date_to', dateTo.length === 10 ? `${dateTo}T23:59:59.999999Z` : dateTo);
 
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -448,12 +424,24 @@ export const ReportService = {
     const res = await fetch(url.toString(), { headers });
     if (!res.ok) throw new Error('Error al generar el archivo Excel en el backend.');
     const blob = await res.blob();
-    const sha256 = res.headers.get('X-Report-SHA256') || 'SHA256-OK';
+    const sha256 = res.headers.get('X-Content-SHA256') || '';
     const cd = res.headers.get('Content-Disposition');
     const match = cd?.match(/filename="?([^"]+)"?/);
     const filename = match?.[1] || `telemetria_aeroguard_${type}.xlsx`;
     this._triggerDownload(blob, filename);
     return { filename, sha256 };
+  },
+
+  async downloadCsv(type = 'detections', dateFrom = null, dateTo = null) {
+    const url = new URL(`${API_BASE}/reports/export/csv`, location.origin);
+    url.searchParams.set('type', type);
+    if (dateFrom) url.searchParams.set('date_from', dateFrom.length === 10 ? `${dateFrom}T00:00:00Z` : dateFrom);
+    if (dateTo) url.searchParams.set('date_to', dateTo.length === 10 ? `${dateTo}T23:59:59.999999Z` : dateTo);
+    const res = await fetch(url, {headers: {'Authorization': `Bearer ${AuthService.getToken()}`}});
+    if (!res.ok) throw new Error('No se pudo exportar el CSV.');
+    const filename = `aeroguard_${type}.csv`;
+    this._triggerDownload(await res.blob(), filename);
+    return {filename, sha256: res.headers.get('X-Content-SHA256') || ''};
   },
 
   _triggerDownload(blob, filename) {
@@ -496,7 +484,7 @@ export const AuditService = {
     return http.get(`/audit/${id}`);
   },
   async verifyIntegrity(id) {
-    return http.get(`/audit/${id}/integrity`);
+    return http.get('/audit/verify', {limit: 500});
   },
 };
 
@@ -506,10 +494,10 @@ export const AuditService = {
 
 export const ConfigService = {
   async get() {
-    return http.get('/config/detection');
+    return http.get('/config');
   },
   async update(data) {
-    return http.put('/config/detection', data);
+    return http.put('/config', data);
   },
 };
 
@@ -926,7 +914,7 @@ export const WebSocketService = {
 // ============================================================
 
 export const MockService = {
-  enabled: window.AEROGUARD_DEMO_MODE !== false,
+  enabled: window.AEROGUARD_DEMO_MODE === true,
 
   _generateId: () => Math.random().toString(36).slice(2, 10),
 

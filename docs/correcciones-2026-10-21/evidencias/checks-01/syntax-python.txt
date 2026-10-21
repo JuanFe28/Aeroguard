@@ -1,0 +1,60 @@
+======================================================================
+ [AEROGUARD C-UAS] Validacion de Sintaxis Python (py_compile)
+======================================================================
+  [OK]   backend/app/__init__.py
+  [OK]   backend/app/main.py
+  [OK]   backend/app/api/__init__.py
+  [OK]   backend/app/api/v1/__init__.py
+  [OK]   backend/app/api/v1/endpoints/__init__.py
+  [OK]   backend/app/api/v1/endpoints/ai.py
+  [OK]   backend/app/api/v1/endpoints/alerts.py
+  [OK]   backend/app/api/v1/endpoints/audit.py
+  [OK]   backend/app/api/v1/endpoints/auth.py
+  [OK]   backend/app/api/v1/endpoints/config.py
+  [OK]   backend/app/api/v1/endpoints/detections.py
+  [OK]   backend/app/api/v1/endpoints/reports.py
+  [OK]   backend/app/api/v1/endpoints/sensors.py
+  [OK]   backend/app/api/v1/endpoints/users.py
+  [OK]   backend/app/api/v1/endpoints/websocket.py
+  [OK]   backend/app/api/v1/endpoints/zones.py
+  [OK]   backend/app/core/__init__.py
+  [OK]   backend/app/core/config.py
+  [OK]   backend/app/core/database.py
+  [OK]   backend/app/core/security.py
+  [OK]   backend/app/core/spatial.py
+  [OK]   backend/app/models/__init__.py
+  [OK]   backend/app/models/models.py
+  [OK]   backend/app/schemas/__init__.py
+  [OK]   backend/app/services/__init__.py
+  [OK]   backend/app/services/ai_tactical_agent_service.py
+  [OK]   backend/app/services/ai_vision_service.py
+  [OK]   backend/app/services/audit_service.py
+  [OK]   backend/app/services/email_service.py
+  [OK]   backend/app/services/geospatial_service.py
+  [OK]   backend/app/services/report_data_service.py
+  [OK]   backend/app/services/report_generator_service.py
+  [OK]   backend/app/services/report_scheduler_service.py
+  [OK]   backend/app/services/session_service.py
+  [OK]   backend/app/services/user_service.py
+  [OK]   backend/app/workers/__init__.py
+  [OK]   backend/tests/conftest.py
+  [OK]   backend/tests/e2e_full_simulation.py
+  [OK]   backend/tests/test_ai_endpoint.py
+  [OK]   backend/tests/test_ai_tactical_agent.py
+  [OK]   backend/tests/test_alerts_verdict.py
+  [OK]   backend/tests/test_auth.py
+  [OK]   backend/tests/test_exposicion_lunes.py
+  [OK]   backend/tests/test_geospatial.py
+  [OK]   backend/tests/test_local_config.py
+  [OK]   backend/tests/test_release_regressions.py
+  [OK]   backend/tests/test_remediation.py
+  [OK]   backend/tests/test_reports_export.py
+  [OK]   backend/tests/test_security_regressions.py
+  [OK]   backend/tests/test_websocket.py
+  [OK]   backend/tests/test_websocket_load.py
+  [OK]   ai_service/detector.py
+  [OK]   sensor_simulator/simulator.py
+----------------------------------------------------------------------
+ Total auditados: 53 archivos | Errores: 0
+======================================================================
+[SUCCESS] Sintaxis Python 100% valida en todos los microservicios.

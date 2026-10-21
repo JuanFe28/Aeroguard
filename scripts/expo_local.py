@@ -73,6 +73,11 @@ def main():
     LOGS.mkdir(parents=True, exist_ok=True)
     environment["DATABASE_URL"] = f"sqlite+aiosqlite:///{(LOGS / 'aeroguard.db').as_posix()}"
     environment["AI_USE_YOLO"] = "false"
+    environment["APP_ENV"] = "development"
+    environment["DEBUG"] = "true"
+    environment["SEED_DEMO_DATA"] = "true"
+    environment["ALLOW_DEMO_TOKENS"] = "false"
+    environment["SOAR_AI_AGENT_ENABLED"] = "false"
     environment["REPORTS_DIR"] = str(LOGS / "reports")
     start_service(
         "Backend", 8000, "http://127.0.0.1:8000/health", b"healthy",

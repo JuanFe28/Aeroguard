@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Users View + ViewModel (RF-004 to RF-007)
  */
@@ -18,7 +19,7 @@ class UsersViewModel {
         this.state.users = MockService.users.map(u => new UserModel(u));
       } else {
         const res = await UserService.list();
-        this.state.users = (res.items || []).map(u => new UserModel(u));
+        this.state.users = (Array.isArray(res) ? res : (res.items || [])).map(u => new UserModel(u));
       }
       this._applyFilters();
     } catch (err) { Toast.error('Error al cargar usuarios.'); }
@@ -45,20 +46,20 @@ class UsersViewModel {
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="user-fname">Nombre *</label>
-              <input id="user-fname" type="text" class="form-input" required value="${user?.firstName || ''}" aria-required="true"/>
+              <input id="user-fname" type="text" class="form-input" required value="${escapeHtml(user?.firstName || '')}" aria-required="true"/>
             </div>
             <div class="form-group">
               <label class="form-label" for="user-lname">Apellido *</label>
-              <input id="user-lname" type="text" class="form-input" required value="${user?.lastName || ''}" aria-required="true"/>
+              <input id="user-lname" type="text" class="form-input" required value="${escapeHtml(user?.lastName || '')}" aria-required="true"/>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="user-username">Usuario *</label>
-            <input id="user-username" type="text" class="form-input" required value="${user?.username || ''}" ${user ? 'readonly style="opacity:0.6"' : ''} aria-required="true"/>
+            <input id="user-username" type="text" class="form-input" required value="${escapeHtml(user?.username || '')}" ${user ? 'readonly style="opacity:0.6"' : ''} aria-required="true"/>
           </div>
           <div class="form-group">
             <label class="form-label" for="user-email">Correo Electrónico *</label>
-            <input id="user-email" type="email" class="form-input" required value="${user?.email || ''}" aria-required="true"/>
+            <input id="user-email" type="email" class="form-input" required value="${escapeHtml(user?.email || '')}" aria-required="true"/>
           </div>
           <div class="form-group">
             <label class="form-label" for="user-role">Rol *</label>
@@ -149,19 +150,19 @@ class UsersViewModel {
           <div style="display:flex;align-items:center;gap:var(--spacing-md)">
             <div class="user-avatar" style="width:36px;height:36px;font-size:13px">${u.initials}</div>
             <div>
-              <div style="font-weight:600;color:var(--text-primary)">${u.fullName}</div>
-              <div style="font-size:var(--font-size-xs);color:var(--text-muted)">@${u.username}</div>
+              <div style="font-weight:600;color:var(--text-primary)">${escapeHtml(u.fullName)}</div>
+              <div style="font-size:var(--font-size-xs);color:var(--text-muted)">@${escapeHtml(u.username)}</div>
             </div>
           </div>
         </td>
-        <td style="color:var(--text-secondary)">${u.email}</td>
+        <td style="color:var(--text-secondary)">${escapeHtml(u.email)}</td>
         <td><span class="badge badge-info">${u.roleLabel}</span></td>
         <td><span class="badge ${u.isActive ? 'badge-success badge-dot' : 'badge-neutral'}">${u.isActive ? 'Activo' : 'Inactivo'}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${u.lastLogin ? new Date(u.lastLogin).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' }) : 'Nunca'}</td>
         <td>
           <div style="display:flex;gap:var(--spacing-sm)">
-            <button class="btn btn-icon" onclick="usersVM.showUserModal(usersVM.state.users.find(u=>u.id==='${u.id}'))" title="Editar" aria-label="Editar usuario ${u.fullName}">✏️</button>
-            <button class="btn btn-icon" onclick="usersVM.toggleUser('${u.id}', ${u.isActive})" title="${u.isActive ? 'Desactivar' : 'Activar'}" aria-label="${u.isActive ? 'Desactivar' : 'Activar'} usuario ${u.fullName}">
+            <button class="btn btn-icon" onclick="usersVM.showUserModal(usersVM.state.users.find(u=>u.id==='${u.id}'))" title="Editar" aria-label="Editar usuario ${escapeHtml(u.fullName)}">✏️</button>
+            <button class="btn btn-icon" onclick="usersVM.toggleUser('${u.id}', ${u.isActive})" title="${u.isActive ? 'Desactivar' : 'Activar'}" aria-label="${u.isActive ? 'Desactivar' : 'Activar'} usuario ${escapeHtml(u.fullName)}">
               ${u.isActive ? '⏸️' : '▶️'}
             </button>
           </div>

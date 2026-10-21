@@ -1,3 +1,4 @@
+import { safeColor } from '../utils/html.js';
 /**
  * AeroGuard — Models (MVVM - Model Layer)
  * Representa las estructuras de datos del dominio.
@@ -78,7 +79,7 @@ export class DetectionModel {
     this.aiAnalyzed     = data.ai_analyzed  || data.aiAnalyzed  || false;
     this.aiConfidence   = data.ai_confidence ?? data.aiConfidence ?? null;
     this.isDrone        = data.is_drone     || data.isDrone     || false;
-    this.timestamp      = data.timestamp    || new Date().toISOString();
+    this.timestamp      = data.timestamp || data.created_at || new Date().toISOString();
     this.updatedAt      = data.updated_at   || data.updatedAt   || null;
     this.trajectory     = data.trajectory   || [];
     this.alerts         = data.alerts       || [];
@@ -307,7 +308,7 @@ export class RestrictedZoneModel {
       [AlertSeverity.HIGH]:     '#ff6d00',
       [AlertSeverity.CRITICAL]: '#ff1744',
     };
-    return colors[this.severity] || this.color;
+    return colors[this.severity] || safeColor(this.color);
   }
 }
 
@@ -358,12 +359,12 @@ export class AuditLogModel {
     this.resource   = data.resource    || '';
     this.resourceId = data.resource_id || data.resourceId || null;
     this.details    = data.details     || {};
-    this.ip         = data.ip          || '';
+    this.ip         = data.ip || data.ip_address || '';
     this.userAgent  = data.user_agent  || data.userAgent  || '';
     this.timestamp  = data.timestamp   || new Date().toISOString();
-    this.hash       = data.hash        || '';
+    this.hash       = data.hash || data.data_hash || '';
     this.prevHash   = data.prev_hash   || data.prevHash   || '';
-    this.integrityOk = data.integrity_ok ?? data.integrityOk ?? true;
+    this.integrityOk = data.integrity_ok ?? data.integrityOk ?? null;
   }
 
   get formattedTime() {

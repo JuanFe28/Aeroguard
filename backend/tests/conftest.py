@@ -9,6 +9,12 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 # Se fija antes de importar la aplicación para no conectar a una BD de exposición.
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["SEED_DEMO_DATA"] = "true"
+os.environ["ALLOW_DEMO_TOKENS"] = "true"
+os.environ["APP_ENV"] = "development"
+os.environ["DEBUG"] = "true"
+os.environ["AUTH_RATE_LIMIT"] = "10000"
+os.environ["REPORT_SCHEDULER_ENABLED"] = "false"
 
 from app.main import app  # noqa: E402 - DATABASE_URL debe fijarse antes de importar.
 from app.core import database  # noqa: E402

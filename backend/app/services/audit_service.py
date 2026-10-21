@@ -6,8 +6,8 @@ Mantiene un registro de auditoría inmutable mediante encadenamiento criptográf
 import json
 from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
-from app.models.models import AuditLog
+from sqlalchemy import select, desc, func
+from app.models.models import AuditLog, AuditCheckpoint
 from app.core.security import compute_hash
 
 
@@ -34,6 +34,20 @@ async def log_audit(
     Registra un evento de auditoría garantizando integridad criptográfica (SHA-256 chain).
     """
     details = details or {}
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    insert = pg_insert if db.bind.dialect.name == "postgresql" else sqlite_insert
+    initial_head = await get_last_audit_hash(db)
+    initial_count = (await db.execute(select(func.count()).select_from(AuditLog))).scalar_one()
+    await db.execute(insert(AuditCheckpoint).values(id=1, head=initial_head, records=initial_count).on_conflict_do_nothing())
+    # Escritura del punto de control toma un lock transaccional también en SQLite.
+    from sqlalchemy import update
+    await db.execute(update(AuditCheckpoint).where(AuditCheckpoint.id == 1).values(records=AuditCheckpoint.records))
+    checkpoint = (await db.execute(select(AuditCheckpoint).where(AuditCheckpoint.id == 1).with_for_update().execution_options(populate_existing=True))).scalar_one()
+    current_count = (await db.execute(select(func.count()).select_from(AuditLog))).scalar_one()
+    current_head = await get_last_audit_hash(db)
+    if checkpoint.records != current_count or checkpoint.head != current_head:
+        raise ValueError("La auditoría no coincide con su punto de control persistido.")
     prev_hash = await get_last_audit_hash(db)
 
     # Serialización canónica de los datos del registro
@@ -54,6 +68,8 @@ async def log_audit(
     )
 
     db.add(log_entry)
+    checkpoint.head = data_hash
+    checkpoint.records += 1
     await db.commit()
     await db.refresh(log_entry)
     return log_entry
@@ -63,7 +79,11 @@ async def verify_audit_chain(db: AsyncSession, limit: int = 100) -> Dict[str, An
     """
     Valida la cadena criptográfica de auditoría desde el registro más antiguo hasta el más reciente.
     """
-    query = select(AuditLog).order_by(AuditLog.timestamp.asc()).limit(limit)
+    checkpoint = await db.get(AuditCheckpoint, 1)
+    total = (await db.execute(select(func.count()).select_from(AuditLog))).scalar_one()
+    if checkpoint and (checkpoint.records != total or checkpoint.head != await get_last_audit_hash(db)):
+        return {"valid": False, "records_checked": 0, "reason": "checkpoint_mismatch", "total_records": total}
+    query = select(AuditLog).order_by(AuditLog.timestamp.asc(), AuditLog.id.asc()).limit(limit)
     result = await db.execute(query)
     logs: List[AuditLog] = result.scalars().all()
 
@@ -82,4 +102,6 @@ async def verify_audit_chain(db: AsyncSession, limit: int = 100) -> Dict[str, An
         if log.data_hash != expected_hash:
             return {"valid": False, "compromised_id": log.id, "reason": "hash_tampered"}
 
-    return {"valid": True, "records_checked": len(logs), "status": "intact"}
+    complete = len(logs) == total
+    return {"valid": True if complete else None, "records_checked": len(logs), "total_records": total,
+            "complete": complete, "status": "intact" if complete else "partial", "anchored": checkpoint is not None}

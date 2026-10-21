@@ -58,6 +58,7 @@ class TelemetryPacket:
     speed:      float
     heading:    float
     timestamp:  str
+    object_id: str = ""
 
     def is_valid(self) -> bool:
         """Validate data ranges. Discard packets outside physical limits."""
@@ -166,6 +167,7 @@ class SensorSimulator:
 
             packet = TelemetryPacket(
                 sensor_id  = self.sensor_id,
+                object_id  = obj.id,
                 latitude   = round(obj.lat, 6),
                 longitude  = round(obj.lng, 6),
                 altitude   = round(obj.altitude, 1),

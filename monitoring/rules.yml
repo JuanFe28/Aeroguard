@@ -1,0 +1,16 @@
+groups:
+  - name: aeroguard
+    rules:
+      - alert: AeroGuardBackendUnavailable
+        expr: up{job="aeroguard"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: API o autenticación del monitor no disponibles
+      - alert: AeroGuardSensorStale
+        expr: aeroguard_sensors_stale > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: Hay sensores activos sin telemetría reciente

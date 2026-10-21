@@ -77,7 +77,7 @@ class ZoneCreateSchema(BaseModel):
     description: Optional[str] = None
     threat_level: Optional[ThreatLevel] = None
     severity: Optional[str] = None
-    color: Optional[str] = None
+    color: Optional[str] = Field(default=None, pattern=r'^#[0-9a-fA-F]{6}$')
     max_altitude: float = 500.0
     min_altitude: float = 0.0
     coordinates: Optional[list] = None
@@ -90,7 +90,7 @@ class ZoneUpdateSchema(BaseModel):
     description: Optional[str] = None
     threat_level: Optional[ThreatLevel] = None
     severity: Optional[str] = None
-    color: Optional[str] = None
+    color: Optional[str] = Field(default=None, pattern=r'^#[0-9a-fA-F]{6}$')
     max_altitude: Optional[float] = None
     min_altitude: Optional[float] = None
     coordinates: Optional[list] = None
@@ -162,6 +162,8 @@ async def check_zone_breach(
 
     # Evaluar contra todas las zonas activas
     query = select(RestrictedZone).where(RestrictedZone.is_active == True)
+    from app.core.spatial import zone_candidates
+    query = await zone_candidates(db, query, body.latitude, body.longitude)
     result = await db.execute(query)
     zones = result.scalars().all()
 

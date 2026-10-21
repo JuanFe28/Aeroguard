@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Zones View + ViewModel (RF-015, RF-016, RF-017)
  * Gestión de zonas restringidas con mapa interactivo y editor de polígonos.
@@ -35,9 +36,9 @@ export class ZonesViewModel {
       let items = [];
       try {
         const res = await ZoneService.list();
-        items = Array.isArray(res) ? res : (res.items || []);
+        items = Array.isArray(res) ? res : (Array.isArray(res) ? res : (res.items || []));
       } catch (apiErr) {
-        console.warn('API error loading zones:', apiErr);
+        if (!MockService.enabled) throw apiErr;
       }
 
       if (items.length > 0) {
@@ -45,11 +46,11 @@ export class ZonesViewModel {
         MockService.zones = items;
         MockService.saveZones();
       } else {
-        this.state.zones = (MockService.zones || []).map(z => new RestrictedZoneModel(z));
+        this.state.zones = (MockService.enabled ? MockService.zones || [] : []).map(z => new RestrictedZoneModel(z));
       }
     } catch (err) {
       console.error('Error al cargar zonas:', err);
-      this.state.zones = (MockService.zones || []).map(z => new RestrictedZoneModel(z));
+      this.state.zones = (MockService.enabled ? MockService.zones || [] : []).map(z => new RestrictedZoneModel(z));
       Toast.error('Error al cargar zonas.');
     } finally {
       this.state.isLoading = false;
@@ -131,7 +132,7 @@ export class ZonesViewModel {
         weight: zone.id === this.state.selectedZone?.id ? 3 : 2,
       });
 
-      poly.bindTooltip(`<strong>${zone.name}</strong><br>${zone.description}`, { sticky: true });
+      poly.bindTooltip(`<strong>${escapeHtml(zone.name)}</strong><br>${escapeHtml(zone.description)}`, { sticky: true });
       poly.on('click', () => this._selectZone(zone));
       poly.addTo(this._map);
 
@@ -140,7 +141,7 @@ export class ZonesViewModel {
         const label = L.marker(zone.center, {
           icon: L.divIcon({
             className: '',
-            html: `<div style="background:${color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${zone.name}</div>`,
+            html: `<div style="background:${color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${escapeHtml(zone.name)}</div>`,
             iconAnchor: [0, 0],
           }),
         }).addTo(this._map);
@@ -167,7 +168,7 @@ export class ZonesViewModel {
     document.querySelectorAll('.zone-card').forEach(el => {
       el.classList.toggle('active', el.dataset.zoneId === zone.id);
     });
-    if (zone.center) {
+    if (zone.center && this._map) {
       this._map.setView([zone.center.lat, zone.center.lng], 14);
     }
   }
@@ -185,8 +186,8 @@ export class ZonesViewModel {
       <div style="display:flex;flex-direction:column;gap:var(--spacing-md)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
-            <h3 style="color:var(--text-primary)">${zone.name}</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--text-muted)">${zone.description || 'Sin descripción'}</p>
+            <h3 style="color:var(--text-primary)">${escapeHtml(zone.name)}</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--text-muted)">${escapeHtml(zone.description || 'Sin descripción')}</p>
           </div>
           <span class="badge badge-${zone.severity}">${zone.severity.toUpperCase()}</span>
         </div>
@@ -214,11 +215,11 @@ export class ZonesViewModel {
           <button class="btn btn-${this.state.isDrawing ? 'success' : 'primary'} btn-sm" onclick="zonesVM.toggleDrawingMode()" aria-label="${this.state.isDrawing ? 'Guardar Polígono' : 'Dibujar Polígono'}">
             ${this.state.isDrawing ? '✅ Guardar Polígono' : '🖌️ Dibujar Polígono'}
           </button>
-          <button class="btn btn-secondary btn-sm" onclick="zonesVM.openEditForm()" aria-label="Editar zona ${zone.name}">✏️ Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="zonesVM.deleteZone('${zone.id}')" aria-label="Eliminar zona ${zone.name}">🗑️ Eliminar</button>
+          <button class="btn btn-secondary btn-sm" onclick="zonesVM.openEditForm()" aria-label="Editar zona ${escapeHtml(zone.name)}">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="zonesVM.deleteZone('${zone.id}')" aria-label="Eliminar zona ${escapeHtml(zone.name)}">🗑️ Eliminar</button>
           <button class="btn btn-${zone.isActive ? 'warning' : 'success'} btn-sm"
             onclick="zonesVM.toggleZone('${zone.id}')"
-            aria-label="${zone.isActive ? 'Desactivar' : 'Activar'} zona ${zone.name}">
+            aria-label="${zone.isActive ? 'Desactivar' : 'Activar'} zona ${escapeHtml(zone.name)}">
             ${zone.isActive ? '⏸️ Desactivar' : '▶️ Activar'}
           </button>
           ` : ''}
@@ -253,7 +254,7 @@ export class ZonesViewModel {
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="zone-name">Nombre *</label>
-              <input id="zone-name" type="text" class="form-input" required value="${zone?.name || ''}" placeholder="Nombre de la zona" aria-required="true"/>
+              <input id="zone-name" type="text" class="form-input" required value="${escapeHtml(zone?.name || '')}" placeholder="Nombre de la zona" aria-required="true"/>
             </div>
             <div class="form-group">
               <label class="form-label" for="zone-severity">Severidad *</label>
@@ -267,7 +268,7 @@ export class ZonesViewModel {
           </div>
           <div class="form-group">
             <label class="form-label" for="zone-description">Descripción</label>
-            <textarea id="zone-description" class="form-textarea" rows="2" placeholder="Descripción de la zona...">${zone?.description || ''}</textarea>
+            <textarea id="zone-description" class="form-textarea" rows="2" placeholder="Descripción de la zona...">${escapeHtml(zone?.description || '')}</textarea>
           </div>
           <div class="grid-2">
             <div class="form-group">
@@ -337,10 +338,10 @@ export class ZonesViewModel {
     try {
       let savedZone = null;
       try {
-        if (id) savedZone = await ZoneService.update(id, data);
-        else savedZone = await ZoneService.create(data);
+        if (!MockService.enabled && id) savedZone = await ZoneService.update(id, data);
+        else if (!MockService.enabled) savedZone = await ZoneService.create(data);
       } catch (apiErr) {
-        console.warn('API error saving zone, persisting locally:', apiErr);
+        if (!MockService.enabled) throw apiErr;
       }
 
       const finalId = savedZone?.id || id || `Z-${Date.now()}`;
@@ -449,7 +450,7 @@ export class ZonesViewModel {
       try {
         savedZone = await ZoneService.update(z.id, data);
       } catch (apiErr) {
-        console.warn('API error updating polygon, persisting locally:', apiErr);
+        if (!MockService.enabled) throw apiErr;
       }
 
       // Sync with MockService / localStorage
@@ -481,7 +482,7 @@ export class ZonesViewModel {
       try {
         await ZoneService.delete(id);
       } catch (apiErr) {
-        console.warn('API error deleting zone, removing locally:', apiErr);
+        if (!MockService.enabled) throw apiErr;
       }
       const idx = MockService.zones.findIndex(z => z.id === id);
       if (idx >= 0) MockService.zones.splice(idx, 1);
@@ -506,7 +507,7 @@ export class ZonesViewModel {
       try {
         await ZoneService.update(id, { is_active: newActive });
       } catch (apiErr) {
-        console.warn('API error toggling zone:', apiErr);
+        if (!MockService.enabled) throw apiErr;
       }
       const mz = MockService.zones.find(z => z.id === id);
       if (mz) mz.is_active = newActive;
@@ -547,11 +548,11 @@ export class ZonesViewModel {
            onclick="zonesVM._selectZone(zonesVM.state.zones.find(z=>z.id==='${zone.id}'))"
            role="button"
            tabindex="0"
-           aria-label="Zona: ${zone.name}"
+           aria-label="Zona: ${escapeHtml(zone.name)}"
            aria-selected="${this.state.selectedZone?.id === zone.id}">
         <div class="zone-card-header">
           <div>
-            <div class="zone-card-name">${zone.name}</div>
+            <div class="zone-card-name">${escapeHtml(zone.name)}</div>
             <div class="zone-card-id">${zone.id}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">

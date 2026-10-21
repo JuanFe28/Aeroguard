@@ -162,34 +162,4 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
--- Initial Users (Pass: Admin@12345, Operator@12345, Analyst@12345)
-INSERT INTO users (username, email, first_name, last_name, password_hash, role, is_active)
-VALUES
-    ('admin', 'admin@aeroguard.co', 'Admin', 'AeroGuard', crypt('Admin@12345', gen_salt('bf', 12)), 'admin', TRUE),
-    ('operador', 'operador@aeroguard.co', 'Carlos', 'Operador', crypt('Operator@12345', gen_salt('bf', 12)), 'operator', TRUE),
-    ('analista', 'analista@aeroguard.co', 'Laura', 'Analista', crypt('Analyst@12345', gen_salt('bf', 12)), 'analyst', TRUE)
-ON CONFLICT (username) DO NOTHING;
-
--- Initial Restricted Zones (Bogotá & Bucaramanga Strategic Infrastructure)
-INSERT INTO restricted_zones (name, description, threat_level, color, max_altitude, min_altitude, coordinates, is_active)
-VALUES
-    ('Aeropuerto El Dorado', 'Zona de aproximación y pista de aterrizaje principal Bogotá.', 'critical', '#ef4444', 1200.0, 0.0,
-     '[[4.6980,-74.1500],[4.7150,-74.1350],[4.7050,-74.1200],[4.6890,-74.1380]]'::jsonb, TRUE),
-    ('Centro de Operaciones Bogotá', 'Instalación militar y centro de control aéreo regional.', 'high', '#f97316', 500.0, 0.0,
-     '[[4.6400,-74.1000],[4.6500,-74.0900],[4.6420,-74.0800],[4.6320,-74.0920]]'::jsonb, TRUE),
-    ('Zona Residencial Norte Bogotá', 'Área urbana densamente poblada con restricción de sobrevuelo.', 'medium', '#eab308', 250.0, 0.0,
-     '[[4.7200,-74.0400],[4.7350,-74.0300],[4.7280,-74.0180],[4.7120,-74.0280]]'::jsonb, TRUE),
-    ('Aeropuerto Palonegro (Área Crítica)', 'Zona de aproximación y pista de aterrizaje principal.', 'critical', '#ef4444', 1200.0, 0.0,
-     '[[7.1265,-73.1848],[7.1350,-73.1720],[7.1210,-73.1650],[7.1140,-73.1780]]'::jsonb, TRUE),
-    ('Complejo Gubernamental Santander', 'Edificios administrativos centrales y centro de mando.', 'high', '#f59e0b', 300.0, 0.0,
-     '[[7.1190,-73.1250],[7.1240,-73.1200],[7.1210,-73.1140],[7.1150,-73.1190]]'::jsonb, TRUE)
-ON CONFLICT DO NOTHING;
-
--- Initial Sensors
-INSERT INTO sensors (name, type, status, latitude, longitude, altitude, range_km, detections_count)
-VALUES
-    ('Radar Alfa (Palonegro)', 'radar', 'active', 7.1265, -73.1848, 1180.0, 15.0, 14),
-    ('Sensor Óptico/IR Bravo', 'optical', 'active', 7.1220, -73.1750, 1150.0, 4.0, 8),
-    ('Sensor RF Charlie (Espectro)', 'rf', 'active', 7.1180, -73.1220, 960.0, 8.0, 5),
-    ('Sensor Acústico Delta', 'acoustic', 'active', 7.1250, -73.1280, 950.0, 2.5, 2)
-ON CONFLICT DO NOTHING;
+-- Sin cuentas ni datos de demostración. Bootstrap controlado por la aplicación.

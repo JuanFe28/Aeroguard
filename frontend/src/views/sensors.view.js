@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Sensors View + ViewModel (RF-019, RF-020)
  */
@@ -35,7 +36,7 @@ class SensorsViewModel {
         this.state.sensors = MockService.sensors.map(s => new SensorModel(s));
       } else {
         const res = await SensorService.list();
-        this.state.sensors = (res.items || []).map(s => new SensorModel(s));
+        this.state.sensors = (Array.isArray(res) ? res : (res.items || [])).map(s => new SensorModel(s));
       }
     } catch (err) { Toast.error('Error al cargar sensores.'); }
     finally { this.state.isLoading = false; }
@@ -70,7 +71,7 @@ class SensorsViewModel {
         <form id="sensor-form">
           <div class="form-group">
             <label class="form-label" for="sensor-name">Nombre *</label>
-            <input id="sensor-name" type="text" class="form-input" required value="${sensor?.name || ''}" aria-required="true"/>
+            <input id="sensor-name" type="text" class="form-input" required value="${escapeHtml(sensor?.name || '')}" aria-required="true"/>
           </div>
           <div class="form-group">
             <label class="form-label" for="sensor-type">Tipo *</label>
@@ -148,13 +149,13 @@ class SensorsViewModel {
       const statusLabels = { active: 'En línea', inactive: 'Inactivo', error: 'Error' };
       const dotClass     = s.status === 'active' ? 'status-online' : s.status === 'error' ? 'status-danger' : 'status-offline';
       return `
-        <div class="card" style="position:relative;overflow:hidden" role="article" aria-label="Sensor: ${s.name}">
+        <div class="card" style="position:relative;overflow:hidden" role="article" aria-label="Sensor: ${escapeHtml(s.name)}">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${statusColors[s.status] || 'var(--neutral)'}"></div>
           <div style="display:flex;align-items:center;gap:var(--spacing-md);margin-bottom:var(--spacing-md)">
             <div style="font-size:32px">${s.typeIcon}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;color:var(--text-primary);font-size:var(--font-size-md)">${s.name}</div>
-              <div style="font-size:var(--font-size-sm);color:var(--text-muted)">${s.typeLabel}</div>
+              <div style="font-weight:700;color:var(--text-primary);font-size:var(--font-size-md)">${escapeHtml(s.name)}</div>
+              <div style="font-size:var(--font-size-sm);color:var(--text-muted)">${escapeHtml(s.typeLabel)}</div>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="status-dot ${dotClass}"></span>
@@ -178,10 +179,10 @@ class SensorsViewModel {
           <div style="display:flex;gap:var(--spacing-sm)">
             <button class="btn btn-${s.status === 'active' ? 'warning' : 'success'} btn-sm flex-1"
               onclick="sensorsVM.toggleSensor('${s.id}', '${s.status}')"
-              aria-label="${s.status === 'active' ? 'Desactivar' : 'Activar'} sensor ${s.name}">
+              aria-label="${s.status === 'active' ? 'Desactivar' : 'Activar'} sensor ${escapeHtml(s.name)}">
               ${s.status === 'active' ? '⏸️ Desactivar' : '▶️ Activar'}
             </button>
-            <button class="btn btn-icon" onclick="sensorsVM.showSensorModal(sensorsVM.state.sensors.find(s=>s.id==='${s.id}'))" aria-label="Editar sensor ${s.name}" title="Editar">✏️</button>
+            <button class="btn btn-icon" onclick="sensorsVM.showSensorModal(sensorsVM.state.sensors.find(s=>s.id==='${s.id}'))" aria-label="Editar sensor ${escapeHtml(s.name)}" title="Editar">✏️</button>
           </div>
         </div>
       `;

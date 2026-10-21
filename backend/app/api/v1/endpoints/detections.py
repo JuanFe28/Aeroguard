@@ -6,7 +6,7 @@ Gestión, consulta y actualización de detecciones de drones.
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
@@ -15,6 +15,48 @@ from app.core.security import get_current_user, require_permission
 from app.models.models import Detection, DetectionStatus, ThreatLevel, TrajectoryPoint, Alert, AlertStatus, AlertType, AlertSeverity
 
 router = APIRouter()
+
+
+class AIAnalysisSchema(BaseModel):
+    job_id: str = Field(min_length=1, max_length=128)
+    is_drone: bool
+    confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
+    model_used: str = Field(min_length=1, max_length=128)
+    processing_ms: float = Field(ge=0, allow_inf_nan=False)
+
+
+@router.post('/{detection_id}/ai-analysis')
+async def save_ai_analysis(detection_id: str, body: AIAnalysisSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('detections:write'))):
+    from app.models.models import Event
+    from uuid import UUID, uuid5, NAMESPACE_URL
+    try:
+        detection_id = str(UUID(detection_id))
+    except ValueError:
+        raise HTTPException(422, 'Identificador inválido.')
+    detection = await db.get(Detection, detection_id)
+    if detection is None:
+        raise HTTPException(404, 'Detección no encontrada.')
+    event_id = str(uuid5(NAMESPACE_URL, detection_id + ':' + body.job_id))
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+    statement = insert(Event).values(id=event_id, detection_id=detection_id, event_type='ai_analysis',
+        data={**body.model_dump(), 'model_validated': False, 'confidence_kind': 'uncalibrated_score'}).on_conflict_do_nothing().returning(Event.id)
+    if (await db.execute(statement)).scalar_one_or_none() is not None:
+        detection.ai_analyzed = True
+        detection.ai_confidence = body.confidence
+        detection.is_drone = body.is_drone
+    await db.commit()
+    return {'status': 'stored', 'event_id': event_id, 'model_validated': False}
+
+
+@router.get('/{detection_id}/ai-analysis')
+async def get_ai_analysis(detection_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('detections:read'))):
+    from app.models.models import Event
+    event = (await db.execute(select(Event).where(Event.detection_id == detection_id, Event.event_type == 'ai_analysis').order_by(Event.timestamp.desc()).limit(1))).scalar_one_or_none()
+    if event is None:
+        raise HTTPException(404, 'Sin análisis visual asociado.')
+    return event.data
 
 
 class DetectionCreateSchema(BaseModel):

@@ -112,13 +112,13 @@ def test_telemetry_does_not_claim_visual_inference(isolated_client):
     assert detection["is_drone"] is False
 
 
-def test_report_exports_disclose_demo_data(isolated_client):
+def test_report_exports_identify_database_source(isolated_client):
     response = isolated_client.get("/api/v1/reports/export/excel", headers=headers("analyst"))
     assert response.status_code == 200
-    assert response.headers.get("X-AeroGuard-Data-Source") == "synthetic_demo"
+    assert response.headers.get("X-AeroGuard-Data-Source") == "database"
     from openpyxl import load_workbook
     workbook = load_workbook(io.BytesIO(response.content))
     try:
-        assert "DEMO" in workbook["Telemetría e Incursiones"]["A1"].value
+        assert "DEMO" not in workbook["Telemetría e Incursiones"]["A1"].value
     finally:
         workbook.close()

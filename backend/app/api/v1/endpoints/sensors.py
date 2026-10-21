@@ -6,9 +6,11 @@ Gestión, configuración y monitoreo del estado de sensores físicos o simulados
 from typing import List, Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update, func
+from uuid import UUID
+from app.core.config import settings
 
 from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
@@ -18,24 +20,26 @@ router = APIRouter()
 
 
 class SensorCreateSchema(BaseModel):
-    name: str
+    model_config = ConfigDict(allow_inf_nan=False)
+    name: str = Field(min_length=1, max_length=128)
     type: SensorType = SensorType.RADAR
     status: SensorStatus = SensorStatus.ACTIVE
-    latitude: float
-    longitude: float
-    altitude: float = 0.0
-    range_km: float = 5.0
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    altitude: float = Field(default=0, ge=0, le=15000)
+    range_km: float = Field(default=5, gt=0, le=1000)
     config: dict = {}
 
 
 class SensorUpdateSchema(BaseModel):
-    name: Optional[str] = None
+    model_config = ConfigDict(allow_inf_nan=False)
+    name: Optional[str] = Field(default=None, min_length=1, max_length=128)
     type: Optional[SensorType] = None
     status: Optional[SensorStatus] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    altitude: Optional[float] = None
-    range_km: Optional[float] = None
+    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
+    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
+    altitude: Optional[float] = Field(default=None, ge=0, le=15000)
+    range_km: Optional[float] = Field(default=None, gt=0, le=1000)
     config: Optional[dict] = None
 
 
@@ -133,13 +137,15 @@ async def delete_sensor(
 # ============================================================
 
 class TelemetryPacketSchema(BaseModel):
-    sensor_id: str
+    model_config = ConfigDict(allow_inf_nan=False)
+    sensor_id: str = Field(min_length=1, max_length=128)
+    object_id: Optional[str] = Field(default=None, min_length=1, max_length=128)
     latitude: float
     longitude: float
     altitude: float
     speed: float
-    heading: float
-    timestamp: Optional[str] = None
+    heading: float = Field(ge=0, le=360)
+    timestamp: Optional[datetime] = None
     signal_strength: Optional[float] = None
 
 
@@ -162,12 +168,38 @@ async def ingest_telemetry(
     if packet.altitude < 0 or packet.altitude > 10000 or packet.speed < 0 or packet.speed > 1000:
         raise HTTPException(status_code=400, detail="Parámetros cinemáticos fuera de rango operacional.")
 
-    from app.models.models import Detection, TrajectoryPoint, Alert, RestrictedZone, DetectionStatus, ThreatLevel, AlertSeverity, AlertType
+    from app.models.models import Detection, TrajectoryPoint, Alert, RestrictedZone, DetectionStatus, ThreatLevel, AlertSeverity, AlertType, SensorTrack, AlertStatus
     from app.api.v1.endpoints.websocket import broadcast_detection, broadcast_alert
     from app.services.geospatial_service import geospatial_service
 
-    # 2. Registrar o asociar detección
-    detection = Detection(
+    from app.api.v1.endpoints.config import load_persisted_config
+    await load_persisted_config(db)
+    if packet.altitude > settings.DETECTION_MAX_ALTITUDE or not settings.DETECTION_MIN_SPEED <= packet.speed <= settings.DETECTION_MAX_SPEED:
+        raise HTTPException(status_code=400, detail="Telemetría fuera de los umbrales configurados.")
+    try:
+        sensor_uuid = str(UUID(packet.sensor_id))
+    except ValueError:
+        sensor_uuid = None
+    predicate = Sensor.id == sensor_uuid if sensor_uuid else Sensor.name == packet.sensor_id
+    sensor = (await db.execute(select(Sensor).where(predicate).with_for_update())).scalar_one_or_none()
+    if sensor is None:
+        # El registro automático está limitado a la exposición local explícita.
+        if not (settings.APP_ENV == 'development' and settings.SEED_DEMO_DATA):
+            raise HTTPException(status_code=404, detail="Registra el sensor antes de enviar telemetría.")
+        sensor = Sensor(name=packet.sensor_id, latitude=packet.latitude, longitude=packet.longitude)
+        db.add(sensor)
+        await db.flush()
+    if sensor.status != SensorStatus.ACTIVE:
+        raise HTTPException(status_code=409, detail="El sensor no está activo.")
+    await db.execute(update(Sensor).where(Sensor.id == sensor.id).values(last_active=datetime.now(timezone.utc)))
+    track = await db.get(SensorTrack, (sensor.id, packet.object_id)) if packet.object_id else None
+    detection = await db.get(Detection, track.detection_id) if track else None
+    if detection and detection.status not in (DetectionStatus.ACTIVE, DetectionStatus.PENDING):
+        detection = None
+    is_new = detection is None
+    if is_new:
+        detection = Detection(
+        sensor_id=sensor.id,
         latitude=packet.latitude,
         longitude=packet.longitude,
         altitude=packet.altitude,
@@ -178,12 +210,24 @@ async def ingest_telemetry(
         is_drone=False,
         ai_analyzed=False,
         ai_confidence=None,
-    )
-    db.add(detection)
+        )
+        db.add(detection)
+    else:
+        for key in ('latitude', 'longitude', 'altitude', 'speed', 'heading'):
+            setattr(detection, key, getattr(packet, key))
+    detection.zone_id = None
     await db.flush()
+    if is_new:
+        await db.execute(update(Sensor).where(Sensor.id == sensor.id).values(detections_count=Sensor.detections_count + 1))
+        if packet.object_id:
+            if track:
+                track.detection_id = detection.id
+            else:
+                db.add(SensorTrack(sensor_id=sensor.id, object_key=packet.object_id, detection_id=detection.id))
 
     # 3. Guardar punto de trayectoria
     point = TrajectoryPoint(
+        sequence=(await db.execute(select(func.count()).select_from(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection.id))).scalar_one(),
         detection_id=detection.id,
         latitude=packet.latitude,
         longitude=packet.longitude,
@@ -195,6 +239,8 @@ async def ingest_telemetry(
 
     # 4. Verificar invasión de zona restringida (RF-012) usando GeospatialService (PostGIS / Ray-Casting)
     zones_query = select(RestrictedZone).where(RestrictedZone.is_active == True)
+    from app.core.spatial import zone_candidates
+    zones_query = await zone_candidates(db, zones_query, packet.latitude, packet.longitude)
     zones_res = await db.execute(zones_query)
     zones = zones_res.scalars().all()
 
@@ -225,7 +271,9 @@ async def ingest_telemetry(
         if threat_str in threat_enum_map:
             detection.threat_level = threat_enum_map[threat_str]
 
-        alert = Alert(
+        existing_alert = (await db.execute(select(Alert.id).where(Alert.detection_id == detection.id, Alert.type == AlertType.RESTRICTED_ZONE, Alert.status.in_([AlertStatus.OPEN, AlertStatus.ASSIGNED])).limit(1))).scalar_one_or_none()
+        if settings.ALERTS_ENABLED and existing_alert is None:
+            alert = Alert(
             detection_id=detection.id,
             type=AlertType.RESTRICTED_ZONE,
             severity=severity_enum,
@@ -235,9 +283,9 @@ async def ingest_telemetry(
                 f"'{highest_breach['zone_name']}' a {packet.speed:.0f} km/h (Techo permitido: {highest_breach['max_altitude']:.0f}m)."
             ),
         )
-        db.add(alert)
-        await db.flush()
-        alert_created = alert
+            db.add(alert)
+            await db.flush()
+            alert_created = alert
 
     await db.commit()
     await db.refresh(detection)

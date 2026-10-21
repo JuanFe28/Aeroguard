@@ -11,6 +11,7 @@
 !ai_service/detector.py
 !.env.example
 !pyproject.toml
+!constraints.txt
 !scripts/
 !scripts/expo_local.py
 **/__pycache__/

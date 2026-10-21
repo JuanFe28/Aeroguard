@@ -1,210 +1,76 @@
-# 🛡️ AeroGuard — Sistema de Monitoreo de Drones
+# AeroGuard
 
-**Prototipo académico** para la detección, clasificación y monitoreo de posibles drones no autorizados mediante sensores simulados y visión artificial.
+Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Versión de trabajo **1.2.0**, todavía sin publicación oficial.
 
-## Estado verificado — 21 de octubre de 2026
+La API y el frontend usan datos persistidos por defecto. La exposición local puede sembrar ejemplos de forma explícita. La visión usa heurísticas OpenCV/Pillow o un adaptador YOLO opcional: **no existe un modelo de drones validado con un conjunto de prueba independiente**. No se han probado sensores físicos, identificación de fabricante ni funciones de neutralización.
 
-La interfaz usa datos simulados. La visión procesa imágenes con heurísticas OpenCV/Pillow por defecto; no hay un detector de drones validado con métricas de campo. Las exportaciones PDF/Excel son archivos reales con datos sintéticos. No se han demostrado capacidades de radar, RF ni neutralización.
+## Estado comprobado
 
-La auditoría local reproduce 79 pruebas funcionales y 3 de carga; cobertura de líneas del backend 72,28 %. La demo en Edge se verificó. El cierre de Release sigue pendiente por dependencias, pruebas de contenedores y aceptación/publicación autorizada. Consulta los [cinco informes, matriz de Release y evidencias](docs/auditoria-2026-10-21/README.md), la [guía actual](docs/auditoria-2026-10-21/07_GUIA_RELEASE.md) y el [CHANGELOG](CHANGELOG.md).
+- Autenticación JWT con revocación persistente, recuperación de un solo uso, límites de intentos y permisos por rol.
+- Telemetría asociada a sensores, seguimiento por `object_id`, trayectorias y alertas de geocerca sin duplicados activos.
+- Consultas espaciales con PostGIS e índice GiST en PostgreSQL; geometría en memoria para la exposición SQLite.
+- PDF, Excel y CSV consultan la BD y respetan filtros. Los reportes guardados conservan el archivo original y verifican su hash al descargar.
+- Programaciones de reportes persistidas en UTC, con adquisición atómica del trabajo vencido.
+- Worker RabbitMQ con persistencia idempotente y cola de mensajes rechazados; análisis experimental identificado expresamente.
+- Métricas autenticadas, Prometheus, alertas de sensores y dashboard provisionado en Grafana.
+- Cuatro imágenes construidas; pruebas de Linux, navegador, PostgreSQL/PostGIS, RabbitMQ y restauración verificadas.
 
----
+Las evidencias y el estado de Trello están en [correcciones del 21-10-2026](docs/correcciones-2026-10-21/README.md). Los [informes iniciales de auditoría](docs/auditoria-2026-10-21/README.md) son históricos: sus pendientes pueden haber quedado resueltos en esta revisión.
 
-## 🚀 Inicio Rápido (Solo Frontend — Demo Inmediata)
+## Exposición local en Windows
 
-El frontend funciona completamente con datos simulados **sin necesidad de backend ni Docker**.
+Requiere Python 3.11 y Node para los controles de sintaxis.
 
-1. Abre `frontend/index.html` directamente en tu navegador (Chrome/Edge/Firefox)
-2. Usa las credenciales de demo que aparecen en la pantalla de login:
-   - **admin** / Admin123!
-   - **operator1** / Oper123!
-   - **analyst1** / Anal123!
-
-> ⚠️ Algunos navegadores bloquean módulos ES6 desde `file://`. Si tienes problemas, usa un servidor local:
-> ```bash
-> cd frontend
-> python -m http.server 3000
-> # Abre http://localhost:3000
-> ```
-
----
-
-## 🏗️ Arquitectura
-
-Diseño general del proyecto. La integración efectiva de colas, IA y PostGIS es parcial; el [diagnóstico técnico](docs/auditoria-2026-10-21/01_ESTADO_ACTUAL.md) distingue el diseño previsto del flujo ejecutado.
-
-```
-┌─────────────┐    HTTP/WS    ┌──────────────────┐    SQL     ┌────────────┐
-│  Frontend   │ ←──────────── │  Backend FastAPI  │ ────────── │ PostgreSQL │
-│  (MVVM JS)  │               │  Python 3.11      │            └────────────┘
-└─────────────┘               └──────────────────┘
-                                       │  AMQP
-                               ┌───────┴────────┐
-                               │    RabbitMQ    │
-                               └───────┬────────┘
-                                       │
-                        ┌──────────────┴──────────────┐
-                        │                             │
-               ┌────────────────┐          ┌─────────────────┐
-│  AI Service    │          │ Sensor Simulator │
-               │ OpenCV + YOLO  │          │ Telemetría       │
-               └────────────────┘          └─────────────────┘
+```powershell
+py -3.11 -m venv .venv
+.venv/Scripts/python.exe -m pip install -c constraints.txt -r backend/requirements-expo.txt
+.venv/Scripts/python.exe scripts/expo_local.py
 ```
 
-## 📁 Estructura del Proyecto
+Abre [la interfaz local](http://127.0.0.1:3000) y entra con `admin` / `Admin@12345` en una base nueva. El script activa datos de ejemplo y SQLite solamente para desarrollo. Las cuentas ya existentes conservan sus contraseñas. El frontend se autentica contra la API; no cambia automáticamente a resultados ficticios si la API falla.
 
-```
-AeroguardClase/
-├── frontend/                    # SPA JavaScript (MVVM)
-│   ├── index.html               # Punto de entrada
-│   └── src/
-│       ├── main.js              # Router + registro de vistas
-│       ├── app.js               # Router, Layout, Toast
-│       ├── models/              # Capa Modelo MVVM
-│       ├── viewmodels/          # Capa ViewModel MVVM
-│       ├── views/               # Capa Vista MVVM (páginas)
-│       ├── services/            # API service, WebSocket, Mock
-│       └── assets/css/          # Design system CSS
-│
-├── backend/                     # FastAPI Python
-│   └── app/
-│       ├── main.py              # Punto de entrada FastAPI
-│       ├── core/                # Config, Seguridad, DB
-│       ├── models/              # Modelos SQLAlchemy
-│       ├── schemas/             # Esquemas Pydantic
-│       ├── services/            # Lógica de negocio
-│       ├── api/v1/endpoints/    # Endpoints REST
-│       └── workers/             # Consumidores RabbitMQ
-│
-├── ai_service/                  # Servicio de Visión Artificial
-│   └── detector.py              # OpenCV + YOLO detector
-│
-├── sensor_simulator/            # Simulador de telemetría
-│   └── simulator.py             # Generador de datos de vuelo
-│
-└── docker-compose.yml           # Orquestación de servicios
+No abras el HTML con `file://`: los módulos y peticiones necesitan un servidor HTTP. El modo de demostración del frontend exige cambiar explícitamente `AEROGUARD_DEMO_MODE` a `true` y no debe utilizarse como evidencia de integración real.
+
+## Docker
+
+```powershell
+Copy-Item .env.example .env
+# Editar .env: generar SECRET_KEY, POSTGRES_PASSWORD, RABBITMQ_DEFAULT_PASS
+# y BOOTSTRAP_ADMIN_PASSWORD propios. No reutilizar los valores de ejemplo.
+docker compose up -d --build
 ```
 
----
+La interfaz queda en [localhost](http://localhost) y la API en [localhost:8000/docs](http://localhost:8000/docs). La configuración del frontend usa el proxy del mismo origen. PostgreSQL, RabbitMQ y el puerto directo del backend se limitan a la interfaz local del host.
 
-## 🛠️ Instalación Completa (con Docker)
+Compose ejecuta el backend en producción: rechaza la clave JWT de ejemplo, DEBUG, tokens/datos de demostración y fallback SQLite. `BOOTSTRAP_ADMIN_PASSWORD` crea un administrador cuando no existe; no modifica cuentas existentes. Una base reutilizada requiere revisar y cambiar las contraseñas antiguas. Las tablas nuevas y la geometría PostGIS se añaden durante el arranque; respalda primero una instalación existente.
 
-### Prerrequisitos
-- Docker Desktop
-- Docker Compose v2
+El simulador y el worker son perfiles opcionales. Registra los sensores antes de enviar telemetría en producción. El simulador necesita `SIMULATOR_TOKEN`; el worker necesita `AI_WORKER_TOKEN` de un usuario operador dedicado. Estos JWT deben renovarse al expirar.
 
-### Pasos
-
-```bash
-# 1. Clona / navega al proyecto
-cd D:\aeroguard
-
-# 2. Crea el archivo de variables de entorno
-cp .env.example .env
-# Edita .env y cambia SECRET_KEY
-
-# 3. Levanta todos los servicios
-docker compose up -d
-
-# 4. Espera ~30 segundos y accede a:
-#    Frontend:  http://localhost
-#    API Docs:  http://localhost:8000/docs
-#    RabbitMQ:  http://localhost:15672 (aeroguard / aeroguard_pass)
+```powershell
+docker compose --profile ai up -d ai-service
+docker compose --profile demo up -d simulator
 ```
 
----
+La cola `ai.processing` acepta JSON con `detection_id` e `image_base64`. Los resultados se consultan en `/api/v1/detections/{id}/ai-analysis`; los errores permanentes quedan en `ai.processing.dead`. Un mensaje no acredita precisión de reconocimiento.
 
-## 🔐 Seguridad
+## Observabilidad y operación
 
-Estos mecanismos describen implementaciones parciales del prototipo; no acreditan conformidad ni certificación OWASP. Revisar los riesgos pendientes de la auditoría antes de usar datos reales o exponer servicios.
+Consulta [el manual de operación y recuperación](docs/correcciones-2026-10-21/OPERACION.md). Configura un `METRICS_BEARER_TOKEN` aleatorio de al menos 32 caracteres y guarda el mismo valor en `secrets/metrics.token`; configura también `GRAFANA_ADMIN_PASSWORD`.
 
-| Mecanismo | Implementación |
-|---|---|
-| Autenticación | OAuth 2.0 Password Flow |
-| Tokens | JWT (HS256, 60min access + 7d refresh) |
-| Contraseñas | bcrypt (rounds=12) |
-| Integridad | SHA-256 chain en audit logs |
-| Headers | X-Content-Type-Options, X-Frame-Options, X-XSS-Protection |
-| Acceso | RBAC (admin / operator / analyst) |
-| Estándar | OWASP Top 10 2021 |
-
----
-
-## 👥 Roles
-
-| Rol | Acceso |
-|---|---|
-| **Administrador** | Acceso completo: usuarios, sensores, zonas, configuración, auditoría |
-| **Operador** | Dashboard, detecciones, alertas, trayectorias, zonas (solo lectura) |
-| **Analista** | Historial, reportes, auditoría, exportación |
-
----
-
-## 📋 Requisitos Funcionales Declarados
-
-Inventario original con correcciones de alcance de la auditoría. Una pantalla demo o una ruta presente no implica integración completa ni validación operativa.
-
-| RF | Descripción | Estado |
-|---|---|---|
-| RF-001 | Iniciar Sesión | ✅ Frontend + Backend |
-| RF-002 | Cambiar Contraseña | ✅ Backend |
-| RF-003 | Recuperar Contraseña | ✅ Backend |
-| RF-004 | Crear Nuevo Usuario | ✅ Frontend + Backend |
-| RF-005 | Listar y Editar Usuarios | ✅ Frontend + Backend |
-| RF-006 | Desactivar/Activar Usuario | ✅ Frontend + Backend |
-| RF-007 | Gestionar Permisos y Roles | ✅ RBAC implementado |
-| RF-008 | Dashboard en Tiempo Real | ✅ Leaflet + WebSocket/Sim |
-| RF-009 | Visualizar Detecciones | ✅ Frontend |
-| RF-010 | Consultar Detalle | ✅ Frontend |
-| RF-011 | Trayectoria de Detección | ✅ Frontend + mapa |
-| RF-012 | Alerta por Zona Restringida | ✅ Lógica backend |
-| RF-013 | Alerta por Comportamiento | ✅ Simulador + backend |
-| RF-014 | Gestionar Alertas | ✅ Frontend completo |
-| RF-015 | Crear Zona Restringida | ✅ Frontend + backend |
-| RF-016 | Editar y Eliminar Zonas | ✅ Frontend + backend |
-| RF-017 | Visualizar Zonas | ✅ Mapa Leaflet |
-| RF-018 | Configurar Parámetros | ✅ Frontend |
-| RF-019 | Activar/Desactivar Sensores | ✅ Frontend + backend |
-| RF-020 | Procesar Datos de Detección | ✅ Backend + simulador |
-| RF-021 | Analizar Objeto IA | Heurísticas OpenCV/Pillow; YOLO opcional sin validación de drones |
-| RF-022 | Registrar Evento | ✅ Backend |
-| RF-023 | Reporte de Detecciones | PDF/XLSX binarios con datos sintéticos; consulta real pendiente |
-| RF-024 | Reporte de Alertas | Demostración; filtros y dataset de BD pendientes |
-| RF-025 | Reportes Programados | UI/modelo presentes; scheduler activo no implementado |
-| RF-026 | Exportar Histórico | Demo; exportación histórica real y CSV por completar |
-| RF-027 | Registrar Auditoría | ✅ Backend (SHA-256 chain) |
-| RF-028 | Consultar Auditoría | ✅ Frontend |
-| RF-029 | Validar Integridad | ✅ Hash SHA-256 + validación rangos |
-
----
-
-## 🗺️ Google Maps (Opcional)
-
-Para activar Google Maps además de Leaflet, edita `frontend/index.html`:
-
-```html
-window.GOOGLE_MAPS_API_KEY = 'TU_API_KEY_AQUI';
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.monitoring.yml --profile monitoring up -d
 ```
 
----
+Prometheus queda en [localhost:19090](http://localhost:19090) y Grafana en [localhost:13000](http://localhost:13000). El token de métricas permite únicamente `/metrics`. El monitor de sensores usa el último paquete recibido; no diagnostica por sí solo fallos físicos. SMTP y un receptor externo de alertas requieren configuración del operador.
 
-## 📊 Stack Tecnológico
+## Verificación y respaldo
 
-| Capa | Tecnología |
-|---|---|
-| Frontend | Vanilla JS + HTML/CSS (MVVM) |
-| Mapa | Leaflet.js + OpenStreetMap |
-| Backend | Python 3.11 + FastAPI |
-| Base de datos | PostgreSQL 16 |
-| Mensajería | RabbitMQ 3.13 |
-| IA | Python + OpenCV + YOLOv8 |
-| Contenedores | Docker + Docker Compose |
-| Autenticación | OAuth 2.0 + JWT |
-| API Docs | OpenAPI / Swagger |
+```powershell
+.venv/Scripts/python.exe scripts/release_checks.py --output tmp/mi-verificacion --audit-dependencies
+docker build --target test -f backend/Dockerfile .
+.venv/Scripts/python.exe scripts/database_backup.py --output backups/respaldo.dump --verify-restore --reports-container aeroguard-backend
+```
 
----
+Usa carpetas y nombres nuevos para conservar las ejecuciones anteriores. Los respaldos, bases, reportes generados, sesiones y `.env` quedan fuera de Git. El respaldo PostgreSQL contiene información privada: no debe subirse como código fuente.
 
-## 📄 Licencia
-
-Prototipo académico — Unidades Tecnológicas de Santander (UTS).
-Solo para uso educativo.
+La publicación de imágenes, ejecución de Actions en GitHub, despliegue en una VM y aceptación docente siguen siendo pasos separados. Consulta [el changelog](CHANGELOG.md) y la [política de versionado](docs/correcciones-2026-10-21/VERSIONADO.md).

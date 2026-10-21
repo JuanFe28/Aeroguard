@@ -1,306 +1,196 @@
-"""
-AeroGuard — Reports Endpoint (RF-024 a RF-027 / CODE-02)
-Generación, exportación física binaria (PDF, Excel, CSV) y firma criptográfica SHA-256.
-Cumple con la especificación de HU-02 y los escenarios 3 y 4 de Gherkin.
-"""
-
-from typing import List, Optional, Dict, Any
+"""Reportes de BD, archivos recuperables por ID y programación UTC."""
+import csv
 from datetime import datetime, timezone
-import os
-import tempfile
-
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from fastapi.responses import Response, StreamingResponse
-from pydantic import BaseModel
+import hashlib
+import io
+from pathlib import Path
+import uuid
+from apscheduler.triggers.cron import CronTrigger
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
+from pydantic import BaseModel, Field, model_validator
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
-import structlog
-
+from starlette.concurrency import run_in_threadpool
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.security import get_current_user, require_permission
-from app.models.models import Report, ReportType, ReportFormat
+from app.core.security import require_permission
+from app.models.models import Report, ReportType, ReportFormat, ReportSchedule
+from app.services.report_data_service import build_dataset, utc
 from app.services.report_generator_service import report_generator_service
 
-logger = structlog.get_logger("AeroGuard-Reports-Endpoint")
-
 router = APIRouter()
-
+MEDIA = {'pdf': 'application/pdf', 'excel': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'csv': 'text/csv; charset=utf-8'}
+EXT = {'pdf': 'pdf', 'excel': 'xlsx', 'csv': 'csv'}
 
 class ReportCreateSchema(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=255)
     type: ReportType = ReportType.SUMMARY
     format: ReportFormat = ReportFormat.PDF
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    params: dict = {}
-
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    params: dict = Field(default_factory=dict)
+    @model_validator(mode='after')
+    def dates(self):
+        if self.date_from and self.date_to and utc(self.date_from) > utc(self.date_to):
+            raise ValueError('Rango de fechas inválido.')
+        return self
 
 class ReportExportRequestSchema(BaseModel):
-    format: str = "pdf"
-    type: str = "detections"
-    date_from: Optional[str] = None
-    date_to: Optional[str] = None
+    format: ReportFormat = ReportFormat.PDF
+    type: ReportType = ReportType.DETECTIONS
+    date_from: datetime | None = None
+    date_to: datetime | None = None
 
+def safe_cell(value):
+    return "'" + value if isinstance(value, str) and value.startswith(('=', '+', '-', '@', '\t', '\r')) else value
 
-# ============================================================
-# Endpoints de Exportación Directa (HU-02 / Escenarios 3 y 4)
-# ============================================================
+def compile_report(data, fmt):
+    if fmt == ReportFormat.PDF:
+        return report_generator_service.generate_pdf(data=data)
+    if fmt == ReportFormat.EXCEL:
+        return report_generator_service.generate_excel(data=data)
+    buffer = io.StringIO(newline='')
+    rows = data['audit_records'] if data['report_type'] == 'audit' else data['incursions']
+    writer = csv.DictWriter(buffer, fieldnames=list(rows[0]) if rows else ['id', 'timestamp'])
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({key: safe_cell(value) for key, value in row.items()})
+    result = buffer.getvalue().encode('utf-8-sig')
+    return result, hashlib.sha256(result).hexdigest()
 
-@router.get("/export/pdf", summary="Descargar reporte táctico en PDF con SHA-256 (HU-02 / Escenario 3)")
-async def export_pdf_report(
-    type: str = Query("detections", description="Tipo de reporte: detections, alerts, summary"),
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None,
-    current_user = Depends(require_permission("reports:read")),
-):
-    """
-    Genera un PDF académico con datos sintéticos, no una consulta de incidentes reales.
-    Incluye:
-    - Membrete institucional UTS.
-    - Resumen ejecutivo de KPIs.
-    - Dictamen de Inteligencia Artificial táctico.
-    - Tabla detallada de telemetría e incursiones en zonas protegidas.
-    - Huella SHA-256 del dataset; no equivale a firma digital ni cadena de custodia acreditada.
-    """
-    operator_name = getattr(current_user, "username", "Operador C-UAS")
-    pdf_bytes, sha256_hash = report_generator_service.generate_pdf(operator=operator_name)
+def download(content, fmt, filename, data_hash):
+    return Response(content=content, media_type=MEDIA[fmt], headers={
+        'Content-Disposition': f'attachment; filename="{filename}"', 'X-Report-SHA256': data_hash,
+        'X-Content-SHA256': hashlib.sha256(content).hexdigest(), 'X-AeroGuard-Data-Source': 'database'})
 
-    timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    filename = f"reporte_aeroguard_{type}_{timestamp_str}.pdf"
-
-    logger.info(
-        "Reporte PDF generado exitosamente",
-        filename=filename,
-        size_bytes=len(pdf_bytes),
-        sha256=sha256_hash,
-        user=operator_name,
-    )
-
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-            "X-Report-SHA256": sha256_hash,
-            "X-AeroGuard-Data-Source": "synthetic_demo",
-            "Access-Control-Expose-Headers": "Content-Disposition, X-Report-SHA256",
-        },
-    )
-
-
-@router.get("/export/excel", summary="Descargar telemetría histórica en Excel (.xlsx) (HU-02 / Escenario 4)")
-async def export_excel_report(
-    type: str = Query("detections", description="Tipo de reporte"),
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None,
-    current_user = Depends(require_permission("reports:read")),
-):
-    """
-    Genera una hoja de cálculo (.xlsx) con datos sintéticos, sin consulta histórica de BD.
-    Incluye:
-    - Hoja 1: Telemetría e Incursiones tabuladas con formato táctico militar.
-    - Hoja 2: Resumen ejecutivo y registro de auditoría con firma SHA-256.
-    """
-    operator_name = getattr(current_user, "username", "Operador C-UAS")
-    excel_bytes, sha256_hash = report_generator_service.generate_excel(operator=operator_name)
-
-    timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    filename = f"telemetria_aeroguard_{type}_{timestamp_str}.xlsx"
-
-    logger.info(
-        "Reporte Excel generado exitosamente",
-        filename=filename,
-        size_bytes=len(excel_bytes),
-        sha256=sha256_hash,
-        user=operator_name,
-    )
-
-    return Response(
-        content=excel_bytes,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-            "X-Report-SHA256": sha256_hash,
-            "X-AeroGuard-Data-Source": "synthetic_demo",
-            "Access-Control-Expose-Headers": "Content-Disposition, X-Report-SHA256",
-        },
-    )
-
-
-@router.post("/export", summary="Exportar reporte genérico (POST)")
-async def export_report_post(
-    body: ReportExportRequestSchema,
-    current_user = Depends(require_permission("reports:read")),
-):
-    """Endpoint unificado POST para exportar PDF o Excel según parámetros del cliente."""
-    fmt = (body.format or "pdf").lower()
-    if fmt == "excel" or fmt == "xlsx":
-        return await export_excel_report(type=body.type, current_user=current_user)
-    return await export_pdf_report(type=body.type, current_user=current_user)
-
-
-# ============================================================
-# Gestión y Descarga por ID
-# ============================================================
-
-@router.get("", summary="Listar informes generados (RF-024)")
-async def list_reports(
-    skip: int = 0,
-    limit: int = 50,
-    db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_permission("reports:read")),
-):
-    """Lista todos los reportes solicitados con su estado y enlace de descarga."""
+async def export(db, user, fmt, type, date_from=None, date_to=None):
     try:
-        query = select(Report).order_by(desc(Report.created_at)).offset(skip).limit(limit)
-        result = await db.execute(query)
-        return result.scalars().all()
-    except Exception as e:
-        logger.warning("Error al listar reportes de BD, devolviendo histórico estático", error=str(e))
-        now = datetime.now(timezone.utc)
-        return [
-            {
-                "id": "rep-demo-01",
-                "title": "Reporte Táctico Diario — Incursiones Bucaramanga",
-                "type": "detections",
-                "format": "pdf",
-                "status": "completed",
-                "file_size": 182400,
-                "file_url": "/api/v1/reports/export/pdf",
-                "created_at": now.isoformat(),
-                "completed_at": now.isoformat(),
-            },
-            {
-                "id": "rep-demo-02",
-                "title": "Histórico Semanal de Alertas — Aeropuertos",
-                "type": "alerts",
-                "format": "excel",
-                "status": "completed",
-                "file_size": 245000,
-                "file_url": "/api/v1/reports/export/excel",
-                "created_at": now.isoformat(),
-                "completed_at": now.isoformat(),
-            }
-        ]
+        data = await build_dataset(db, type, date_from, date_to, user.username)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    content, digest = await run_in_threadpool(compile_report, data, fmt)
+    return download(content, fmt.value, f'aeroguard_{uuid.uuid4().hex}.{EXT[fmt]}', digest)
 
+@router.get('/export/pdf')
+async def export_pdf_report(type: ReportType = ReportType.DETECTIONS, date_from: datetime | None = None, date_to: datetime | None = None,
+                            db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return await export(db, current_user, ReportFormat.PDF, type, date_from, date_to)
 
-@router.post("", status_code=status.HTTP_201_CREATED, summary="Solicitar generación de reporte (RF-024)")
-async def create_report(
-    body: ReportCreateSchema,
-    db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_permission("reports:write")),
-):
-    """Crea un reporte físico y persiste su metadata."""
-    operator_name = getattr(current_user, "username", "Operador C-UAS")
+@router.get('/export/excel')
+async def export_excel_report(type: ReportType = ReportType.DETECTIONS, date_from: datetime | None = None, date_to: datetime | None = None,
+                              db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return await export(db, current_user, ReportFormat.EXCEL, type, date_from, date_to)
 
-    # Compilar físicamente el archivo
-    if body.format == ReportFormat.EXCEL:
-        file_bytes, sha256_hash = report_generator_service.generate_excel(operator=operator_name)
-        ext = "xlsx"
-    else:
-        file_bytes, sha256_hash = report_generator_service.generate_pdf(operator=operator_name)
-        ext = "pdf"
+@router.get('/export/csv')
+async def export_csv_report(type: ReportType = ReportType.DETECTIONS, date_from: datetime | None = None, date_to: datetime | None = None,
+                            db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return await export(db, current_user, ReportFormat.CSV, type, date_from, date_to)
 
-    now = datetime.now(timezone.utc)
-    # Creación exclusiva: evita sobrescrituras y archivos precreados por terceros.
-    reports_dir = settings.REPORTS_DIR
+@router.post('/export')
+async def export_report_post(body: ReportExportRequestSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return await export(db, current_user, body.format, body.type, body.date_from, body.date_to)
+
+@router.get('')
+async def list_reports(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500), db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return (await db.execute(select(Report).order_by(Report.created_at.desc()).offset(skip).limit(limit))).scalars().all()
+
+async def persist_report(db, body, current_user):
+    data = await build_dataset(db, body.type, body.date_from, body.date_to, current_user.username)
+    content, digest = await run_in_threadpool(compile_report, data, body.format)
+    report_id = str(uuid.uuid4())
+    filename = f'{report_id}.{EXT[body.format]}'
+    directory = Path(settings.REPORTS_DIR)
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    destination = directory / filename
     try:
-        os.makedirs(reports_dir, mode=0o700, exist_ok=True)
-        with tempfile.NamedTemporaryFile(
-            mode="wb", prefix=f"{body.type.value}_", suffix=f".{ext}",
-            dir=reports_dir, delete=False,
-        ) as f:
-            f.write(file_bytes)
-    except Exception as e:
-        logger.warning("No se pudo escribir en REPORTS_DIR, persistiendo en memoria", error=str(e))
-
-    report = Report(
-        title=body.title,
-        type=body.type,
-        format=body.format,
-        date_from=body.date_from,
-        date_to=body.date_to,
-        params={"sha256": sha256_hash, **(body.params or {})},
-        created_by_id=getattr(current_user, "id", None),
-        status="completed",
-        file_url=f"/api/v1/reports/export/{body.format.value}",
-        file_size=len(file_bytes),
-        completed_at=now,
-    )
-
-    try:
+        with destination.open('xb') as stream:
+            stream.write(content)
+        report = Report(id=report_id, title=body.title, type=body.type, format=body.format, date_from=body.date_from,
+                        date_to=body.date_to, created_by_id=current_user.id, params={**body.params, 'storage_name': filename,
+                        'sha256': digest, 'file_sha256': hashlib.sha256(content).hexdigest(), 'data_source': 'database'},
+                        status='completed', file_url=f'/api/v1/reports/{report_id}/download', file_size=len(content),
+                        completed_at=datetime.now(timezone.utc))
         db.add(report)
         await db.commit()
         await db.refresh(report)
         return report
-    except Exception as e:
-        logger.warning("No se pudo persistir en base de datos, retornando entidad en memoria", error=str(e))
-        return {
-            "id": f"rep-{now.strftime('%H%M%S')}",
-            "title": body.title,
-            "type": body.type.value,
-            "format": body.format.value,
-            "status": "completed",
-            "file_size": len(file_bytes),
-            "file_url": f"/api/v1/reports/export/{body.format.value}",
-            "sha256": sha256_hash,
-            "completed_at": now.isoformat(),
-        }
+    except Exception:
+        await db.rollback()
+        if destination.is_file():
+            destination.unlink()
+        raise
 
+@router.post('', status_code=201)
+async def create_report(body: ReportCreateSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
+    return await persist_report(db, body, current_user)
 
-@router.get("/{report_id}/download", summary="Descargar archivo físico por ID")
-async def download_report_by_id(
-    report_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_permission("reports:read")),
-):
-    """Descarga el binario físico del reporte identificado por report_id."""
-    operator_name = getattr(current_user, "username", "Operador C-UAS")
+class ScheduleSchema(BaseModel):
+    name: str = Field(min_length=1, max_length=128)
+    report_type: ReportType = ReportType.DETECTIONS
+    format: ReportFormat = ReportFormat.PDF
+    cron_expr: str
+    is_active: bool = True
+    @model_validator(mode='after')
+    def valid_cron(self):
+        CronTrigger.from_crontab(self.cron_expr, timezone='UTC')
+        return self
 
-    # Si es un reporte con formato excel o id demo
-    if "excel" in report_id.lower() or "xlsx" in report_id.lower():
-        excel_bytes, sha = report_generator_service.generate_excel(operator=operator_name)
-        return Response(
-            content=excel_bytes,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f'attachment; filename="reporte_{report_id}.xlsx"'},
-        )
+@router.get('/schedules')
+async def schedules(db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return (await db.execute(select(ReportSchedule).order_by(ReportSchedule.created_at))).scalars().all()
 
-    # Por defecto compilar PDF
-    pdf_bytes, sha = report_generator_service.generate_pdf(operator=operator_name)
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="reporte_{report_id}.pdf"'},
-    )
+@router.post('/schedules', status_code=201)
+async def create_schedule(body: ScheduleSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
+    item = ReportSchedule(**body.model_dump(), created_by=current_user.id, next_run=CronTrigger.from_crontab(body.cron_expr, timezone='UTC').get_next_fire_time(None, datetime.now(timezone.utc)))
+    db.add(item)
+    await db.commit()
+    await db.refresh(item)
+    return item
 
+@router.put('/schedules/{schedule_id}')
+async def update_schedule(schedule_id: str, body: ScheduleSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
+    item = await db.get(ReportSchedule, schedule_id)
+    if item is None:
+        raise HTTPException(404, 'Programación no encontrada.')
+    for name, value in body.model_dump().items():
+        setattr(item, name, value)
+    item.next_run = CronTrigger.from_crontab(body.cron_expr, timezone='UTC').get_next_fire_time(None, datetime.now(timezone.utc))
+    await db.commit()
+    return item
 
-@router.get("/{report_id}", summary="Detalle de informe")
-async def get_report(
-    report_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_permission("reports:read")),
-):
-    """Obtiene el estado o enlace de descarga de un reporte."""
+@router.delete('/schedules/{schedule_id}', status_code=204)
+async def delete_schedule(schedule_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
+    item = await db.get(ReportSchedule, schedule_id)
+    if item is None:
+        raise HTTPException(404, 'Programación no encontrada.')
+    await db.delete(item)
+    await db.commit()
+
+async def lookup(db, report_id):
     try:
-        query = select(Report).where(Report.id == report_id)
-        result = await db.execute(query)
-        report = result.scalar_one_or_none()
-        if report:
-            return report
-    except Exception as error:
-        logger.warning("No se pudo consultar el reporte; se usará el descriptor de demostración", error=str(error))
+        uuid.UUID(report_id)
+    except ValueError:
+        raise HTTPException(404, 'Reporte no encontrado.')
+    report = await db.get(Report, report_id)
+    if report is None:
+        raise HTTPException(404, 'Reporte no encontrado.')
+    return report
 
-    # Si no está en BD o BD offline, devolver descriptor de demo
-    now = datetime.now(timezone.utc)
-    return {
-        "id": report_id,
-        "title": f"Reporte Táctico {report_id}",
-        "type": "detections",
-        "format": "pdf",
-        "status": "completed",
-        "file_url": f"/api/v1/reports/{report_id}/download",
-        "file_size": 182400,
-        "completed_at": now.isoformat(),
-    }
+@router.get('/{report_id}/download')
+async def download_report_by_id(report_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    report = await lookup(db, report_id)
+    filename = (report.params or {}).get('storage_name', '')
+    if filename != f'{report.id}.{EXT[report.format]}':
+        raise HTTPException(409, 'Reporte histórico sin archivo verificable; debe regenerarse.')
+    path = Path(settings.REPORTS_DIR) / filename
+    if path.is_symlink() or not path.is_file():
+        raise HTTPException(404, 'Archivo no disponible.')
+    content = await run_in_threadpool(path.read_bytes)
+    if hashlib.sha256(content).hexdigest() != report.params.get('file_sha256'):
+        raise HTTPException(409, 'La integridad del archivo no coincide.')
+    return download(content, report.format.value, filename, report.params['sha256'])
+
+@router.get('/{report_id}')
+async def get_report(report_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:read'))):
+    return await lookup(db, report_id)

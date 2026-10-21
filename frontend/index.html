@@ -36,11 +36,12 @@
 
   <!-- Config (override before main.js) -->
   <script>
-    // API configuration — change these to point to your backend
-    window.AEROGUARD_API_URL = 'http://localhost:8000/api/v1';
-    window.AEROGUARD_WS_URL = 'ws://localhost:8000/ws';
-    window.GOOGLE_MAPS_API_KEY = 'AIzaSyCE5ZGHU7pxBnCq7xHludUhl2sOGW7-sw4'; 
-    window.AEROGUARD_DEMO_MODE = true; // Set to true for local dev/demo
+    const localExpo = ['localhost', '127.0.0.1'].includes(location.hostname) && location.port === '3000';
+    const backendOrigin = localExpo ? `${location.protocol}//${location.hostname}:8000` : location.origin;
+    window.AEROGUARD_API_URL = `${backendOrigin}/api/v1`;
+    window.AEROGUARD_WS_URL = `${backendOrigin.replace(/^http/, 'ws')}/ws`;
+    window.GOOGLE_MAPS_API_KEY = '';
+    window.AEROGUARD_DEMO_MODE = false;
   </script>
 </head>
 

@@ -1,0 +1,27 @@
+{
+  "date_utc": "2026-10-21T16:19:34.057534+00:00",
+  "checks": {
+    "postgresql_ready": true,
+    "postgis_breach": true,
+    "telemetry_track_and_alert_deduplication": true,
+    "report_file_retrieval": true,
+    "concurrent_audit_chain": {
+      "valid": true,
+      "records_checked": 7,
+      "total_records": 7,
+      "complete": true,
+      "status": "intact",
+      "anchored": true
+    },
+    "rabbitmq_worker_persisted": {
+      "job_id": "5d8d029d8b7e3b3de412b66ee8753a2827cee8e2107de24f79a48abb6097c1d4",
+      "is_drone": false,
+      "confidence": 0.05,
+      "model_used": "OpenCV-Heuristic",
+      "processing_ms": 2.3477180000099906,
+      "model_validated": false,
+      "confidence_kind": "uncalibrated_score"
+    },
+    "authenticated_metrics": true
+  }
+}

@@ -8,9 +8,10 @@ from fastapi.websockets import WebSocketState
 from typing import Dict, Set, List, Tuple, Optional
 import asyncio
 import json
+import time
 from datetime import datetime, timezone
 
-from app.core.security import get_current_user
+from app.core.security import get_current_user, decode_token
 
 router = APIRouter()
 
@@ -39,6 +40,23 @@ class ConnectionManager:
                 if not self._active[user_id]:
                     self._active.pop(user_id, None)
 
+    async def close_user(self, username):
+        async with self._lock:
+            sockets = list(self._active.pop(username, set()))
+        for socket in sockets:
+            try:
+                await socket.close(code=4001, reason='Sesión revocada')
+            except Exception:
+                pass
+
+    async def validate_socket(self, socket):
+        token = getattr(getattr(socket, 'state', None), 'auth_token', None)
+        if token:
+            decode_token(token)  # Expiración en cada entrega, sin consulta por cada heartbeat.
+            if time.monotonic() >= socket.state.next_auth_check:
+                await get_current_user(token)
+                socket.state.next_auth_check = time.monotonic() + 15
+
     async def send_to(self, user_id: str, message: dict):
         payload = json.dumps(message, default=str)
         async with self._lock:
@@ -60,6 +78,12 @@ class ConnectionManager:
         for user_id, ws in targets:
             if ws.client_state == WebSocketState.CONNECTED:
                 try:
+                    try:
+                        await self.validate_socket(ws)
+                    except Exception:
+                        await ws.close(code=4001, reason='Sesión expirada o revocada')
+                        disconnected.append((ws, user_id))
+                        continue
                     await ws.send_text(payload)
                 except Exception:
                     disconnected.append((ws, user_id))
@@ -97,6 +121,8 @@ async def websocket_live(websocket: WebSocket, token: str = Query(...)):
         await websocket.close(code=4001, reason="Token inválido o expirado")
         return
 
+    websocket.state.auth_token = token
+    websocket.state.next_auth_check = time.monotonic() + 15
     await manager.connect(websocket, user_id)
     try:
         # Enviar mensaje de bienvenida y configuración de cadencia de heartbeat
@@ -115,6 +141,11 @@ async def websocket_live(websocket: WebSocket, token: str = Query(...)):
         # Loop de escucha de mensajes cliente (ping/pong, suscripciones, etc.)
         while True:
             try:
+                try:
+                    await manager.validate_socket(websocket)
+                except Exception:
+                    await websocket.close(code=4001, reason='Sesión expirada o revocada')
+                    break
                 raw_text = await asyncio.wait_for(websocket.receive_text(), timeout=25.0)
                 try:
                     data = json.loads(raw_text)

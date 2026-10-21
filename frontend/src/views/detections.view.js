@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Detections View + ViewModel
  * Lista y detalle de detecciones (RF-009, RF-010, RF-011, RF-021)
@@ -84,7 +85,7 @@ export class DetectionsViewModel {
           page: this.state.page,
           per_page: this.state.perPage,
         });
-        this.state.detections = (res.items || []).map(d => new DetectionModel(d));
+        this.state.detections = (Array.isArray(res) ? res : (res.items || [])).map(d => new DetectionModel(d));
         this.state.total = res.total || 0;
       }
       this._applyFilters();
@@ -142,7 +143,7 @@ export class DetectionsViewModel {
         <td>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="status-dot ${d.status === 'active' ? 'status-danger' : d.status === 'pending' ? 'status-warning' : 'status-online'}"></span>
-            ${d.sensorName}
+            ${escapeHtml(d.sensorName)}
           </div>
         </td>
         <td>

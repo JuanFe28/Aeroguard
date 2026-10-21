@@ -47,6 +47,18 @@ async def _seed_data(session: AsyncSession):
     from app.models.models import User, RestrictedZone, UserRole, ThreatLevel
     from app.core.security import hash_password
 
+    if not (settings.SEED_DEMO_DATA and settings.APP_ENV == "development"):
+        if settings.BOOTSTRAP_ADMIN_PASSWORD:
+            from app.core.security import validate_password_strength
+            if not validate_password_strength(settings.BOOTSTRAP_ADMIN_PASSWORD):
+                raise ValueError("BOOTSTRAP_ADMIN_PASSWORD no cumple la política de contraseñas.")
+            existing = await session.execute(select(User).where(User.role == UserRole.ADMIN))
+            if existing.scalars().first() is None:
+                session.add(User(username="admin", email="admin@aeroguard.co", first_name="Admin", last_name="AeroGuard",
+                                 password_hash=hash_password(settings.BOOTSTRAP_ADMIN_PASSWORD), role=UserRole.ADMIN, is_active=True))
+                await session.commit()
+        return
+
     try:
         # Seed Users
         user_res = await session.execute(select(User))
@@ -143,8 +155,11 @@ async def _seed_data(session: AsyncSession):
             await session.commit()
             logger.info("Zonas iniciales creadas en la base de datos")
     except Exception as e:
+        if settings.APP_ENV == "production" or not settings.ALLOW_SQLITE_FALLBACK:
+            raise
         logger.error("Error al sembrar datos iniciales", error=str(e))
         await session.rollback()
+        raise
 
 
 async def init_db():
@@ -154,8 +169,13 @@ async def init_db():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            if engine.dialect.name == 'postgresql':
+                from app.core.spatial import initialize_spatial
+                await initialize_spatial(conn)
         logger.info("Base de datos conectada exitosamente", url=str(engine.url))
     except Exception as e:
+        if settings.APP_ENV == "production" or not settings.ALLOW_SQLITE_FALLBACK:
+            raise
         logger.warning(
             "No se pudo conectar a PostgreSQL. Activando fallback a SQLite local...",
             error=str(e),

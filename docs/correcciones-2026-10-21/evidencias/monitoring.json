@@ -1,0 +1,8 @@
+{
+  "prometheus_target": "up",
+  "sensor_stale_alert": "firing",
+  "grafana_dashboard": "AeroGuard \u2014 Operaci\u00f3n acad\u00e9mica",
+  "panels": 4,
+  "prometheus_build": "3.15.1",
+  "grafana_build": "13.2.4"
+}

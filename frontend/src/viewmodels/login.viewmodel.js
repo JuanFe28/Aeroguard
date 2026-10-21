@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Login ViewModel (MVVM)
  * Gestiona el estado y lógica de la vista de inicio de sesión.
@@ -44,11 +45,9 @@ export class LoginViewModel {
 
     let data;
     try {
-      try {
-        data = await MockService.fakeLogin(this.state.username, this.state.password);
-      } catch (mockErr) {
-        data = await AuthService.login(this.state.username, this.state.password);
-      }
+      data = MockService.enabled
+        ? await MockService.fakeLogin(this.state.username, this.state.password)
+        : await AuthService.login(this.state.username, this.state.password);
       AuthService.saveSession(data.access_token, data.user);
       Toast.success(`Bienvenido, ${data.user?.first_name || data.user?.username}`);
       return true;
@@ -120,7 +119,7 @@ export class LoginViewModel {
           <div class="empty-state-icon">📧</div>
           <div class="empty-state-title">Correo enviado</div>
           <div class="empty-state-message">
-            Revisa tu bandeja de entrada en <strong>${this.state.forgotEmail}</strong>.
+            Revisa tu bandeja de entrada en <strong>${escapeHtml(this.state.forgotEmail)}</strong>.
             Si el correo existe en el sistema, recibirás las instrucciones.
           </div>
           <button class="btn btn-secondary mt-lg" id="back-to-login-btn">

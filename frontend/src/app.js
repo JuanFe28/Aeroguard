@@ -1,3 +1,4 @@
+import { escapeHtml } from './utils/html.js';
 /**
  * AeroGuard — Router & App Shell
  * Sistema de routing SPA + gestión de la sesión + toasts
@@ -31,7 +32,7 @@ export const Toast = {
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
       <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-      <span class="toast-message">${message}</span>
+      <span class="toast-message">${escapeHtml(message)}</span>
     `;
     container.appendChild(toast);
     setTimeout(() => {
@@ -57,9 +58,9 @@ export function confirm(message, title = '¿Confirmar acción?') {
     overlay.innerHTML = `
       <div class="modal" style="max-width:420px">
         <div class="modal-header">
-          <h3 class="modal-title">⚠️ ${title}</h3>
+          <h3 class="modal-title">⚠️ ${escapeHtml(title)}</h3>
         </div>
-        <p style="color:var(--text-secondary)">${message}</p>
+        <p style="color:var(--text-secondary)">${escapeHtml(message)}</p>
         <div class="modal-footer">
           <button class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
           <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
@@ -176,15 +177,15 @@ export const Layout = {
         <div class="sidebar-nav" id="sidebar-nav">
           ${navItems.map(section => `
             <div class="nav-section">
-              <div class="nav-section-label">${section.label}</div>
+              <div class="nav-section-label">${escapeHtml(section.label)}</div>
               ${section.items.map(item => `
                 <a class="nav-item ${activePath === item.path ? 'active' : ''}"
                    href="${item.path}"
                    id="nav-${item.id}"
-                   aria-label="${item.label}"
+                   aria-label="${escapeHtml(item.label)}"
                    aria-current="${activePath === item.path ? 'page' : 'false'}">
                   <span class="nav-icon" aria-hidden="true">${item.icon}</span>
-                  <span class="nav-label">${item.label}</span>
+                  <span class="nav-label">${escapeHtml(item.label)}</span>
                   ${item.badge ? `<span class="nav-badge" id="badge-${item.id}">${item.badge}</span>` : ''}
                 </a>
               `).join('')}
@@ -194,9 +195,9 @@ export const Layout = {
 
         <div class="sidebar-footer">
           <div class="user-profile" id="user-profile-btn" role="button" tabindex="0" aria-label="Perfil de usuario">
-            <div class="user-avatar" aria-hidden="true">${initials}</div>
+            <div class="user-avatar" aria-hidden="true">${escapeHtml(initials)}</div>
             <div class="user-info">
-              <div class="user-name">${user?.first_name || user?.username || 'Usuario'}</div>
+              <div class="user-name">${escapeHtml(user?.first_name || user?.username || 'Usuario')}</div>
               <div class="user-role">${this._getRoleLabel(role)}</div>
             </div>
           </div>

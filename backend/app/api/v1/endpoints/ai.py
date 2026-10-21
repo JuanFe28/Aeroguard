@@ -9,6 +9,9 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, s
 import structlog
 
 from app.core.security import require_permission
+from app.core.config import settings
+from app.core.database import get_db
+from starlette.concurrency import run_in_threadpool
 from app.services.ai_vision_service import ai_vision_service, AIVisionService
 
 logger = structlog.get_logger("AeroGuard-AI-Endpoint")
@@ -20,7 +23,8 @@ router = APIRouter()
 async def analyze_image(
     file: UploadFile = File(...),
     sensor_id: Optional[str] = Form("CAM-BGA-NORTE-01"),
-    zone_id: Optional[int] = Form(None),
+    zone_id: Optional[str] = Form(None),
+    db=Depends(get_db),
     current_user = Depends(require_permission("detections:write")),
 ):
     """
@@ -31,6 +35,10 @@ async def analyze_image(
     - Devuelve candidatos, caja envolvente, score y tiempo de procesamiento.
     - Identifica el motor utilizado y declara model_validated=false.
     """
+    from app.api.v1.endpoints.config import load_persisted_config
+    await load_persisted_config(db)
+    if not settings.AI_ENABLED:
+        raise HTTPException(409, 'El análisis visual está deshabilitado en la configuración.')
     # 1. Leer contenido binario del archivo
     max_upload_bytes = 10 * 1024 * 1024
     data = await file.read(max_upload_bytes + 1)
@@ -68,7 +76,7 @@ async def analyze_image(
 
     # 3. Procesamiento con el motor de visión artificial
     try:
-        result = ai_vision_service.analyze_image_bytes(
+        result = await run_in_threadpool(ai_vision_service.analyze_image_bytes,
             image_bytes=data,
             sensor_id=sensor_id or "CAM-BGA-NORTE-01",
             zone_id=zone_id,

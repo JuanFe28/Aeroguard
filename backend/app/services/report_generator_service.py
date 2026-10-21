@@ -10,6 +10,7 @@ import io
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple, Optional
+from xml.sax.saxutils import escape
 
 import structlog
 from openpyxl import Workbook
@@ -268,7 +269,8 @@ class ReportGeneratorService:
         elements.append(Paragraph("AeroGuard — Detección experimental y monitoreo", title_style))
         if data.get("data_source") == "synthetic_demo":
             elements.append(Paragraph("DEMO — DATOS SINTÉTICOS. No acredita incidentes ni detecciones reales.", subtitle_style))
-        elements.append(Paragraph(f"Emisión: {data['generated_at']} | Operador Responsable: <b>{data['operator']}</b>", subtitle_style))
+        elements.append(Paragraph(f"Emisión: {data['generated_at']} | Operador Responsable: <b>{escape(data['operator'])}</b>", subtitle_style))
+        elements.append(Paragraph(f"Origen: {escape(data.get('data_source', 'no especificado'))}. Límite: 5000 registros; truncado: {data.get('truncated', False)}.", subtitle_style))
         elements.append(Spacer(1, 12))
 
         # 2. Resumen Ejecutivo (KPI Cards en Tabla)
@@ -278,7 +280,7 @@ class ReportGeneratorService:
                 Paragraph(str(kpis.get("total_flights", 0)), kpi_num_style),
                 Paragraph(str(kpis.get("geofence_violations", 0)), ParagraphStyle("KRed", parent=kpi_num_style, textColor=cls.COLOR_DANGER)),
                 Paragraph(f"{kpis.get('max_altitude_m', 0):.0f} m", kpi_num_style),
-                Paragraph(str(kpis.get("top_sensor", "N/A")), ParagraphStyle("KSens", parent=kpi_num_style, fontSize=10, leading=14)),
+                Paragraph(escape(str(kpis.get("top_sensor", "N/A"))), ParagraphStyle("KSens", parent=kpi_num_style, fontSize=10, leading=14)),
             ],
             [
                 Paragraph("Vuelos Detectados", kpi_label_style),
@@ -301,7 +303,7 @@ class ReportGeneratorService:
         # 3. Dictamen Táctico de IA (Sección 1.4 punto 3)
         ai_box_data = [
             [Paragraph("<b>🤖 DICTAMEN TÁCTICO DE INTELIGENCIA ARTIFICIAL (C-UAS AI ANALYST)</b>", ParagraphStyle("AITitle", parent=subtitle_style, fontName="Helvetica-Bold", textColor=cls.COLOR_PRIMARY))],
-            [Paragraph(f'"{data.get("ai_verdict", "Sin dictamen registrado.")}"', verdict_style)]
+            [Paragraph(escape(data.get("ai_verdict", "Sin dictamen registrado.")), verdict_style)]
         ]
         ai_box_table = Table(ai_box_data, colWidths=[540])
         ai_box_table.setStyle(TableStyle([
@@ -333,8 +335,8 @@ class ReportGeneratorService:
             sev_badge = f"<font color='{sev_color}'><b>{sev}</b></font>"
 
             table_rows.append([
-                Paragraph(inc.get("id", ""), table_cell_mono),
-                Paragraph(f"<b>{inc.get('sensor','')}</b><br/><font color='#64748b'>{inc.get('zone','')}</font>", table_cell_style),
+                Paragraph(escape(inc.get("id", "")), table_cell_mono),
+                Paragraph(f"<b>{escape(inc.get('sensor',''))}</b><br/><font color='#64748b'>{escape(inc.get('zone',''))}</font>", table_cell_style),
                 Paragraph(f"{inc.get('lat',0):.4f}, {inc.get('lng',0):.4f}", table_cell_mono),
                 Paragraph(f"{inc.get('alt',0):.0f} m", table_cell_style),
                 Paragraph(f"{inc.get('speed',0):.1f} km/h", table_cell_style),
@@ -342,7 +344,7 @@ class ReportGeneratorService:
                 Paragraph(inc.get("timestamp", ""), table_cell_style),
             ])
 
-        inc_table = Table(table_rows, colWidths=[65, 135, 80, 50, 55, 65, 90])
+        inc_table = Table(table_rows, colWidths=[60, 120, 75, 45, 50, 60, 70], repeatRows=1)
         inc_table.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,0), cls.COLOR_PRIMARY),
             ('ALIGN', (0,0), (-1,-1), 'LEFT'),
@@ -354,6 +356,12 @@ class ReportGeneratorService:
         ]))
         elements.append(inc_table)
         elements.append(Spacer(1, 14))
+        if data.get("audit_records"):
+            audit_rows = [["Usuario", "Acción", "Recurso", "Fecha UTC"]]
+            for entry in data["audit_records"]:
+                audit_rows.append([Paragraph(escape(str(entry[key])), table_cell_style)
+                                   for key in ("username", "action", "resource", "timestamp")])
+            elements.append(Table(audit_rows, colWidths=[100, 120, 100, 160], repeatRows=1))
 
         # 5. Pie de página criptográfico (Sección 1.4 punto 5)
         raw_signature_data = json.dumps(data, sort_keys=True, default=str).encode("utf-8")
@@ -362,9 +370,9 @@ class ReportGeneratorService:
         footer_data = [
             [
                 Paragraph(
-                    f"<b>SELLO CRIPTOGRÁFICO DE INTEGRIDAD Y CADENA DE CUSTODIA (SHA-256):</b><br/>"
+                    f"<b>HUELLA SHA-256 DEL DATASET:</b><br/>"
                     f"<font face='Courier' size='6.5' color='#0284c7'>{sha256_hash}</font><br/>"
-                    f"<font size='6' color='#64748b'>Certificado expedido por motor AeroGuard C-UAS v1.1.0 — Validez pericial militar y académica.</font>",
+                    f"<font size='6' color='#64748b'>Huella de integridad; no constituye firma digital, certificación ni validez pericial acreditada.</font>",
                     table_cell_style,
                 )
             ]
@@ -463,6 +471,8 @@ class ReportGeneratorService:
                 inc.get("timestamp"),
             ]
             for col_idx, val in enumerate(row_vals, 1):
+                if isinstance(val, str) and val.startswith(("=", "+", "-", "@", "\t", "\r")):
+                    val = "'" + val
                 c = ws1.cell(row=row_idx, column=col_idx, value=val)
                 c.font = mono_font if col_idx in [1, 4, 5] else regular_font
                 c.border = thin_border
@@ -470,15 +480,23 @@ class ReportGeneratorService:
                 if row_idx % 2 == 0:
                     c.fill = zebra_fill
 
+        if not data.get("incursions"):
+            ws1.cell(row=5, column=1, value="Sin registros en el período seleccionado")
+        if data.get("audit_records"):
+            audit_sheet = wb.create_sheet("Registros de Auditoría")
+            audit_sheet.append(list(data["audit_records"][0]))
+            for entry in data["audit_records"]:
+                audit_sheet.append([("'" + value if isinstance(value, str) and value.startswith(("=", "+", "-", "@")) else value)
+                                    for value in entry.values()])
         # Ajuste de anchos de columna
         for col in ws1.columns:
             max_len = max(len(str(cell.value or '')) for cell in col)
             col_letter = get_column_letter(col[0].column)
-            ws1.column_dimensions[col_letter].width = max(max_len + 3, 12)
+            ws1.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 55)
 
         # ====== Hoja 2: Resumen Ejecutivo y Cadena de Custodia ======
         ws2 = wb.create_sheet(title="Resumen y Auditoría")
-        ws2["A1"] = "RESUMEN EJECUTIVO Y FIRMA CRIPTOGRÁFICA"
+        ws2["A1"] = "RESUMEN Y HUELLA DE INTEGRIDAD"
         ws2["A1"].font = title_font
 
         kpis = data.get("kpis", {})
@@ -493,10 +511,14 @@ class ReportGeneratorService:
             ("Altitud Máxima (m)", kpis.get("max_altitude_m", 0)),
             ("Sensor con Mayor Actividad", kpis.get("top_sensor", "N/A")),
             ("Dictamen IA", data.get("ai_verdict", "N/A")),
+            ("Origen de datos", data.get("data_source", "no especificado")),
+            ("Truncado a 5000 registros", data.get("truncated", False)),
         ]
 
         r_start = 3
         for label, val in summary_rows:
+            if isinstance(val, str) and val.startswith(("=", "+", "-", "@", "\t", "\r")):
+                val = "'" + val
             c1 = ws2.cell(row=r_start, column=1, value=label)
             c2 = ws2.cell(row=r_start, column=2, value=val)
             c1.font = bold_font

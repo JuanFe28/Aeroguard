@@ -1,7 +1,8 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Reports, History & Audit Views (RF-023 to RF-029)
  */
-import { ReportService, AuditService, DetectionService, MockService } from '../services/api.service.js';
+import { ReportService, AuditService, DetectionService, ConfigService, MockService } from '../services/api.service.js';
 import { AuditLogModel } from '../models/models.js';
 import { Layout, Toast } from '../app.js';
 
@@ -16,6 +17,7 @@ export class ReportsView {
     Layout.bindShellEvents();
     document.getElementById('page-content').innerHTML = this._template();
     this._bindEvents();
+    await this._loadSchedules();
   }
 
   _template() {
@@ -93,32 +95,13 @@ export class ReportsView {
       </div>
       <button class="btn btn-secondary btn-sm" id="new-schedule-btn" aria-label="Programar nuevo reporte">➕ Programar</button>
     </div>
-    <div id="schedules-list">
-      <div style="display:flex;flex-direction:column;gap:var(--spacing-sm)">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--spacing-md);background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-md)">
-          <div>
-            <div style="font-weight:600;color:var(--text-primary)">Reporte Diario de Detecciones</div>
-            <div style="font-size:var(--font-size-xs);color:var(--text-muted)">Todos los días a las 08:00 · PDF + CSV</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:var(--spacing-sm)">
-            <span class="badge badge-success badge-dot">Activo</span>
-            <button class="btn btn-icon" title="Editar" aria-label="Editar reporte programado">✏️</button>
-            <button class="btn btn-icon" title="Eliminar" aria-label="Eliminar reporte programado">🗑️</button>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--spacing-md);background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-md)">
-          <div>
-            <div style="font-weight:600;color:var(--text-primary)">Reporte Semanal de Alertas</div>
-            <div style="font-size:var(--font-size-xs);color:var(--text-muted)">Cada lunes a las 07:00 · PDF</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:var(--spacing-sm)">
-            <span class="badge badge-success badge-dot">Activo</span>
-            <button class="btn btn-icon" title="Editar" aria-label="Editar reporte programado">✏️</button>
-            <button class="btn btn-icon" title="Eliminar" aria-label="Eliminar reporte programado">🗑️</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <form id="schedule-form" class="hidden">
+      <label>Nombre <input class="form-input" name="name" required maxlength="128"></label>
+      <label>Cron (UTC) <input class="form-input" name="cron" value="0 8 * * *" required></label>
+      <label>Formato <select class="form-input" name="format"><option>pdf</option><option>csv</option><option>excel</option></select></label>
+      <button class="btn btn-primary" type="submit">Guardar programación</button>
+    </form>
+    <div id="schedules-list" aria-live="polite">Consultando programaciones...</div>
   </div>
 
   <!-- Status / Progress -->
@@ -150,6 +133,8 @@ export class ReportsView {
 
         if (format === 'pdf') {
           res = await ReportService.downloadPdf(type, dateFrom, dateTo);
+        } else if (format === 'csv') {
+          res = await ReportService.downloadCsv(type, dateFrom, dateTo);
         } else {
           res = await ReportService.downloadExcel(type, dateFrom, dateTo);
         }
@@ -164,15 +149,39 @@ export class ReportsView {
     };
 
     document.getElementById('gen-det-pdf')?.addEventListener('click',   () => handleDownload('detections', 'pdf'));
-    document.getElementById('gen-det-csv')?.addEventListener('click',   () => handleDownload('detections', 'excel'));
+    document.getElementById('gen-det-csv')?.addEventListener('click',   () => handleDownload('detections', 'csv'));
     document.getElementById('gen-det-excel')?.addEventListener('click', () => handleDownload('detections', 'excel'));
     document.getElementById('gen-alt-pdf')?.addEventListener('click',   () => handleDownload('alerts', 'pdf'));
-    document.getElementById('gen-alt-csv')?.addEventListener('click',   () => handleDownload('alerts', 'excel'));
+    document.getElementById('gen-alt-csv')?.addEventListener('click',   () => handleDownload('alerts', 'csv'));
 
     document.getElementById('new-schedule-btn')?.addEventListener('click', () => {
-      Toast.info('Programador de reportes periódico activo con APScheduler en backend.');
+      document.getElementById('schedule-form')?.classList.toggle('hidden');
     });
   }
+  async _loadSchedules() {
+    const target = document.getElementById('schedules-list');
+    if (!target) return;
+    try {
+      const items = await ReportService.getSchedules();
+      target.innerHTML = items.length ? items.map(item => `<div class="card"><strong>${escapeHtml(item.name)}</strong> · ${escapeHtml(item.cron_expr)} UTC · ${escapeHtml(item.format)} · ${item.is_active ? 'Activo' : 'Inactivo'} <button class="btn btn-secondary" data-delete-schedule="${escapeHtml(item.id)}">Eliminar</button></div>`).join('') : '<p>No hay reportes programados.</p>';
+      target.querySelectorAll('[data-delete-schedule]').forEach(button => button.addEventListener('click', async () => {
+        try { await ReportService.deleteSchedule(button.dataset.deleteSchedule); await this._loadSchedules(); }
+        catch (error) { Toast.error(error.message); }
+      }));
+    } catch (error) { target.textContent = error.message; }
+    const form = document.getElementById('schedule-form');
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = 'true';
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        try {
+          await ReportService.createSchedule({name: form.elements.name.value, cron_expr: form.elements.cron.value, format: form.elements.format.value, report_type: 'detections'});
+          form.classList.add('hidden'); await this._loadSchedules(); Toast.success('Programación guardada.');
+        } catch (error) { Toast.error(error.message); }
+      });
+    }
+  }
+
 
   destroy() {}
 }
@@ -195,13 +204,15 @@ export class HistoryView {
     const tbody = document.getElementById('history-tbody');
     if (!tbody) return;
     await new Promise(r => setTimeout(r, 300));
-    const items = MockService.detections.slice().reverse();
+    let items;
+    try { items = MockService.enabled ? MockService.detections.slice().reverse() : await DetectionService.list(); }
+    catch (error) { Toast.error(error.message); return; }
     tbody.innerHTML = items.map(d => {
       const dm = { ...d };
       return `
         <tr>
           <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">${dm.id}</td>
-          <td style="color:var(--text-secondary)">${dm.sensor_name}</td>
+          <td style="color:var(--text-secondary)">${escapeHtml(dm.sensor_name)}</td>
           <td style="font-size:12px">
             <div style="color:var(--text-primary)">${(dm.latitude||0).toFixed(5)}, ${(dm.longitude||0).toFixed(5)}</div>
             <div style="color:var(--text-muted)">Alt ${(dm.altitude||0).toFixed(0)}m · ${(dm.speed||0).toFixed(1)} km/h</div>
@@ -217,10 +228,10 @@ export class HistoryView {
 
   _bindEvents() {
     document.getElementById('export-history-csv')?.addEventListener('click', () => {
-      Toast.success('Exportación CSV iniciada. (Conectar backend para descarga real)');
+      ReportService.downloadCsv().catch(error => Toast.error(error.message));
     });
     document.getElementById('export-history-excel')?.addEventListener('click', () => {
-      Toast.success('Exportación Excel iniciada. (Conectar backend para descarga real)');
+      ReportService.downloadExcel().catch(error => Toast.error(error.message));
     });
   }
 
@@ -282,7 +293,7 @@ export class AuditView {
     await new Promise(r => setTimeout(r, 400));
 
     // Mock audit logs
-    const logs = [
+    let logs = MockService.enabled ? [
       { id:'AUD-1', username:'admin',     action:'LOGIN',          resource:'auth',        ip:'192.168.1.10', timestamp: new Date(Date.now()-3600000).toISOString(),  integrity_ok: true },
       { id:'AUD-2', username:'operator1', action:'VIEW_DETECTION', resource:'detection',   ip:'192.168.1.20', timestamp: new Date(Date.now()-3200000).toISOString(),  integrity_ok: true },
       { id:'AUD-3', username:'admin',     action:'CREATE_ZONE',    resource:'zone',        ip:'192.168.1.10', timestamp: new Date(Date.now()-2800000).toISOString(),  integrity_ok: true },
@@ -291,23 +302,27 @@ export class AuditView {
       { id:'AUD-6', username:'operator1', action:'VIEW_DASHBOARD', resource:'dashboard',   ip:'192.168.1.20', timestamp: new Date(Date.now()-1200000).toISOString(),  integrity_ok: true },
       { id:'AUD-7', username:'admin',     action:'UPDATE_CONFIG',  resource:'config',      ip:'192.168.1.10', timestamp: new Date(Date.now()-600000).toISOString(),   integrity_ok: true },
       { id:'AUD-8', username:'analyst1',  action:'GENERATE_REPORT',resource:'report',      ip:'192.168.1.30', timestamp: new Date(Date.now()-300000).toISOString(),   integrity_ok: true },
-    ].map(l => new AuditLogModel(l));
+    ] : [];
+    if (!MockService.enabled) {
+      try { const verification = await AuditService.verifyIntegrity(); logs = (await AuditService.list()).map(log => ({...log, integrity_ok: verification.valid})); } catch (error) { Toast.error(error.message); return; }
+    }
+    logs = logs.map(l => new AuditLogModel(l));
 
     tbody.innerHTML = logs.map(log => `
       <tr>
         <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${log.id}</td>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
-            <div class="user-avatar" style="width:28px;height:28px;font-size:10px">${(log.username?.[0] || '?').toUpperCase()}</div>
-            <span style="font-size:var(--font-size-sm);color:var(--text-primary)">${log.username}</span>
+            <div class="user-avatar" style="width:28px;height:28px;font-size:10px">${escapeHtml((log.username?.[0] || '?').toUpperCase())}</div>
+            <span style="font-size:var(--font-size-sm);color:var(--text-primary)">${escapeHtml(log.username)}</span>
           </div>
         </td>
-        <td><span class="badge badge-info" style="font-family:var(--font-mono)">${log.action}</span></td>
-        <td style="color:var(--text-secondary);font-size:var(--font-size-sm)">${log.resource}</td>
-        <td style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono)">${log.ip}</td>
+        <td><span class="badge badge-info" style="font-family:var(--font-mono)">${escapeHtml(log.action)}</span></td>
+        <td style="color:var(--text-secondary);font-size:var(--font-size-sm)">${escapeHtml(log.resource)}</td>
+        <td style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono)">${escapeHtml(log.ip)}</td>
         <td>
           <span class="badge ${log.integrityOk ? 'badge-success' : 'badge-danger'}">
-            ${log.integrityOk ? '✅ Íntegro' : '⚠️ Alterado'}
+            ${log.integrityOk === null ? 'Sin verificación completa' : log.integrityOk ? '✅ Íntegro' : '⚠️ Alterado'}
           </span>
         </td>
         <td style="font-size:12px;color:var(--text-muted)">${log.formattedTime}</td>
@@ -321,14 +336,14 @@ export class AuditView {
   <div class="mb-lg">
     <h2 style="color:var(--text-primary)">Auditoría del Sistema</h2>
     <p style="color:var(--text-muted);font-size:var(--font-size-sm)">
-      Registro inmutable de operaciones críticas. Los hashes garantizan la integridad de cada registro.
+      Registro de operaciones críticas con verificación de integridad mediante hashes.
     </p>
   </div>
   <div class="alert alert-info mb-lg">
     <span class="alert-icon">🔒</span>
     <div class="alert-content">
       <div class="alert-title">Registros de Solo Lectura</div>
-      <div class="alert-message">Los registros de auditoría son inmutables. La integridad se verifica mediante hashes criptográficos SHA-256 encadenados.</div>
+      <div class="alert-message">La API expone los registros en modo de solo lectura. La integridad se verifica mediante hashes criptográficos SHA-256 encadenados.</div>
     </div>
   </div>
   <div class="card" style="padding:0">
@@ -368,6 +383,15 @@ export class DetectionConfigView {
     Layout.bindShellEvents();
     document.getElementById('page-content').innerHTML = this._template();
     this._bindEvents();
+    try {
+      const config = await ConfigService.get();
+      const fields = {'conf-max-altitude':'detection_max_altitude', 'conf-min-speed':'detection_min_speed', 'conf-max-speed':'detection_max_speed', 'conf-anomaly-threshold':'anomaly_threshold'};
+      for (const [id, key] of Object.entries(fields)) document.getElementById(id).value = config[key];
+      document.getElementById('conf-min-confidence').value = config.ai_confidence_threshold * 100;
+      document.getElementById('conf-min-confidence-val').textContent = `${config.ai_confidence_threshold * 100}%`;
+      document.getElementById('conf-ai-enabled').checked = config.ai_enabled;
+      document.getElementById('conf-alerts-enabled').checked = config.alerts_enabled;
+    } catch (error) { Toast.error(error.message); }
   }
 
   _template() {
@@ -390,15 +414,7 @@ export class DetectionConfigView {
           <span>99%</span>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Estado del procesamiento IA</label>
-        <div style="display:flex;align-items:center;gap:var(--spacing-md)">
-          <label style="display:flex;align-items:center;gap:var(--spacing-sm);cursor:pointer">
-            <input type="checkbox" id="conf-ai-enabled" checked style="accent-color:var(--brand-primary);width:18px;height:18px" aria-label="Habilitar procesamiento IA"/>
-            <span style="color:var(--text-secondary)">Procesamiento IA habilitado</span>
-          </label>
-        </div>
-      </div>
+
     </div>
 
     <div class="card mb-lg">
@@ -459,8 +475,18 @@ export class DetectionConfigView {
       e.preventDefault();
       const btn = document.getElementById('save-config-btn');
       if (btn) btn.textContent = 'Guardando...';
-      await new Promise(r => setTimeout(r, 600));
-      Toast.success('Configuración guardada correctamente.');
+      try {
+        await ConfigService.update({
+          detection_max_altitude: Number(document.getElementById('conf-max-altitude').value),
+          detection_min_speed: Number(document.getElementById('conf-min-speed').value),
+          detection_max_speed: Number(document.getElementById('conf-max-speed').value),
+          anomaly_threshold: Number(document.getElementById('conf-anomaly-threshold').value),
+          ai_confidence_threshold: Number(slider.value) / 100,
+          ai_enabled: document.getElementById('conf-ai-enabled').checked,
+          alerts_enabled: document.getElementById('conf-alerts-enabled').checked
+        });
+        Toast.success('Configuración persistida correctamente.');
+      } catch (error) { Toast.error(error.message); }
       if (btn) btn.textContent = '💾 Guardar Configuración';
     });
 
@@ -473,7 +499,7 @@ export class DetectionConfigView {
       document.getElementById('conf-max-speed').value = 300;
       document.getElementById('conf-ai-enabled').checked = true;
       document.getElementById('conf-alerts-enabled').checked = true;
-      document.getElementById('conf-processing-enabled').checked = true;
+
       Toast.info('Configuración restablecida a valores predeterminados.');
     });
   }
@@ -525,13 +551,17 @@ export class TrajectoryView {
 </div>`;
   }
 
-  _populateSelect() {
+  async _populateSelect() {
     const sel = document.getElementById('traj-select');
     if (!sel) return;
-    MockService.detections.slice(0, 10).forEach(d => {
+    let detections;
+    try { detections = MockService.enabled ? MockService.detections : await DetectionService.list(); }
+    catch (error) { Toast.error(error.message); return; }
+    this._detections = detections;
+    detections.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.id;
-      opt.textContent = `ID: ${d.id} · ${d.sensor_name} · ${new Date(d.timestamp).toLocaleString('es-CO', {dateStyle:'short', timeStyle:'short'})}`;
+      opt.textContent = `ID: ${d.id} · ${escapeHtml(d.sensor_name)} · ${new Date(d.timestamp).toLocaleString('es-CO', {dateStyle:'short', timeStyle:'short'})}`;
       sel.appendChild(opt);
     });
   }
@@ -544,23 +574,22 @@ export class TrajectoryView {
     L.control.zoom({ position: 'bottomright' }).addTo(this._map);
   }
 
-  _loadTrajectory() {
+  async _loadTrajectory() {
     const id = document.getElementById('traj-select')?.value;
     if (!id) { Toast.warn('Selecciona una detección primero.'); return; }
     if (!this._map) return;
 
-    // Generate mock trajectory
-    const det = MockService.detections.find(d => d.id === id);
+    const det = this._detections?.find(d => d.id === id);
     if (!det) return;
-
     const L = window.L;
-    const points = [];
-    let lat = det.latitude, lng = det.longitude;
-    for (let i = 0; i < 20; i++) {
-      lat += (Math.random() - 0.5) * 0.002;
-      lng += (Math.random() - 0.5) * 0.002;
-      points.push([lat, lng]);
-    }
+    let samples;
+    try { samples = await DetectionService.getTrajectory(id); }
+    catch (error) { Toast.error(error.message); return; }
+    const points = samples.map(point => [point.latitude, point.longitude]);
+    if (!points.length) { Toast.info('Esta detección no tiene puntos de trayectoria.'); return; }
+    const distanceKm = points.slice(1).reduce((total, point, index) => total + L.latLng(points[index]).distanceTo(L.latLng(point)) / 1000, 0);
+    const averageSpeed = samples.reduce((total, point) => total + point.speed, 0) / samples.length;
+    const maxAltitude = Math.max(...samples.map(point => point.altitude));
 
     // Clear previous
     this._map.eachLayer(l => { if (l instanceof L.Polyline || l instanceof L.CircleMarker) l.remove(); });
@@ -587,10 +616,10 @@ export class TrajectoryView {
     if (stats && grid) {
       stats.classList.remove('hidden');
       grid.innerHTML = `
-        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,212,255,0.1)">📍</div><div class="stat-card-value text-accent">20</div><div class="stat-card-label">Puntos</div></div>
-        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,230,118,0.1)">📏</div><div class="stat-card-value" style="color:var(--success)">${(Math.random()*5+1).toFixed(1)} km</div><div class="stat-card-label">Distancia</div></div>
-        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(255,179,0,0.1)">⚡</div><div class="stat-card-value" style="color:var(--warning)">${(det.speed||30).toFixed(0)} km/h</div><div class="stat-card-label">Vel. Promedio</div></div>
-        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,102,255,0.1)">⬆️</div><div class="stat-card-value" style="color:var(--brand-secondary)">${(det.altitude||80).toFixed(0)} m</div><div class="stat-card-label">Alt. Máxima</div></div>
+        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,212,255,0.1)">📍</div><div class="stat-card-value text-accent">${points.length}</div><div class="stat-card-label">Puntos</div></div>
+        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,230,118,0.1)">📏</div><div class="stat-card-value" style="color:var(--success)">${distanceKm.toFixed(2)} km</div><div class="stat-card-label">Distancia</div></div>
+        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(255,179,0,0.1)">⚡</div><div class="stat-card-value" style="color:var(--warning)">${averageSpeed.toFixed(1)} km/h</div><div class="stat-card-label">Vel. Promedio</div></div>
+        <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,102,255,0.1)">⬆️</div><div class="stat-card-value" style="color:var(--brand-secondary)">${maxAltitude.toFixed(0)} m</div><div class="stat-card-label">Alt. Máxima</div></div>
       `;
     }
 

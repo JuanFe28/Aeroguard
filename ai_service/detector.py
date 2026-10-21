@@ -243,44 +243,65 @@ async def process_ai_queue():
     Consume image analysis requests from RabbitMQ queue.
     Used for asynchronous processing (RF-021).
     """
-    try:
-        import aio_pika
-
-        RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://aeroguard:aeroguard_pass@localhost:5672/")
-        QUEUE_NAME   = os.getenv("QUEUE_AI_PROCESSING", "ai.processing")
-
-        connection = await aio_pika.connect_robust(RABBITMQ_URL)
-        channel    = await connection.channel()
-        queue      = await channel.declare_queue(QUEUE_NAME, durable=True)
-
-        service = DroneDetectionService()
-        logger.info(f"AI Worker listening on queue: {QUEUE_NAME}")
-
-        async for message in queue:
-            async with message.process():
-                try:
-                    payload     = json.loads(message.body.decode())
-                    image_b64   = payload.get("image_base64", "")
-                    detection_id = payload.get("detection_id", "")
-
-                    result = service.analyze_base64(image_b64)
-
-                    logger.info(
-                        f"AI Analysis complete | detection={detection_id} | "
-                        f"is_drone={result.is_drone} | confidence={result.confidence:.2f} | "
-                        f"model={result.model_used} | time={result.processing_ms:.1f}ms"
-                    )
-
-                    # TODO: Update detection record in database
-                    # await update_detection_ai_result(detection_id, result)
-
-                except Exception as e:
-                    logger.error(f"Error processing AI message: {e}")
-
-    except Exception as e:
-        logger.error(f"RabbitMQ connection error: {e}")
-        await asyncio.sleep(5)
-        await process_ai_queue()  # Reconnect
+    import aio_pika
+    import httpx
+    import hashlib
+    from uuid import UUID
+    token = os.getenv('AI_WORKER_TOKEN', '')
+    if not token:
+        raise RuntimeError('AI_WORKER_TOKEN es obligatorio; crea una sesión de operador dedicada.')
+    service = DroneDetectionService()
+    queue_name = os.getenv('QUEUE_AI_PROCESSING', 'ai.processing')
+    backend = os.getenv('BACKEND_URL', 'http://backend:8000/api/v1').rstrip('/')
+    while True:
+        connection = None
+        try:
+            connection = await aio_pika.connect_robust(os.environ['RABBITMQ_URL'])
+            channel = await connection.channel()
+            await channel.set_qos(prefetch_count=1)
+            await channel.declare_queue(queue_name + '.dead', durable=True)
+            queue = await channel.declare_queue(queue_name, durable=True, arguments={
+                'x-dead-letter-exchange': '', 'x-dead-letter-routing-key': queue_name + '.dead'})
+            async with httpx.AsyncClient(timeout=30, headers={'Authorization': 'Bearer ' + token}) as client:
+                async with queue.iterator() as messages:
+                    async for message in messages:
+                        try:
+                            if len(message.body) > 14 * 1024 * 1024:
+                                raise ValueError('Mensaje demasiado grande')
+                            payload = json.loads(message.body)
+                            detection_id = str(UUID(payload['detection_id']))
+                            raw = base64.b64decode(payload['image_base64'], validate=True)
+                            import io
+                            from PIL import Image
+                            with Image.open(io.BytesIO(raw)) as image:
+                                if image.format not in {'JPEG','PNG','WEBP'} or image.width * image.height > 25_000_000:
+                                    raise ValueError('Formato o dimensiones no permitidas')
+                                image.verify()
+                            result = service.analyze_bytes(raw)
+                            if result.model_used == 'Error':
+                                raise ValueError('No se pudo analizar la imagen')
+                            body = {'job_id': hashlib.sha256(message.body).hexdigest(), 'is_drone': result.is_drone,
+                                    'confidence': result.confidence, 'model_used': result.model_used, 'processing_ms': result.processing_ms}
+                            response = await client.post(f'{backend}/detections/{detection_id}/ai-analysis', json=body)
+                            if response.status_code >= 500:
+                                raise httpx.ConnectError('Backend no disponible')
+                            response.raise_for_status()
+                            await message.ack()
+                            logger.info('Resultado experimental persistido para detección %s', detection_id)
+                        except (httpx.ConnectError, httpx.TimeoutException):
+                            await asyncio.sleep(2)
+                            await message.reject(requeue=True)
+                        except Exception:
+                            logger.exception('Trabajo rechazado; conservado en cola dead-letter')
+                            await message.reject(requeue=False)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception('Worker desconectado; reintento en cinco segundos')
+            await asyncio.sleep(5)
+        finally:
+            if connection:
+                await connection.close()
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Alerts View + ViewModel (RF-012 to RF-014)
  */
@@ -50,7 +51,7 @@ export class AlertsViewModel {
           status: this.state.filterStatus || undefined,
           severity: this.state.filterSeverity || undefined,
         });
-        this.state.alerts = (res.items || []).map(a => new AlertModel(a));
+        this.state.alerts = (Array.isArray(res) ? res : (res.items || [])).map(a => new AlertModel(a));
       }
       this._applyFilters();
     } catch (err) {
@@ -124,31 +125,31 @@ export class AlertsViewModel {
     }
 
     container.innerHTML = this.state.filtered.map(a => `
-      <div class="card" style="border-left:4px solid var(--severity-${a.severity})" role="article" aria-label="Alerta: ${a.title}">
+      <div class="card" style="border-left:4px solid var(--severity-${a.severity})" role="article" aria-label="Alerta: ${escapeHtml(a.title)}">
         <div class="card-header" style="margin-bottom:var(--spacing-sm)">
           <div style="display:flex;align-items:center;gap:var(--spacing-sm)">
             <span style="font-size:20px">${a.severityIcon}</span>
             <div>
-              <div style="font-weight:600;color:var(--text-primary)">${a.title}</div>
+              <div style="font-weight:600;color:var(--text-primary)">${escapeHtml(a.title)}</div>
               <div style="display:flex;gap:var(--spacing-sm);margin-top:4px">
                 <span class="badge badge-${a.severity}">${a.severity.toUpperCase()}</span>
                 <span class="badge ${a.status === 'open' ? 'badge-danger' : a.status === 'assigned' ? 'badge-warning' : 'badge-success'}">${a.status}</span>
-                <span class="badge badge-info">${a.typeLabel}</span>
+                <span class="badge badge-info">${escapeHtml(a.typeLabel)}</span>
               </div>
             </div>
           </div>
           <div style="text-align:right">
             <div style="font-size:var(--font-size-xs);color:var(--text-muted)">${a.formattedTime}</div>
-            ${a.zoneName ? `<div style="font-size:var(--font-size-xs);color:var(--brand-primary)">📍 ${a.zoneName}</div>` : ''}
+            ${a.zoneName ? `<div style="font-size:var(--font-size-xs);color:var(--brand-primary)">📍 ${escapeHtml(a.zoneName)}</div>` : ''}
           </div>
         </div>
-        <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-bottom:var(--spacing-md)">${a.description}</p>
+        <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-bottom:var(--spacing-md)">${escapeHtml(a.description)}</p>
         <div style="display:flex;gap:var(--spacing-sm);flex-wrap:wrap">
           ${a.status !== 'resolved' ? `
-            <button class="btn btn-success btn-sm" onclick="alertsVM.resolveAlert('${a.id}')" aria-label="Resolver alerta ${a.title}">
+            <button class="btn btn-success btn-sm" onclick="alertsVM.resolveAlert('${a.id}')" aria-label="Resolver alerta ${escapeHtml(a.title)}">
               ✅ Resolver
             </button>
-            <button class="btn btn-warning btn-sm" onclick="alertsVM.assignAlert('${a.id}', 'U-2')" aria-label="Asignar alerta ${a.title}">
+            <button class="btn btn-warning btn-sm" onclick="alertsVM.assignAlert('${a.id}', null)" aria-label="Asignar alerta ${escapeHtml(a.title)}">
               👤 Asignar
             </button>
           ` : ''}

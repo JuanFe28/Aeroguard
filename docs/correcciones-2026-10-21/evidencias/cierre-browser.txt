@@ -1,0 +1,7 @@
+OK: sesión autenticada y mapa renderizado
+OK: vista Sensores con datos
+OK: vista Reportes
+OK: botón CSV entrega CSV real
+OK: nombre y formulario escapan HTML persistido sin ejecutar eventos
+Evidencia: docs\correcciones-2026-10-21\evidencias\browser\evidencia_selenium.png
+✅ PRUEBA E2E SELENIUM COMPLETADA CON ÉXITO

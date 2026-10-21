@@ -196,7 +196,9 @@ class AIVisionService:
         elapsed_ms: float,
     ) -> Dict[str, Any]:
         """Construye la respuesta estrictamente alineada al contrato de API v1.1."""
-        threat_level = "CRITICAL" if is_drone and confidence >= 0.70 else ("HIGH" if is_drone else "LOW")
+        from app.core.config import settings
+        is_drone = is_drone and confidence >= settings.AI_CONFIDENCE_THRESHOLD
+        threat_level = "HIGH" if is_drone else "LOW"
         label = "quadcopter_uav" if is_drone else "no_drone_detected"
 
         return {

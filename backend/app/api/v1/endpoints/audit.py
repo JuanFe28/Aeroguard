@@ -41,7 +41,7 @@ async def list_audit_logs(
 
 @router.get("/verify", summary="Verificar integridad criptográfica de la cadena SHA-256 (RF-029)")
 async def verify_chain(
-    limit: int = Query(default=100, le=500),
+    limit: int = Query(default=100, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("audit:read")),
 ):

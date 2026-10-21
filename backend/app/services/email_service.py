@@ -1,7 +1,7 @@
 """
 AeroGuard — Email Service (RF-003)
 Gestión de envío de correos (recuperación de contraseña, notificaciones).
-En modo desarrollo o sin SMTP configurado, simula el envío registrándolo en log.
+Sin SMTP configurado informa falta de entrega sin divulgar enlaces ni tokens.
 """
 
 import logging
@@ -13,12 +13,10 @@ logger = logging.getLogger("aeroguard.email")
 async def send_reset_email(email: str, token: str) -> bool:
     """
     Envía enlace de recuperación de contraseña.
-    En entorno académico o sin SMTP configurado, registra el enlace directamente en logs.
+    Devuelve False si SMTP no está configurado o no pudo entregar el correo.
     """
-    reset_url = f"http://localhost:3000/#reset-password?token={token}"
-
-    logger.info(f"[EMAIL SIMULATION] Enlace de recuperación para {email}: {reset_url}")
-    print(f"\n[AEROGUARD EMAIL SERVICE] Para: {email}\nEnlace de recuperación: {reset_url}\n")
+    reset_url = f"{settings.PUBLIC_FRONTEND_URL.rstrip('/')}/#/reset-password?token={token}"
+    # Los tokens nunca se imprimen: tampoco en desarrollo ni cuando falla SMTP.
 
     # Si se han configurado credenciales SMTP válidas
     if settings.SMTP_USER and settings.SMTP_PASSWORD:
@@ -50,7 +48,8 @@ Si no realizaste esta solicitud, ignora este mensaje.
             server.quit()
             return True
         except Exception as exc:
-            logger.error(f"Error enviando correo SMTP a {email}: {exc}")
+            logger.error("No se pudo entregar el correo de recuperación")
             return False
 
-    return True
+    logger.warning("Recuperación no entregada: SMTP no configurado")
+    return False

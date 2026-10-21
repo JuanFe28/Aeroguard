@@ -118,7 +118,9 @@ async def login(
                 )
 
             # Create tokens
-            token_data = {"sub": user.username, "role": user.role}
+            from app.services.session_service import state_for
+            state = await state_for(db, user.id)
+            token_data = {"sub": user.username, "role": user.role, "ver": state.version}
             access_token  = create_access_token(token_data)
             refresh_token = create_refresh_token(token_data)
 
@@ -165,19 +167,24 @@ async def refresh_token(body: RefreshRequest):
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=400, detail="Token de tipo incorrecto.")
     user = await get_user_from_token(body.refresh_token, expected_type="refresh")
-    new_token = create_access_token({"sub": user.username, "role": user.role})
+    from app.core.database import AsyncSessionLocal
+    from app.services.session_service import state_for
+    async with AsyncSessionLocal() as db:
+        state = await state_for(db, user.id)
+        new_token = create_access_token({"sub": user.username, "role": user.role, "ver": state.version})
     return {"access_token": new_token, "token_type": "bearer"}
 
 
 @router.post("/logout", summary="Cerrar Sesión", status_code=204)
 async def logout(request: Request, current_user=Depends(get_current_user)):
     """
-    Registra el cierre de sesión en auditoría.
-    (En producción: añadir token a blacklist Redis)
+    Revoca todas las sesiones del usuario y registra el cierre en auditoría.
     """
     from app.services.audit_service import log_audit
     from app.core.database import AsyncSessionLocal
     async with AsyncSessionLocal() as db:
+        from app.services.session_service import revoke_sessions
+        await revoke_sessions(db, current_user.id)
         await log_audit(
             db=db,
             user_id=current_user.id,
@@ -218,7 +225,9 @@ async def change_password(
     from app.core.database import AsyncSessionLocal
 
     async with AsyncSessionLocal() as db:
-        await update_password(db, current_user.id, body.new_password)
+        await update_password(db, current_user.id, body.new_password, commit=False)
+        from app.services.session_service import revoke_sessions
+        await revoke_sessions(db, current_user.id)
         await log_audit(
             db=db,
             user_id=current_user.id,
@@ -243,7 +252,13 @@ async def request_password_reset(body: PasswordResetRequest):
         user = await get_user_by_email(db, body.email)
         if user and user.is_active:
             user_email = str(user.email)
-            token = create_reset_token(user_email)
+            from app.services.session_service import state_for, digest_token
+            state = await state_for(db, user.id)
+            token = create_reset_token(user_email, state.version)
+            state.reset_digest = digest_token(token)
+            from datetime import timedelta
+            state.reset_expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES)
+            await db.commit()
             await send_reset_email(user_email, token)
 
     return {"message": "Si el correo existe en el sistema, recibirás las instrucciones."}
@@ -265,6 +280,19 @@ async def reset_password(body: PasswordResetConfirm):
 
     async with AsyncSessionLocal() as db:
         user = await get_user_by_email(db, str(email))
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado.")
-        await update_password(db, str(user.id), body.new_password)
+        if not user or not user.is_active:
+            raise HTTPException(status_code=400, detail="Token de recuperación inválido.")
+        from app.services.session_service import digest_token, revoke_sessions
+        from app.models.models import AuthState
+        from sqlalchemy import update
+        # Consumo condicional atómico: dos peticiones no pueden reutilizar el mismo reset.
+        consumed = await db.execute(update(AuthState).where(
+            AuthState.user_id == user.id, AuthState.version == payload.get("ver", 0),
+            AuthState.reset_digest == digest_token(body.token),
+            AuthState.reset_expires_at > datetime.now(timezone.utc),
+        ).values(reset_digest=None, reset_expires_at=None).returning(AuthState.user_id))
+        if consumed.scalar_one_or_none() is None:
+            raise HTTPException(status_code=400, detail="Token de recuperación inválido o utilizado.")
+        await update_password(db, str(user.id), body.new_password, commit=False)
+        await revoke_sessions(db, user.id)
+        await db.commit()

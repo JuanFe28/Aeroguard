@@ -1,0 +1,7 @@
+........................................................................ [ 76%]
+......................                                                   [100%]
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.9-final-0 _______________
+
+Coverage JSON written to file D:\aeroguard\docs\correcciones-2026-10-21\evidencias\final\coverage.json
+94 passed in 13.40s

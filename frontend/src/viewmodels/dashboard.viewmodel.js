@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 /**
  * AeroGuard — Dashboard ViewModel (MVVM)
  * Gestiona estado, datos y comunicación del Dashboard en tiempo real.
@@ -71,7 +72,7 @@ export class DashboardViewModel {
       .map(d => new DetectionModel(d));
     this.state.alerts = (MockService.alerts || []).map(a => new AlertModel(a));
     this.state.sensors = (MockService.sensors || []).map(s => new SensorModel(s));
-    const zones = MockService.loadZones() || MockService.zones || [];
+    const zones = MockService.enabled ? (MockService.loadZones() || MockService.zones || []) : [];
     this.state.zones = zones.map(z => new RestrictedZoneModel(z));
     this.state.aiVerdict = {
       incident_id: "INC-2026-0891",
@@ -141,12 +142,12 @@ export class DashboardViewModel {
         MockService.zones = items;
         MockService.saveZones();
       } else {
-        const zones = MockService.loadZones() || MockService.zones || [];
+        const zones = MockService.enabled ? (MockService.loadZones() || MockService.zones || []) : [];
         this.state.zones = zones.map(z => new RestrictedZoneModel(z));
       }
     } catch (e) {
       console.warn('Fallback loading zones from MockService:', e);
-      const zones = MockService.loadZones() || MockService.zones || [];
+      const zones = MockService.enabled ? (MockService.loadZones() || MockService.zones || []) : [];
       this.state.zones = zones.map(z => new RestrictedZoneModel(z));
     }
   }
@@ -340,7 +341,7 @@ export class DashboardViewModel {
     const color = colors[sensor.status] || '#546e7a';
     return L.divIcon({
       className: '',
-      html: `<div style="font-size:20px;filter:drop-shadow(0 0 6px ${color})" title="${sensor.name}">📡</div>`,
+      html: `<div style="font-size:20px;filter:drop-shadow(0 0 6px ${color})" title="${escapeHtml(sensor.name)}">📡</div>`,
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
@@ -414,7 +415,7 @@ export class DashboardViewModel {
       const marker = L.marker(
         [sensor.latitude, sensor.longitude],
         { icon: this._makeSensorIcon(sensor) }
-      ).bindTooltip(`📡 ${sensor.name} (${sensor.typeLabel} - ${sensor.rangeKm}km)`, { direction: 'top' }).addTo(this._map);
+      ).bindTooltip(`📡 ${escapeHtml(sensor.name)} (${escapeHtml(sensor.typeLabel)} - ${sensor.rangeKm}km)`, { direction: 'top' }).addTo(this._map);
 
       this._sensorCircles.push(circle, marker);
     });
@@ -444,7 +445,7 @@ export class DashboardViewModel {
         fillOpacity: 0.15,
         weight: 2,
         dashArray: '4, 4',
-      }).bindTooltip(`🚫 ${zone.name}`, { sticky: true }).addTo(this._map);
+      }).bindTooltip(`🚫 ${escapeHtml(zone.name)}`, { sticky: true }).addTo(this._map);
       this._zonePolygons.push(poly);
     });
   }
@@ -596,8 +597,8 @@ export class DashboardViewModel {
         <div class="alert-list-item ${am.severity}" role="listitem">
           <span class="alert-item-icon">${am.severityIcon}</span>
           <div class="alert-item-content">
-            <div class="alert-item-title">${am.title}</div>
-            <div class="alert-item-desc">${am.description || am.message || ''}</div>
+            <div class="alert-item-title">${escapeHtml(am.title)}</div>
+            <div class="alert-item-desc">${escapeHtml(am.description || am.message || '')}</div>
           </div>
           <span class="alert-item-time">${am.formattedTime.split(',')[1]?.trim() || ''}</span>
         </div>
@@ -617,8 +618,8 @@ export class DashboardViewModel {
         <div class="detector-item">
           <span style="font-size:20px">${s.typeIcon}</span>
           <div class="detector-info">
-            <div class="detector-name">${s.name}</div>
-            <div class="detector-location">${s.typeLabel} · ${s.rangeKm}km</div>
+            <div class="detector-name">${escapeHtml(s.name)}</div>
+            <div class="detector-location">${escapeHtml(s.typeLabel)} · ${s.rangeKm}km</div>
           </div>
           <span class="status-dot ${dot}"></span>
           <span class="detector-status-text" style="color:${textColor}">${statusText}</span>
@@ -745,7 +746,7 @@ export class DashboardViewModel {
     const elInc = document.getElementById('ai-verdict-incident');
 
     if (elText && verdict.ai_verdict) elText.textContent = verdict.ai_verdict;
-    if (elTarget && verdict.drone_id) elTarget.textContent = `${verdict.drone_id} (DJI Matrice 300)`;
+    if (elTarget && verdict.drone_id) elTarget.textContent = `${verdict.drone_id} (tipo no verificado)`;
     if (elInc && verdict.incident_id) elInc.textContent = verdict.incident_id;
 
     if (elBadge && verdict.threat_level) {
@@ -762,7 +763,7 @@ export class DashboardViewModel {
       elTime.textContent = `Actualizado ${d.toLocaleTimeString('es-CO')}`;
     }
     if (elConf) {
-      elConf.textContent = '96.4%';
+      elConf.textContent = 'Sin precisión validada';
     }
   }
 

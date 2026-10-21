@@ -167,11 +167,11 @@ export class DashboardView {
           <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04)">
             <div>
               <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Objetivo / Incursión</div>
-              <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text-primary)" id="ai-verdict-target">UAV-HK-402 (DJI Matrice 300)</div>
+              <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text-primary)" id="ai-verdict-target">Sin objeto verificado</div>
             </div>
             <div style="text-align:right">
               <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Confianza</div>
-              <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--success)" id="ai-verdict-confidence">96.4%</div>
+              <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--success)" id="ai-verdict-confidence">Sin precisión validada</div>
             </div>
           </div>
           <div style="font-size:12px;line-height:1.45;color:var(--text-secondary);background:rgba(255,23,68,0.06);border-left:3px solid var(--danger);padding:8px 10px;border-radius:0 var(--radius-sm) var(--radius-sm) 0" id="ai-verdict-text">

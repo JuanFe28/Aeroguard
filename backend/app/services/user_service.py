@@ -60,7 +60,7 @@ async def update_last_login(db: AsyncSession, user_id: str) -> None:
     await db.commit()
 
 
-async def update_password(db: AsyncSession, user_id: str, new_password: str) -> bool:
+async def update_password(db: AsyncSession, user_id: str, new_password: str, commit: bool = True) -> bool:
     """Actualiza la contraseña cifrada de un usuario."""
     hashed = hash_password(new_password)
     stmt = (
@@ -72,7 +72,8 @@ async def update_password(db: AsyncSession, user_id: str, new_password: str) -> 
         )
     )
     await db.execute(stmt)
-    await db.commit()
+    if commit:
+        await db.commit()
     return True
 
 
@@ -86,6 +87,9 @@ async def create_user(
     role: UserRole = UserRole.OPERATOR,
 ) -> User:
     """Crea un nuevo usuario en la base de datos."""
+    from app.core.security import validate_password_strength
+    if not validate_password_strength(password):
+        raise ValueError("La contraseña debe cumplir complejidad y no superar 72 bytes UTF-8.")
     hashed = hash_password(password)
     user = User(
         username=username,
