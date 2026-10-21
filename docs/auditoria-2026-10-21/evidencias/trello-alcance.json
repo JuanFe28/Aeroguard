@@ -1,0 +1,119 @@
+{
+  "board": "Aeroguard 🚀",
+  "board_url": "https://trello.com/b/0LrfUef0/aeroguard-%F0%9F%9A%80",
+  "source_sha256": "2B37EBDCC19E607477B756832C9D12100644E87EF7081B185CDC978EFC5F4286",
+  "last_activity": "2026-10-21T14:14:08.082Z",
+  "source": "Exportación local aportada por el usuario; no consulta viva de Trello",
+  "release_cards": [
+    {
+      "name": "[RELEASE-01] Definir estrategia de versionado SemVer y generar CHANGELOG.md",
+      "desc": "",
+      "dueComplete": false,
+      "url": "https://trello.com/c/9x67PgRt/36-release-01-definir-estrategia-de-versionado-semver-y-generar-changelogmd"
+    },
+    {
+      "name": "[RELEASE-02] Publicar imágenes de contenedores en GitHub Container Registry (GHCR) o Docker Hub",
+      "desc": "",
+      "dueComplete": false,
+      "url": "https://trello.com/c/EzGK1g5I/37-release-02-publicar-im%C3%A1genes-de-contenedores-en-github-container-registry-ghcr-o-docker-hub"
+    }
+  ],
+  "active_project_cards": [
+    {
+      "name": "[DEPLOY-01] Configurar pipeline de CI/CD con GitHub Actions",
+      "dueComplete": false
+    },
+    {
+      "name": "[DEPLOY-02] Configurar variables de entorno y despliegue en servidor / VM académica",
+      "dueComplete": false
+    },
+    {
+      "name": "[PLAN-01] Definición de historias de usuario y criterios de aceptación para IA Real y Reportes",
+      "dueComplete": true
+    },
+    {
+      "name": "[PLAN-02] Diseño de arquitectura para procesamiento asíncrono con RabbitMQ",
+      "dueComplete": true
+    },
+    {
+      "name": "[PLAN-03] Especificación de interfaz táctica 2.0 y alertas sonoras",
+      "dueComplete": true
+    },
+    {
+      "name": "[PLAN-04] Diseño del flujo SOAR de automatización de alertas y Agente IA con n8n",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-01] Integrar backend con el microservicio de IA (OpenCV + YOLOv8)",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-02] Implementar generación física de reportes en PDF y Excel",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-03] Implementar alerta sonora táctica y widget de altimetría en Dashboard",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-04] Robustecer reconexión y heartbeat en WebSockets",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-05] Implementar Agente IA de Análisis Táctico y Webhook de incidentes hacia n8n",
+      "dueComplete": true
+    },
+    {
+      "name": "[CODE-06] Migrar consultas de zonas de exclusión a funciones geoespaciales en PostGIS",
+      "dueComplete": true
+    },
+    {
+      "name": "[BUILD-01] Optimizar Dockerfiles con compilación Multi-Stage",
+      "dueComplete": true
+    },
+    {
+      "name": "[BUILD-02] Configurar validación de sintaxis y linter para código Python y JS",
+      "dueComplete": true
+    },
+    {
+      "name": "[TEST-01] Ampliar cobertura de pruebas unitarias y de integración en Backend",
+      "dueComplete": true
+    },
+    {
+      "name": "[TEST-02] Pruebas de estrés y rendimiento en WebSockets con carga concurrente",
+      "dueComplete": true
+    },
+    {
+      "name": "[TEST-03] Escaneo estático de vulnerabilidades de seguridad (SAST)",
+      "dueComplete": true
+    },
+    {
+      "name": "[RELEASE-01] Definir estrategia de versionado SemVer y generar CHANGELOG.md",
+      "dueComplete": false
+    },
+    {
+      "name": "[RELEASE-02] Publicar imágenes de contenedores en GitHub Container Registry (GHCR) o Docker Hub",
+      "dueComplete": false
+    },
+    {
+      "name": "[OPERATE-01] Procedimiento de respaldo y restauración de PostgreSQL",
+      "dueComplete": false
+    },
+    {
+      "name": "[OPERATE-02] Manual de Operaciones para Operadores y Analistas (C-UAS SOP)",
+      "dueComplete": false
+    },
+    {
+      "name": "[MONITOR-01] Integrar Prometheus y exportador de métricas en FastAPI",
+      "dueComplete": false
+    },
+    {
+      "name": "[MONITOR-02] Configurar Dashboard de observabilidad con Grafana",
+      "dueComplete": false
+    },
+    {
+      "name": "[MONITOR-03] Sistema de healthcheck y alertas de disponibilidad para sensores",
+      "dueComplete": false
+    }
+  ]
+}

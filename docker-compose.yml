@@ -52,20 +52,22 @@ services:
   # ====== Backend (FastAPI) ======
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       target: runtime
     image: aeroguard/backend:latest
     container_name: aeroguard-backend
     restart: unless-stopped
     environment:
       APP_ENV:            production
+      DEBUG:              "false"
       DATABASE_URL:       postgresql+asyncpg://aeroguard:aeroguard_pass@postgres:5432/aeroguard
       RABBITMQ_URL:       amqp://aeroguard:aeroguard_pass@rabbitmq:5672/
       SECRET_KEY:         ${SECRET_KEY:-CHANGE_THIS_IN_PRODUCTION_MIN_32_CHARS_REQUIRED}
       AI_ENABLED:         "true"
       ALERTS_ENABLED:     "true"
       LOG_LEVEL:          INFO
+      REPORTS_DIR:        /tmp/aeroguard/reports
     ports:
       - "8000:8000"
     depends_on:
@@ -131,7 +133,7 @@ services:
     restart: unless-stopped
     environment:
       BACKEND_URL:      http://backend:8000/api/v1
-      SIMULATOR_TOKEN:  ""
+      SIMULATOR_TOKEN:  ${SIMULATOR_TOKEN:-}
       INTERVAL_SEC:     "3"
     depends_on:
       backend:

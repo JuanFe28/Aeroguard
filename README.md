@@ -2,6 +2,12 @@
 
 **Prototipo académico** para la detección, clasificación y monitoreo de posibles drones no autorizados mediante sensores simulados y visión artificial.
 
+## Estado verificado — 21 de octubre de 2026
+
+La interfaz usa datos simulados. La visión procesa imágenes con heurísticas OpenCV/Pillow por defecto; no hay un detector de drones validado con métricas de campo. Las exportaciones PDF/Excel son archivos reales con datos sintéticos. No se han demostrado capacidades de radar, RF ni neutralización.
+
+La auditoría local reproduce 79 pruebas funcionales y 3 de carga; cobertura de líneas del backend 72,28 %. La demo en Edge se verificó. El cierre de Release sigue pendiente por dependencias, pruebas de contenedores y aceptación/publicación autorizada. Consulta los [cinco informes, matriz de Release y evidencias](docs/auditoria-2026-10-21/README.md), la [guía actual](docs/auditoria-2026-10-21/07_GUIA_RELEASE.md) y el [CHANGELOG](CHANGELOG.md).
+
 ---
 
 ## 🚀 Inicio Rápido (Solo Frontend — Demo Inmediata)
@@ -25,6 +31,8 @@ El frontend funciona completamente con datos simulados **sin necesidad de backen
 
 ## 🏗️ Arquitectura
 
+Diseño general del proyecto. La integración efectiva de colas, IA y PostGIS es parcial; el [diagnóstico técnico](docs/auditoria-2026-10-21/01_ESTADO_ACTUAL.md) distingue el diseño previsto del flujo ejecutado.
+
 ```
 ┌─────────────┐    HTTP/WS    ┌──────────────────┐    SQL     ┌────────────┐
 │  Frontend   │ ←──────────── │  Backend FastAPI  │ ────────── │ PostgreSQL │
@@ -38,7 +46,7 @@ El frontend funciona completamente con datos simulados **sin necesidad de backen
                         ┌──────────────┴──────────────┐
                         │                             │
                ┌────────────────┐          ┌─────────────────┐
-               │  AI Service    │          │ Sensor Simulator │
+│  AI Service    │          │ Sensor Simulator │
                │ OpenCV + YOLO  │          │ Telemetría       │
                └────────────────┘          └─────────────────┘
 ```
@@ -89,7 +97,7 @@ AeroguardClase/
 
 ```bash
 # 1. Clona / navega al proyecto
-cd "h:\UTS\NUEVAS TECNOLOGIAS\AeroguardClase"
+cd D:\aeroguard
 
 # 2. Crea el archivo de variables de entorno
 cp .env.example .env
@@ -107,6 +115,8 @@ docker compose up -d
 ---
 
 ## 🔐 Seguridad
+
+Estos mecanismos describen implementaciones parciales del prototipo; no acreditan conformidad ni certificación OWASP. Revisar los riesgos pendientes de la auditoría antes de usar datos reales o exponer servicios.
 
 | Mecanismo | Implementación |
 |---|---|
@@ -130,7 +140,9 @@ docker compose up -d
 
 ---
 
-## 📋 Requisitos Funcionales Implementados
+## 📋 Requisitos Funcionales Declarados
+
+Inventario original con correcciones de alcance de la auditoría. Una pantalla demo o una ruta presente no implica integración completa ni validación operativa.
 
 | RF | Descripción | Estado |
 |---|---|---|
@@ -154,12 +166,12 @@ docker compose up -d
 | RF-018 | Configurar Parámetros | ✅ Frontend |
 | RF-019 | Activar/Desactivar Sensores | ✅ Frontend + backend |
 | RF-020 | Procesar Datos de Detección | ✅ Backend + simulador |
-| RF-021 | Analizar Objeto IA | ✅ AI Service (OpenCV/YOLO) |
+| RF-021 | Analizar Objeto IA | Heurísticas OpenCV/Pillow; YOLO opcional sin validación de drones |
 | RF-022 | Registrar Evento | ✅ Backend |
-| RF-023 | Reporte de Detecciones | ✅ Frontend (backend en extensión) |
-| RF-024 | Reporte de Alertas | ✅ Frontend (backend en extensión) |
-| RF-025 | Reportes Programados | ✅ Frontend + APScheduler |
-| RF-026 | Exportar Histórico | ✅ Frontend (CSV/Excel) |
+| RF-023 | Reporte de Detecciones | PDF/XLSX binarios con datos sintéticos; consulta real pendiente |
+| RF-024 | Reporte de Alertas | Demostración; filtros y dataset de BD pendientes |
+| RF-025 | Reportes Programados | UI/modelo presentes; scheduler activo no implementado |
+| RF-026 | Exportar Histórico | Demo; exportación histórica real y CSV por completar |
 | RF-027 | Registrar Auditoría | ✅ Backend (SHA-256 chain) |
 | RF-028 | Consultar Auditoría | ✅ Frontend |
 | RF-029 | Validar Integridad | ✅ Hash SHA-256 + validación rangos |
@@ -194,5 +206,5 @@ window.GOOGLE_MAPS_API_KEY = 'TU_API_KEY_AQUI';
 
 ## 📄 Licencia
 
-Prototipo académico — Universidad de Tecnología de Santander (UTS).
+Prototipo académico — Unidades Tecnológicas de Santander (UTS).
 Solo para uso educativo.

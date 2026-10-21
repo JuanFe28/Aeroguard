@@ -1,0 +1,17 @@
+# Contexto raíz exclusivo del backend; conserva fuera secretos y evidencias.
+**
+!backend/
+!backend/app/
+!backend/app/**
+!backend/tests/
+!backend/tests/**
+!backend/requirements*.txt
+!backend/init.sql
+!ai_service/
+!ai_service/detector.py
+!.env.example
+!pyproject.toml
+!scripts/
+!scripts/expo_local.py
+**/__pycache__/
+**/*.pyc

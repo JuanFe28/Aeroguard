@@ -1,0 +1,103 @@
+FFFFFFFFF.FFF                                                            [100%]
+================================== FAILURES ===================================
+_ test_operational_endpoints_require_authentication[GET-/api/v1/alerts/ai-verdict-None] _
+backend\tests\test_release_regressions.py:33: in test_operational_endpoints_require_authentication
+    assert response.status_code == 401
+E   assert 200 == 401
+E    +  where 200 = <Response [200 OK]>.status_code
+---------------------------- Captured stdout setup ----------------------------
+2026-10-21 10:16:22 [info     ] AeroGuard backend starting     env=development
+2026-10-21 10:16:23 [info     ] Base de datos conectada exitosamente url=sqlite+aiosqlite:///D:/aeroguard/tmp/audit/probes/aeroguard0/test.db
+2026-10-21 10:16:24 [info     ] Usuarios iniciales creados en la base de datos
+2026-10-21 10:16:24 [info     ] Zonas iniciales creadas en la base de datos
+2026-10-21 10:16:24 [info     ] AeroGuard backend ready
+_ test_operational_endpoints_require_authentication[POST-/api/v1/alerts/ai-verdict-payload1] _
+backend\tests\test_release_regressions.py:33: in test_operational_endpoints_require_authentication
+    assert response.status_code == 401
+E   assert 200 == 401
+E    +  where 200 = <Response [200 OK]>.status_code
+_ test_operational_endpoints_require_authentication[POST-/api/v1/alerts/trigger-incident-payload2] _
+backend\tests\test_release_regressions.py:33: in test_operational_endpoints_require_authentication
+    assert response.status_code == 401
+E   assert 200 == 401
+E    +  where 200 = <Response [200 OK]>.status_code
+_ test_operational_endpoints_require_authentication[POST-/api/v1/sensors/telemetry-payload3] _
+backend\tests\test_release_regressions.py:33: in test_operational_endpoints_require_authentication
+    assert response.status_code == 401
+E   assert 202 == 401
+E    +  where 202 = <Response [202 Accepted]>.status_code
+_____________________ test_analyst_cannot_inject_verdict ______________________
+backend\tests\test_release_regressions.py:39: in test_analyst_cannot_inject_verdict
+    assert response.status_code == 403
+E   assert 200 == 403
+E    +  where 200 = <Response [200 OK]>.status_code
+_______________________ test_corrupt_image_is_rejected ________________________
+backend\tests\test_release_regressions.py:45: in test_corrupt_image_is_rejected
+    assert response.status_code == 400
+E   assert 200 == 400
+E    +  where 200 = <Response [200 OK]>.status_code
+---------------------------- Captured stdout call -----------------------------
+2026-10-21 10:16:24 [info     ] Inferencia de IA completada    confidence=0.0 engine=OpenCV-Heuristic-Real is_drone=False sensor_id=CAM-BGA-NORTE-01 time_ms=0.12
+________________ test_pillow_fallback_identifies_actual_engine ________________
+backend\tests\test_release_regressions.py:54: in test_pillow_fallback_identifies_actual_engine
+    assert result["engine"] == "Pillow-Heuristic"
+E   AssertionError: assert 'YOLOv8n-OpenCV-Real' == 'Pillow-Heuristic'
+E     
+E     - Pillow-Heuristic
+E     + YOLOv8n-OpenCV-Real
+---------------------------- Captured stdout call -----------------------------
+2026-10-21 10:16:24 [info     ] Detector nativo de ai_service/detector.py inicializado correctamente
+_________ test_yolo_only_accepts_explicit_drone_classes[person-False] _________
+backend\tests\test_release_regressions.py:67: in test_yolo_only_accepts_explicit_drone_classes
+    assert service.analyze(np.zeros((48, 48, 3), dtype=np.uint8)).is_drone is expected
+E   AssertionError: assert True is False
+E    +  where True = AnalysisResult(is_drone=True, confidence=0.99, model_used='YOLOv8:test-only.pt', processing_ms=0.000700005330145359, bounding_box={'x': 1, 'y': 2, 'w': 29, 'h': 38}, raw_detections=1).is_drone
+E    +    where AnalysisResult(is_drone=True, confidence=0.99, model_used='YOLOv8:test-only.pt', processing_ms=0.000700005330145359, bounding_box={'x': 1, 'y': 2, 'w': 29, 'h': 38}, raw_detections=1) = analyze(array([[[0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0...     [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0]]], dtype=uint8))
+E    +      where analyze = <detector.YOLODetector object at 0x000001E4C9E88950>.analyze
+E    +      and   array([[[0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0...     [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0]]], dtype=uint8) = <built-in function zeros>((48, 48, 3), dtype=<class 'numpy.uint8'>)
+E    +        where <built-in function zeros> = np.zeros
+E    +        and   <class 'numpy.uint8'> = np.uint8
+________ test_yolo_only_accepts_explicit_drone_classes[airplane-False] ________
+backend\tests\test_release_regressions.py:67: in test_yolo_only_accepts_explicit_drone_classes
+    assert service.analyze(np.zeros((48, 48, 3), dtype=np.uint8)).is_drone is expected
+E   AssertionError: assert True is False
+E    +  where True = AnalysisResult(is_drone=True, confidence=0.99, model_used='YOLOv8:test-only.pt', processing_ms=0.0004999747034162283, bounding_box={'x': 1, 'y': 2, 'w': 29, 'h': 38}, raw_detections=1).is_drone
+E    +    where AnalysisResult(is_drone=True, confidence=0.99, model_used='YOLOv8:test-only.pt', processing_ms=0.0004999747034162283, bounding_box={'x': 1, 'y': 2, 'w': 29, 'h': 38}, raw_detections=1) = analyze(array([[[0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0...     [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0]]], dtype=uint8))
+E    +      where analyze = <detector.YOLODetector object at 0x000001E4C9EE3010>.analyze
+E    +      and   array([[[0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0...     [0, 0, 0],\n        [0, 0, 0],\n        ...,\n        [0, 0, 0],\n        [0, 0, 0],\n        [0, 0, 0]]], dtype=uint8) = <built-in function zeros>((48, 48, 3), dtype=<class 'numpy.uint8'>)
+E    +        where <built-in function zeros> = np.zeros
+E    +        and   <class 'numpy.uint8'> = np.uint8
+_________ test_audit_chain_verifies_new_records_and_detects_tampering _________
+backend\tests\test_release_regressions.py:79: in test_audit_chain_verifies_new_records_and_detects_tampering
+    assert (await verify_audit_chain(db))["valid"] is True
+E   assert False is True
+_______________ test_telemetry_does_not_claim_visual_inference ________________
+backend\tests\test_release_regressions.py:96: in test_telemetry_does_not_claim_visual_inference
+    assert detection["ai_analyzed"] is False
+E   assert True is False
+___________________ test_report_exports_disclose_demo_data ____________________
+backend\tests\test_release_regressions.py:104: in test_report_exports_disclose_demo_data
+    assert response.headers.get("X-AeroGuard-Data-Source") == "synthetic_demo"
+E   assert None == 'synthetic_demo'
+E    +  where None = get('X-AeroGuard-Data-Source')
+E    +    where get = Headers({'content-disposition': 'attachment; filename="telemetria_aeroguard_detections_20261021_151624.xlsx"', 'x-repo...referrer-policy': 'strict-origin-when-cross-origin', 'permissions-policy': 'camera=(), microphone=(), geolocation=()'}).get
+E    +      where Headers({'content-disposition': 'attachment; filename="telemetria_aeroguard_detections_20261021_151624.xlsx"', 'x-repo...referrer-policy': 'strict-origin-when-cross-origin', 'permissions-policy': 'camera=(), microphone=(), geolocation=()'}) = <Response [200 OK]>.headers
+---------------------------- Captured stdout call -----------------------------
+2026-10-21 10:16:24 [info     ] Reporte Excel generado exitosamente filename=telemetria_aeroguard_detections_20261021_151624.xlsx sha256=b1ce0b924e9bb1ede3866596c9cab30d95fe05f624cb8ad83174f5d73ff49f10 size_bytes=7436 user=release_probe
+-------------------------- Captured stdout teardown ---------------------------
+2026-10-21 10:16:24 [info     ] AeroGuard backend shutting down
+- generated xml file: D:\aeroguard\docs\auditoria-2026-10-21\evidencias\baseline\regresiones.xml -
+=========================== short test summary info ===========================
+FAILED backend/tests/test_release_regressions.py::test_operational_endpoints_require_authentication[GET-/api/v1/alerts/ai-verdict-None]
+FAILED backend/tests/test_release_regressions.py::test_operational_endpoints_require_authentication[POST-/api/v1/alerts/ai-verdict-payload1]
+FAILED backend/tests/test_release_regressions.py::test_operational_endpoints_require_authentication[POST-/api/v1/alerts/trigger-incident-payload2]
+FAILED backend/tests/test_release_regressions.py::test_operational_endpoints_require_authentication[POST-/api/v1/sensors/telemetry-payload3]
+FAILED backend/tests/test_release_regressions.py::test_analyst_cannot_inject_verdict
+FAILED backend/tests/test_release_regressions.py::test_corrupt_image_is_rejected
+FAILED backend/tests/test_release_regressions.py::test_pillow_fallback_identifies_actual_engine
+FAILED backend/tests/test_release_regressions.py::test_yolo_only_accepts_explicit_drone_classes[person-False]
+FAILED backend/tests/test_release_regressions.py::test_yolo_only_accepts_explicit_drone_classes[airplane-False]
+FAILED backend/tests/test_release_regressions.py::test_audit_chain_verifies_new_records_and_detects_tampering
+FAILED backend/tests/test_release_regressions.py::test_telemetry_does_not_claim_visual_inference
+FAILED backend/tests/test_release_regressions.py::test_report_exports_disclose_demo_data
+12 failed, 1 passed in 2.15s

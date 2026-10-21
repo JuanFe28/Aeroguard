@@ -1,0 +1,8 @@
+........................................................................ [ 91%]
+.......                                                                  [100%]
+- generated xml file: D:\aeroguard\docs\auditoria-2026-10-21\evidencias\cierre\pytest.xml -
+
+---------- coverage: platform win32, python 3.11.9-final-0 -----------
+Coverage JSON written to file D:\aeroguard\docs\auditoria-2026-10-21\evidencias\cierre\coverage.json
+
+79 passed in 5.04s

@@ -1,0 +1,62 @@
+name: Verificación académica
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r backend/requirements-expo.txt pip-audit==2.9.0
+      # La auditoría de dependencias bloquea si hay avisos; no se silencian.
+      - run: python scripts/release_checks.py --output tmp/ci-evidence --audit-dependencies
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: academic-checks
+          path: tmp/ci-evidence
+  containers:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            context: .
+            dockerfile: backend/Dockerfile
+          - name: frontend
+            context: .
+            dockerfile: frontend/Dockerfile
+          - name: ai-service
+            context: ai_service
+            dockerfile: ai_service/Dockerfile
+          - name: simulator
+            context: sensor_simulator
+            dockerfile: sensor_simulator/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Pruebas en imagen backend
+        if: matrix.name == 'backend'
+        run: docker build --target test -f backend/Dockerfile .
+      - name: Construir candidata sin publicar
+        run: docker build --target runtime -f '${{ matrix.dockerfile }}' -t 'aeroguard/${{ matrix.name }}:candidate' '${{ matrix.context }}'
+      - name: Guardar artefacto local
+        run: docker save 'aeroguard/${{ matrix.name }}:candidate' -o '${{ matrix.name }}.tar'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: container-${{ matrix.name }}
+          path: '${{ matrix.name }}.tar'

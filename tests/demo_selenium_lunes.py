@@ -26,6 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="http://127.0.0.1:3000")
+    parser.add_argument("--headless", action="store_true", help="Verificación sin abrir ventanas")
+    parser.add_argument("--evidence-dir", type=Path, default=ROOT / "docs")
     args = parser.parse_args()
     if args.url.rstrip("/") == "http://127.0.0.1:3000":
         subprocess.run([sys.executable, str(ROOT / "scripts" / "expo_local.py")], check=True)
@@ -39,12 +41,16 @@ def main():
     os.chdir(ROOT)
     os.environ.setdefault("WDM_LOCAL", "1")
     options = webdriver.EdgeOptions()
+    if args.headless:
+        options.add_argument("--headless=new")
+        options.add_argument("--window-size=1440,1000")
     options.add_argument("--start-maximized")
     options.add_argument("--no-first-run")
     options.page_load_strategy = "eager"
     # WebDriver crea un perfil temporal; no usa la sesión personal del navegador.
     driver = webdriver.Edge(service=Service(EdgeChromiumDriverManager().install()), options=options)
-    evidence = ROOT / "docs" / "evidencia_selenium.png"
+    args.evidence_dir.mkdir(parents=True, exist_ok=True)
+    evidence = args.evidence_dir / "evidencia_selenium.png"
     try:
         driver.set_page_load_timeout(45)
         wait = WebDriverWait(driver, 35)
@@ -62,7 +68,7 @@ def main():
         """))
         print("OK: sesión demo y mapa renderizado")
         time.sleep(2)
-        driver.save_screenshot(str(ROOT / "docs" / "evidencia_selenium_mapa.png"))
+        driver.save_screenshot(str(args.evidence_dir / "evidencia_selenium_mapa.png"))
 
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.nav-item[href="#/sensors"]'))).click()
         wait.until(EC.url_contains("#/sensors"))
@@ -80,7 +86,7 @@ def main():
             raise RuntimeError("No se pudo guardar la captura de evidencia")
         print(f"Evidencia: {evidence}")
     except Exception:
-        driver.save_screenshot(str(ROOT / "docs" / "evidencia_selenium_error.png"))
+        driver.save_screenshot(str(args.evidence_dir / "evidencia_selenium_error.png"))
         raise
     finally:
         driver.quit()

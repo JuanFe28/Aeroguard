@@ -1,0 +1,16 @@
+2026-10-21 10:20:20 [info     ] Detector nativo de ai_service/detector.py inicializado correctamente
+2026-10-21 10:20:20 [info     ] AeroGuard backend starting     env=development
+2026-10-21 10:20:21 [info     ] Base de datos conectada exitosamente url=sqlite+aiosqlite:///D:/aeroguard/tmp/release-checks/20261021T152003074865/load/aeroguard0/test.db
+2026-10-21 10:20:22 [info     ] Usuarios iniciales creados en la base de datos
+2026-10-21 10:20:22 [info     ] Zonas iniciales creadas en la base de datos
+2026-10-21 10:20:22 [info     ] AeroGuard backend ready
+
+TEST-02 {"clients": 10, "ping_pong_pairs": 500, "broadcast_deliveries": 100, "p50_rtt_ms": 1.382, "p95_rtt_ms": 2.725, "max_rtt_ms": 4.429, "duration_s": 0.269, "errors": 0, "lost_messages": 0, "remaining_connections": 0, "passed": true}
+.
+TEST-02 {"clients": 50, "ping_pong_pairs": 2500, "broadcast_deliveries": 500, "p50_rtt_ms": 6.53, "p95_rtt_ms": 11.717, "max_rtt_ms": 16.299, "duration_s": 0.662, "errors": 0, "lost_messages": 0, "remaining_connections": 0, "passed": true}
+.
+TEST-02 {"clients": 100, "ping_pong_pairs": 5000, "broadcast_deliveries": 1000, "p50_rtt_ms": 12.423, "p95_rtt_ms": 26.157, "max_rtt_ms": 51.296, "duration_s": 1.175, "errors": 0, "lost_messages": 0, "remaining_connections": 0, "passed": true}
+.2026-10-21 10:20:24 [info     ] AeroGuard backend shutting down
+
+- generated xml file: D:\aeroguard\docs\auditoria-2026-10-21\evidencias\final\load.xml -
+3 passed in 3.94s

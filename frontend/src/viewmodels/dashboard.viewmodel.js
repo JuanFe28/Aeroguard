@@ -76,7 +76,7 @@ export class DashboardViewModel {
     this.state.aiVerdict = {
       incident_id: "INC-2026-0891",
       timestamp: new Date().toISOString(),
-      ai_verdict: "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida de Bucaramanga Centro. Vector constante y cinemática automatizada. Acción: Alerta perimetral táctica y activación de inhibición RF.",
+      ai_verdict: "DEMO: objeto simulado a 145m, umbral de ejemplo de 120m. Verificar visualmente y avisar al responsable de seguridad.",
       threat_level: "CRITICAL",
       drone_id: "UAV-HK-402"
     };

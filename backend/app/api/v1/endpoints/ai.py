@@ -16,7 +16,7 @@ logger = structlog.get_logger("AeroGuard-AI-Endpoint")
 router = APIRouter()
 
 
-@router.post("/analyze", summary="Analizar imagen con Inteligencia Artificial (RF-021 / CODE-01)")
+@router.post("/analyze", summary="Analizar imagen con visión experimental (RF-021 / CODE-01)")
 async def analyze_image(
     file: UploadFile = File(...),
     sensor_id: Optional[str] = Form("CAM-BGA-NORTE-01"),
@@ -24,15 +24,18 @@ async def analyze_image(
     current_user = Depends(require_permission("detections:write")),
 ):
     """
-    Recibe un fotograma (imagen) capturado por un sensor óptico o cámara C-UAS
-    y lo procesa utilizando el motor real de visión artificial (OpenCV + YOLOv8).
+    Procesa una imagen con heurísticas OpenCV/Pillow o con un adaptador YOLO opcional.
+    No acredita reconocimiento validado de drones; el score no es precisión calibrada.
 
     - Valida formatos permitidos (JPEG, PNG, WEBP).
-    - Detecta objetos aéreos tipo dron, calculando bounding_box, nivel de confianza y tiempo de inferencia.
-    - Cumple estrictamente con el contrato JSON estipulado en la Planificación v1.1.
+    - Devuelve candidatos, caja envolvente, score y tiempo de procesamiento.
+    - Identifica el motor utilizado y declara model_validated=false.
     """
     # 1. Leer contenido binario del archivo
-    data = await file.read()
+    max_upload_bytes = 10 * 1024 * 1024
+    data = await file.read(max_upload_bytes + 1)
+    if len(data) > max_upload_bytes:
+        raise HTTPException(status_code=413, detail="La imagen supera el límite de 10 MiB.")
 
     # 2. Validación de formato y contenido según criterios Gherkin
     try:
@@ -41,6 +44,16 @@ async def analyze_image(
             content_type=file.content_type,
             data_len=len(data),
         )
+        # Comprobar los bytes, además del nombre y MIME declarados por el cliente.
+        import io
+        from PIL import Image, UnidentifiedImageError
+        try:
+            with Image.open(io.BytesIO(data)) as image:
+                if image.format not in {"JPEG", "PNG", "WEBP"} or image.width * image.height > 25_000_000:
+                    raise ValueError("Formato o dimensiones de imagen no permitidos.")
+                image.verify()
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as error:
+            raise ValueError("El contenido no es una imagen JPEG, PNG o WEBP válida.") from error
     except ValueError as ve:
         logger.warning(
             "Petición de análisis rechazada por archivo inválido",
@@ -54,11 +67,14 @@ async def analyze_image(
         )
 
     # 3. Procesamiento con el motor de visión artificial
-    result = ai_vision_service.analyze_image_bytes(
-        image_bytes=data,
-        sensor_id=sensor_id or "CAM-BGA-NORTE-01",
-        zone_id=zone_id,
-    )
+    try:
+        result = ai_vision_service.analyze_image_bytes(
+            image_bytes=data,
+            sensor_id=sensor_id or "CAM-BGA-NORTE-01",
+            zone_id=zone_id,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
     logger.info(
         "Inferencia de IA completada",

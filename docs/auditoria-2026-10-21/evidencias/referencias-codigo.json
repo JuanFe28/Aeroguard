@@ -1,0 +1,147 @@
+[
+  {
+    "file": "backend/app/services/ai_vision_service.py",
+    "line": 34,
+    "symbol": "class AIVisionService"
+  },
+  {
+    "file": "backend/app/services/ai_vision_service.py",
+    "line": 103,
+    "symbol": "engine_name ="
+  },
+  {
+    "file": "backend/app/services/ai_vision_service.py",
+    "line": 172,
+    "symbol": "Pillow-Heuristic"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "line": 31,
+    "symbol": "DRONE_CLASS_NAMES"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "line": 52,
+    "symbol": "class HeuristicDetector"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "line": 122,
+    "symbol": "class YOLODetector"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "line": 159,
+    "symbol": "DRONE_CLASS_NAMES"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "line": 274,
+    "symbol": "TODO: Update"
+  },
+  {
+    "file": "backend/app/services/report_generator_service.py",
+    "line": 49,
+    "symbol": "def get_default_dataset"
+  },
+  {
+    "file": "backend/app/services/report_generator_service.py",
+    "line": 129,
+    "symbol": "synthetic_demo"
+  },
+  {
+    "file": "backend/app/services/report_generator_service.py",
+    "line": 269,
+    "symbol": "synthetic_demo"
+  },
+  {
+    "file": "backend/app/services/report_generator_service.py",
+    "line": 427,
+    "symbol": "synthetic_demo"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/sensors.py",
+    "line": 147,
+    "symbol": "async def ingest_telemetry"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/sensors.py",
+    "line": 179,
+    "symbol": "ai_analyzed=False"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/alerts.py",
+    "line": 154,
+    "symbol": "_latest_verdict:"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/alerts.py",
+    "line": 174,
+    "symbol": "async def register_ai_verdict"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/alerts.py",
+    "line": 224,
+    "symbol": "async def trigger_tactical_incident"
+  },
+  {
+    "file": "backend/app/services/audit_service.py",
+    "line": 62,
+    "symbol": "async def verify_audit_chain"
+  },
+  {
+    "file": "backend/app/services/audit_service.py",
+    "line": 73,
+    "symbol": "expected_prev ="
+  },
+  {
+    "file": "backend/app/core/database.py",
+    "line": 45,
+    "symbol": "async def _seed_data"
+  },
+  {
+    "file": "backend/app/core/database.py",
+    "line": 150,
+    "symbol": "async def init_db"
+  },
+  {
+    "file": "backend/app/core/database.py",
+    "line": 163,
+    "symbol": "sqlite_url ="
+  },
+  {
+    "file": "backend/app/main.py",
+    "line": 30,
+    "symbol": "async def lifespan"
+  },
+  {
+    "file": "backend/app/main.py",
+    "line": 145,
+    "symbol": "async def health_check"
+  },
+  {
+    "file": "backend/app/services/email_service.py",
+    "line": 20,
+    "symbol": "logger.info"
+  },
+  {
+    "file": "backend/app/services/email_service.py",
+    "line": 21,
+    "symbol": "print("
+  },
+  {
+    "file": "frontend/src/services/api.service.js",
+    "line": 256,
+    "symbol": "async resolve("
+  },
+  {
+    "file": "frontend/src/services/api.service.js",
+    "line": 929,
+    "symbol": "enabled: window.AEROGUARD_DEMO_MODE"
+  },
+  {
+    "file": "frontend/src/services/api.service.js",
+    "line": 1041,
+    "symbol": "async fakeLogin"
+  }
+]

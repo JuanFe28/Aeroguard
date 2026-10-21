@@ -47,7 +47,7 @@ class ReportGeneratorService:
 
     @classmethod
     def get_default_dataset(cls, user_name: str = "Carlos Ramírez (Admin)") -> Dict[str, Any]:
-        """Genera un dataset operativo con detecciones e incidentes reales en Bucaramanga y Bogotá."""
+        """Genera datos sintéticos de demostración; no consulta detecciones de la BD."""
         now = datetime.now(timezone.utc)
         report_id = f"REP-{now.strftime('%Y%m%d')}-{now.strftime('%H%M%S')}"
 
@@ -126,6 +126,7 @@ class ReportGeneratorService:
         ]
 
         return {
+            "data_source": "synthetic_demo",
             "report_id": report_id,
             "generated_at": now.strftime("%Y-%m-%d %H:%M:%S UTC"),
             "operator": user_name,
@@ -140,7 +141,7 @@ class ReportGeneratorService:
             "ai_verdict": (
                 "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida "
                 "de Bucaramanga Centro. La cinemática refleja vector de aproximación constante. "
-                "Recomendación: Alerta perimetral táctica y activación de contramedidas de radiofrecuencia (RF)."
+                "Recomendación de ejemplo: verificar visualmente y notificar al responsable de seguridad."
             ),
             "incursions": incursions,
         }
@@ -251,7 +252,7 @@ class ReportGeneratorService:
         header_table_data = [
             [
                 Paragraph("<b>UNIDADES TECNOLÓGICAS DE SANTANDER (UTS)</b><br/>FACULTAD DE CIENCIAS NATURALES E INGENIERÍAS", subtitle_style),
-                Paragraph(f"<b>REPORTE OFICIAL C-UAS</b><br/>ID: <font color='#00d4ff'>{data['report_id']}</font>", ParagraphStyle("RightH", parent=subtitle_style, alignment=2)),
+                Paragraph(f"<b>REPORTE ACADÉMICO C-UAS</b><br/>ID: <font color='#00d4ff'>{data['report_id']}</font>", ParagraphStyle("RightH", parent=subtitle_style, alignment=2)),
             ]
         ]
         header_table = Table(header_table_data, colWidths=[340, 200])
@@ -264,7 +265,9 @@ class ReportGeneratorService:
         elements.append(Spacer(1, 8))
         elements.append(HRFlowable(width="100%", thickness=2, color=cls.COLOR_PRIMARY, spaceAfter=8))
 
-        elements.append(Paragraph("AeroGuard — Sistema de Detección, Monitoreo y Defensa Anti-Dron", title_style))
+        elements.append(Paragraph("AeroGuard — Detección experimental y monitoreo", title_style))
+        if data.get("data_source") == "synthetic_demo":
+            elements.append(Paragraph("DEMO — DATOS SINTÉTICOS. No acredita incidentes ni detecciones reales.", subtitle_style))
         elements.append(Paragraph(f"Emisión: {data['generated_at']} | Operador Responsable: <b>{data['operator']}</b>", subtitle_style))
         elements.append(Spacer(1, 12))
 
@@ -421,6 +424,8 @@ class ReportGeneratorService:
 
         # Título
         ws1["A1"] = "AEROGUARD C-UAS — REPORTE DE TELEMETRÍA E INCURSIONES"
+        if data.get("data_source") == "synthetic_demo":
+            ws1["A1"].value += " — DEMO: DATOS SINTÉTICOS"
         ws1["A1"].font = title_font
         ws1["A2"] = f"Generado: {data['generated_at']} | Operador: {data['operator']} | ID: {data['report_id']}"
         ws1["A2"].font = bold_font

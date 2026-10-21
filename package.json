@@ -1,7 +1,7 @@
 {
   "name": "aeroguard-cuas",
   "version": "1.1.0",
-  "description": "AeroGuard C-UAS — Sistema de Detección, Monitoreo y Neutralización de Drones",
+  "description": "AeroGuard — Prototipo académico de detección experimental y monitoreo de drones",
   "private": true,
   "type": "module",
   "scripts": {

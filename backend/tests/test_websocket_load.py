@@ -3,6 +3,7 @@
 import asyncio
 import json
 import math
+import os
 from pathlib import Path
 import socket
 import threading
@@ -18,7 +19,10 @@ from app.api.v1.endpoints import websocket as endpoint
 from app.core.security import create_access_token
 
 
-REPORT_DIR = Path(__file__).resolve().parents[2] / "docs" / "evidencias" / "TEST-02"
+REPORT_DIR = Path(os.environ.get(
+    "AEROGUARD_LOAD_REPORT_DIR",
+    str(Path(__file__).resolve().parents[2] / "docs" / "evidencias" / "TEST-02"),
+))
 PING_ROUNDS = 50
 BROADCAST_ROUNDS = 10
 MAX_P95_MS = 100

@@ -1,0 +1,9 @@
+Backend listo (PID 26176): http://127.0.0.1:8000/health
+Frontend listo (PID 20492): http://127.0.0.1:3000/
+Frontend: http://127.0.0.1:3000 | API: http://127.0.0.1:8000/docs
+Logs: D:\aeroguard\tmp\expo
+OK: sesión demo y mapa renderizado
+OK: vista Sensores con datos
+OK: vista Reportes
+Evidencia: docs\auditoria-2026-10-21\evidencias\selenium\evidencia_selenium.png
+✅ PRUEBA E2E SELENIUM COMPLETADA CON ÉXITO

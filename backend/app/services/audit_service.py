@@ -70,7 +70,7 @@ async def verify_audit_chain(db: AsyncSession, limit: int = 100) -> Dict[str, An
     if not logs:
         return {"valid": True, "records_checked": 0, "status": "empty"}
 
-    expected_prev = "GENESIS_AEROGUARD_00000000000000000000000000000000000000000000000000"
+    expected_prev = "0" * 64
     for i, log in enumerate(logs):
         if i == 0 and log.prev_hash != expected_prev:
             return {"valid": False, "compromised_id": log.id, "reason": "genesis_mismatch"}

@@ -5,8 +5,10 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.ai_tactical_agent_service import ai_tactical_service
+from app.core.security import create_access_token
 
 client = TestClient(app)
+AUTH = {"Authorization": "Bearer " + create_access_token({"sub": "admin", "role": "admin"})}
 
 
 def test_embedded_ai_tactical_agent_verdict_rules():
@@ -31,7 +33,8 @@ def test_embedded_ai_tactical_agent_verdict_rules():
     assert "UAV-ROGUE-99" in verdict
     assert "155m" in verdict
     assert "120m" in verdict
-    assert "inhibición RF" in verdict
+    assert "responsable de seguridad" in verdict
+    assert "inhibición RF" not in verdict
     # Validar longitud máxima militar concisa (menos de 55 palabras)
     words = verdict.split()
     assert len(words) < 55
@@ -58,16 +61,16 @@ def test_trigger_incident_endpoint_success():
         }
     }
 
-    response = client.post("/api/v1/alerts/trigger-incident", json=payload)
+    response = client.post("/api/v1/alerts/trigger-incident", json=payload, headers=AUTH)
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
     assert data["data"]["incident_id"] == "INC-TEST-SOAR-001"
     assert data["data"]["threat_level"] == "CRITICAL"
-    assert "inhibición RF" in data["data"]["ai_verdict"]
+    assert "responsable de seguridad" in data["data"]["ai_verdict"]
 
     # Validar que /ai-verdict refleja de inmediato el nuevo incidente analizado
-    get_res = client.get("/api/v1/alerts/ai-verdict")
+    get_res = client.get("/api/v1/alerts/ai-verdict", headers=AUTH)
     assert get_res.status_code == 200
     assert get_res.json()["incident_id"] == "INC-TEST-SOAR-001"
     assert get_res.json()["drone_id"] == "UAV-HK-TEST"

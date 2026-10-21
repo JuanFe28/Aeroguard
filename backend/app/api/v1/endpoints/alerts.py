@@ -157,7 +157,7 @@ _latest_verdict: dict = {
     "ai_verdict": (
         "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida "
         "de Bucaramanga Centro. Vector constante y cinemática automatizada. "
-        "Acción: Alerta perimetral táctica y activación de inhibición RF."
+        "Acción: Verificar visualmente y notificar al responsable de seguridad."
     ),
     "threat_level": "CRITICAL",
     "drone_id": "UAV-HK-402"
@@ -165,13 +165,16 @@ _latest_verdict: dict = {
 
 
 @router.get("/ai-verdict", summary="Consultar último dictamen táctico de IA")
-async def get_latest_ai_verdict():
+async def get_latest_ai_verdict(current_user = Depends(require_permission("alerts:read"))):
     """Retorna el dictamen táctico más reciente emitido por el agente IA / SOAR."""
     return _latest_verdict
 
 
 @router.post("/ai-verdict", summary="Registrar dictamen táctico de IA (n8n / Agente)")
-async def register_ai_verdict(body: AIVerdictSchema):
+async def register_ai_verdict(
+    body: AIVerdictSchema,
+    current_user = Depends(require_permission("alerts:write")),
+):
     """Callback invocado por el workflow n8n o agente autónomo C-UAS."""
     global _latest_verdict
     _latest_verdict = {
@@ -218,7 +221,10 @@ class TriggerIncidentSchema(BaseModel):
 
 
 @router.post("/trigger-incident", summary="Disparar análisis de incidente táctico hacia n8n / Agente IA")
-async def trigger_tactical_incident(body: TriggerIncidentSchema):
+async def trigger_tactical_incident(
+    body: TriggerIncidentSchema,
+    current_user = Depends(require_permission("alerts:write")),
+):
     """
     Dispara el análisis táctico de un incidente aéreo:
     - Despacha webhook hacia n8n SOAR

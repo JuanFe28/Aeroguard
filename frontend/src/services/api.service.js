@@ -264,7 +264,7 @@ export const AlertService = {
       return {
         incident_id: "INC-2026-0891",
         timestamp: new Date().toISOString(),
-        ai_verdict: "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida de Bucaramanga Centro. Vector constante y cinemática automatizada. Acción: Alerta perimetral táctica y activación de inhibición RF.",
+        ai_verdict: "DEMO: objeto simulado a 145m, umbral de ejemplo de 120m. Acción: verificar visualmente y avisar al responsable de seguridad.",
         threat_level: "CRITICAL",
         drone_id: "UAV-HK-402"
       };
@@ -288,7 +288,7 @@ export const AlertService = {
       const verdict = {
         incident_id: payload.incident_id || `INC-${Date.now().toString().slice(-4)}`,
         timestamp: new Date().toISOString(),
-        ai_verdict: `${droneId} mantiene rumbo sur a ${alt}m sobrepasando el techo legal de 120m en la zona restringida. Vector cinemático constante con perfil de penetración premeditada. Acción: Declarar alerta perimetral táctica e iniciar protocolo de inhibición RF.`,
+        ai_verdict: `DEMO: ${droneId}, altitud simulada ${alt}m; umbral de ejemplo 120m. Intención no verificada. Acción: verificación visual y aviso al responsable de seguridad.`,
         threat_level: "CRITICAL",
         drone_id: droneId,
         dispatched_to_n8n: false,
@@ -306,7 +306,7 @@ export const AlertService = {
         data: {
           incident_id: payload.incident_id || "INC-2026-FALLBACK",
           timestamp: new Date().toISOString(),
-          ai_verdict: "Intrusión crítica evaluada por Agente IA. Activando contramedidas perimetrales e inhibición C2.",
+          ai_verdict: "DEMO: incidente simulado. Verificar visualmente y avisar al responsable de seguridad.",
           threat_level: "CRITICAL",
           drone_id: payload.drone?.drone_id || "UAV-HK-402"
         }
@@ -525,7 +525,9 @@ export const AIService = {
         status: 'success',
         sensor_id: sensorId,
         timestamp: new Date().toISOString(),
-        engine: 'YOLOv8n-OpenCV-Real',
+        engine: 'Demo-Static',
+        model_validated: false,
+        confidence_kind: 'demo_constant',
         detection: {
           is_drone: true,
           label: 'quadcopter_uav',

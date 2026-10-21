@@ -1,0 +1,78 @@
+Resumen del intento intermedio fallido; no es la ejecución final.
+Traza completa conservada localmente en tmp/audit/intento-intermedio-pytest.txt.
+El XML conserva los casos y fallos.
+
+m                      │ │
+│ │     [3moperator[0m = 'admin_user'                                                                  │ │
+│ │ [3mregular_font[0m = [1m<[0m[1mopenpyxl.styles.fonts.Font[0m object>                                           │ │
+│ │                Parameters:                                                                   │ │
+│ │                name='Calibri', charset=[3mNone[0m, family=[3mNone[0m, b=[3mFalse[0m, i=[3mFalse[0m, strike=[3mNone[0m,     │ │
+│ │                outline=[3mNone[0m, shadow=[3mNone[0m, condense=[3mNone[0m, color=<openpyxl.styles.colors.Color │ │
+│ │                object[1m>[0m                                                                       │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='001E293B', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                extend=[3mNone[0m, sz=[1m10[0m[1m.0[0m, u=[3mNone[0m, vertAlign=[3mNone[0m, scheme=[3mNone[0m                     │ │
+│ │  [3mthin_border[0m = [1m<[0m[1mopenpyxl.styles.borders.Border[0m object>                                       │ │
+│ │                Parameters:                                                                   │ │
+│ │                outline=[3mTrue[0m, diagonalUp=[3mFalse[0m, diagonalDown=[3mFalse[0m, start=[3mNone[0m, end=[3mNone[0m,     │ │
+│ │                left=<openpyxl.styles.borders.Side object>                                    │ │
+│ │                Parameters:                                                                   │ │
+│ │                style='thin', color=<openpyxl.styles.colors.Color object>                     │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00CBD5E1', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                right=<openpyxl.styles.borders.Side object>                                   │ │
+│ │                Parameters:                                                                   │ │
+│ │                style='thin', color=<openpyxl.styles.colors.Color object>                     │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00CBD5E1', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                top=<openpyxl.styles.borders.Side object>                                     │ │
+│ │                Parameters:                                                                   │ │
+│ │                style='thin', color=<openpyxl.styles.colors.Color object>                     │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00CBD5E1', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                bottom=<openpyxl.styles.borders.Side object>                                  │ │
+│ │                Parameters:                                                                   │ │
+│ │                style='thin', color=<openpyxl.styles.colors.Color object[1m>[0m                     │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00CBD5E1', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                diagonal=[3mNone[0m, vertical=[3mNone[0m, horizontal=[3mNone[0m                                 │ │
+│ │   [3mtitle_font[0m = [1m<[0m[1mopenpyxl.styles.fonts.Font[0m object>                                           │ │
+│ │                Parameters:                                                                   │ │
+│ │                name='Calibri', charset=[3mNone[0m, family=[3mNone[0m, b=[3mTrue[0m, i=[3mFalse[0m, strike=[3mNone[0m,      │ │
+│ │                outline=[3mNone[0m, shadow=[3mNone[0m, condense=[3mNone[0m, color=<openpyxl.styles.colors.Color │ │
+│ │                object[1m>[0m                                                                       │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='000A192F', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                extend=[3mNone[0m, sz=[1m14[0m[1m.0[0m, u=[3mNone[0m, vertAlign=[3mNone[0m, scheme=[3mNone[0m                     │ │
+│ │           [3mwb[0m = [1m<[0m[1mopenpyxl.workbook.workbook.Workbook[0m object at [1m0x000002CE05E2EED0[0m[1m>[0m            │ │
+│ │          [3mws1[0m = [1m<[0m[1mWorksheet[0m "Telemetría e Incursiones"[1m>[0m                                        │ │
+│ │   [3mzebra_fill[0m = [1m<[0m[1mopenpyxl.styles.fills.PatternFill[0m object>                                    │ │
+│ │                Parameters:                                                                   │ │
+│ │                patternType='solid', fgColor=<openpyxl.styles.colors.Color object>            │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00F8FAFC', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb',    │ │
+│ │                bgColor=<openpyxl.styles.colors.Color object[1m>[0m                                 │ │
+│ │                Parameters:                                                                   │ │
+│ │                rgb='00F8FAFC', indexed=[3mNone[0m, auto=[3mNone[0m, theme=[3mNone[0m, tint=[1m0[0m[1m.0[0m, type='rgb'     │ │
+│ └──────────────────────────────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+[1mTypeError: [0munsupported operand [1mtype[0m[1m([0ms[1m)[0m for +=: 'Cell' and 'str'
+
+___________ test_verdict_still_returns_success_when_broadcast_fails ___________
+backend\tests\test_security_regressions.py:183: in test_verdict_still_returns_success_when_broadcast_fails
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = <Response [401 Unauthorized]>.status_code
+- generated xml file: D:\aeroguard\docs\auditoria-2026-10-21\evidencias\final\pytest.xml -
+
+---------- coverage: platform win32, python 3.11.9-final-0 -----------
+Coverage JSON written to file D:\aeroguard\docs\auditoria-2026-10-21\evidencias\final\coverage.json
+
+=========================== short test summary info ===========================
+FAILED backend/tests/test_exposicion_lunes.py::test_06_report_excel_export - ...
+FAILED backend/tests/test_geospatial.py::test_sensor_telemetry_triggers_geospatial_breach
+FAILED backend/tests/test_release_regressions.py::test_report_exports_disclose_demo_data
+FAILED backend/tests/test_reports_export.py::test_export_excel_report_success
+FAILED backend/tests/test_reports_export.py::test_reports_post_export_unified
+FAILED backend/tests/test_security_regressions.py::test_verdict_still_returns_success_when_broadcast_fails
+6 failed, 71 passed in 13.52s

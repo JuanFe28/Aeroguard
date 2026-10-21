@@ -176,7 +176,8 @@ def test_verdict_still_returns_success_when_broadcast_fails(monkeypatch, isolate
 
     monkeypatch.setattr(websocket.manager, "broadcast", unavailable)
     monkeypatch.setattr(alerts, "_latest_verdict", dict(alerts._latest_verdict))
-    response = isolated_client.post("/api/v1/alerts/ai-verdict", json={
+    token = create_access_token({"sub": "admin", "role": "admin"})
+    response = isolated_client.post("/api/v1/alerts/ai-verdict", headers={"Authorization": f"Bearer {token}"}, json={
         "incident_id": "TEST-03-BROADCAST", "ai_verdict": "Dictamen de prueba",
         "threat_level": "LOW", "drone_id": "TEST-03",
     })

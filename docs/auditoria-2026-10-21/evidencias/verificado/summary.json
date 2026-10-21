@@ -1,0 +1,123 @@
+{
+  "date_utc": "2026-10-21T15:22:27.677019+00:00",
+  "base_commit": "28c955f3c283133ac755e1a6470aece5842bbbea",
+  "working_tree": [
+    " D INICIAR_EXPO_LUNES.bat",
+    " D PLANIFICACIONMEJORA.md",
+    " M ai_service/detector.py",
+    " M backend/Dockerfile",
+    " M backend/app/api/v1/endpoints/ai.py",
+    " M backend/app/api/v1/endpoints/alerts.py",
+    " M backend/app/api/v1/endpoints/reports.py",
+    " M backend/app/api/v1/endpoints/sensors.py",
+    " M backend/app/core/config.py",
+    " M backend/app/services/ai_tactical_agent_service.py",
+    " M backend/app/services/ai_vision_service.py",
+    " M backend/app/services/audit_service.py",
+    " M backend/app/services/report_generator_service.py",
+    " M backend/tests/test_ai_tactical_agent.py",
+    " M backend/tests/test_alerts_verdict.py",
+    " M backend/tests/test_geospatial.py",
+    " M backend/tests/test_security_regressions.py",
+    " M backend/tests/test_websocket_load.py",
+    " M docker-compose.yml",
+    " M frontend/src/services/api.service.js",
+    " M frontend/src/viewmodels/dashboard.viewmodel.js",
+    " M package.json",
+    " M pyproject.toml",
+    " M tests/demo_selenium_lunes.py",
+    "?? .github/",
+    "?? backend/Dockerfile.dockerignore",
+    "?? backend/tests/test_release_regressions.py",
+    "?? docs/auditoria-2026-10-21/",
+    "?? scripts/release_checks.py"
+  ],
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "scope": "SQLite temporal, imágenes sintéticas, WS local; sin servicios externos",
+  "dependencies_audited": false,
+  "checks": [
+    {
+      "name": "syntax-python",
+      "command": [
+        "D:\\aeroguard\\.venv\\Scripts\\python.exe",
+        "scripts/check_python_syntax.py"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-21T15:22:14.724400+00:00",
+      "passed": true
+    },
+    {
+      "name": "syntax-js",
+      "command": [
+        "node",
+        "scripts/check_js_syntax.js"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-21T15:22:14.825244+00:00",
+      "passed": true
+    },
+    {
+      "name": "pytest",
+      "command": [
+        "D:\\aeroguard\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "backend/tests",
+        "--ignore=backend/tests/test_websocket_load.py",
+        "-q",
+        "--tb=short",
+        "--basetemp=D:\\aeroguard\\tmp\\release-checks\\20261021T152214724400\\functional",
+        "--cov=backend/app",
+        "--cov-report=json:D:\\aeroguard\\docs\\auditoria-2026-10-21\\evidencias\\verificado\\coverage.json",
+        "--junitxml=D:\\aeroguard\\docs\\auditoria-2026-10-21\\evidencias\\verificado\\pytest.xml"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-21T15:22:15.289874+00:00",
+      "passed": true
+    },
+    {
+      "name": "load",
+      "command": [
+        "D:\\aeroguard\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "backend/tests/test_websocket_load.py",
+        "-q",
+        "-s",
+        "--basetemp=D:\\aeroguard\\tmp\\release-checks\\20261021T152214724400\\load",
+        "--junitxml=D:\\aeroguard\\docs\\auditoria-2026-10-21\\evidencias\\verificado\\load.xml"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-21T15:22:21.939344+00:00",
+      "passed": true
+    },
+    {
+      "name": "bandit",
+      "command": [
+        "D:\\aeroguard\\.venv\\Scripts\\python.exe",
+        "-m",
+        "bandit",
+        "-r",
+        "backend/app",
+        "ai_service",
+        "sensor_simulator",
+        "scripts",
+        "-f",
+        "json",
+        "-o",
+        "D:\\aeroguard\\docs\\auditoria-2026-10-21\\evidencias\\verificado\\bandit.json"
+      ],
+      "exit_code": 1,
+      "started_utc": "2026-10-21T15:22:27.200749+00:00",
+      "passed": true,
+      "severity_counts": {
+        "LOW": 23,
+        "MEDIUM": 0,
+        "HIGH": 0
+      },
+      "criterion": "Sin errores de análisis ni avisos medios/altos; bajos conservados"
+    }
+  ],
+  "checks_passed": true,
+  "official_release_approved": false
+}

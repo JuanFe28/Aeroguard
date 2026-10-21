@@ -27,10 +27,8 @@ MIN_CONFIDENCE      = float(os.getenv("AI_CONFIDENCE_THRESHOLD", "0.70"))
 MODEL_PATH          = os.getenv("AI_MODEL_PATH", "models/yolov8n.pt")
 USE_YOLO            = os.getenv("AI_USE_YOLO", "false").lower() == "true"
 
-# COCO class IDs that could indicate a drone-like object
-# Class 0=person, 4=airplane, 5=bus, 6=car, 7=train, 8=truck
-# In a real system, a custom-trained YOLO model for drones would be used.
-DRONE_LIKE_CLASSES = {4, 39, 40}  # airplane, bottle (placeholder), wine glass (placeholder)
+# Solo nombres explícitos de un modelo entrenado para drones. COCO no basta.
+DRONE_CLASS_NAMES = {"drone", "uav", "quadcopter", "quadcopter_uav"}
 
 
 # ============================================================
@@ -156,14 +154,17 @@ class YOLODetector:
         for result in results:
             for box in result.boxes:
                 cls_id     = int(box.cls[0])
+                names = result.names
+                class_name = names.get(cls_id, "") if isinstance(names, dict) else names[cls_id]
+                if str(class_name).strip().casefold() not in DRONE_CLASS_NAMES:
+                    continue
                 confidence = float(box.conf[0])
                 if confidence > best_confidence:
                     best_confidence = confidence
                     xyxy = box.xyxy[0].tolist()
                     best_box = {"x": xyxy[0], "y": xyxy[1], "w": xyxy[2]-xyxy[0], "h": xyxy[3]-xyxy[1]}
 
-        # In a real system, use a custom-trained drone detection model.
-        # Here we simulate detection based on any high-confidence YOLO detection.
+        # La presencia de una clase válida no constituye validación del modelo.
         is_drone = best_confidence >= MIN_CONFIDENCE
 
         return AnalysisResult(

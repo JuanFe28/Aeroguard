@@ -1,0 +1,1314 @@
+[
+  {
+    "file": ".eslintrc.json",
+    "sha256": "a642ee2228b063e36ed51145510cedcb50a0daa0378e5ae6d6bb3652ad1156b1"
+  },
+  {
+    "file": ".github/workflows/ci.yml",
+    "sha256": "f7a667b1307d6835543349aa380792f6107857407a585a719df02a16926e9fb8"
+  },
+  {
+    "file": ".pre-commit-config.yaml",
+    "sha256": "39d7459410748b28330aa67c4cae29303388e3740136d31b4ea58db52e8170fd"
+  },
+  {
+    "file": ".prettierrc.json",
+    "sha256": "8f7ff9009cfdf2acc43441897aea3d0685024310d515f4a66bab2ca96519f695"
+  },
+  {
+    "file": ".vscode/settings.json",
+    "sha256": "fdeca202e931e322fa9c0fcb8e42c7a0e5e37311cc0db2732149224935cbbbb4"
+  },
+  {
+    "file": "CHANGELOG.md",
+    "sha256": "96fd6826d63e262b594627db089e076cba6cb39a8185ee567e4daaf1b62c9503"
+  },
+  {
+    "file": "Estructura.txt",
+    "sha256": "075adf224277819681047035dffa9bf8923c4a6211b1f0f54ba1c44c49b9f07b"
+  },
+  {
+    "file": "README.md",
+    "sha256": "330bad66f9d93437e5fae7d4dcf6cd84ebdb98713861efe810155e1338867064"
+  },
+  {
+    "file": "ai_service/Dockerfile",
+    "sha256": "6b15454c6efead149af06f374c247366702977d9931969a80a997d592eeceb16"
+  },
+  {
+    "file": "ai_service/detector.py",
+    "sha256": "bd46d83a4fc1ec3fd723232c9eba780d3fcb3afcfe566998954c364b16393a91"
+  },
+  {
+    "file": "ai_service/requirements.txt",
+    "sha256": "07c4d11530b342d7a32220e4b11f1709ea36bd0d1d9f63c09fed93ddfa4d6c00"
+  },
+  {
+    "file": "automation/n8n/aeroguard_soar_workflow.json",
+    "sha256": "cedb0cfd42d9b421247c8aaa585629908e9919a6b9cd6c2a6d24450448c4c599"
+  },
+  {
+    "file": "backend/Dockerfile",
+    "sha256": "141dfa521850549c9621c3f9b6aca209f35ca4c6cbd3ac7c3e424e87e2065248"
+  },
+  {
+    "file": "backend/Dockerfile.dockerignore",
+    "sha256": "72fbf5a4736013adfc277b5aa41b472470e88e6d2c787d401f7f3f80a15b71d8"
+  },
+  {
+    "file": "backend/app/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/api/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/api/v1/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/ai.py",
+    "sha256": "b6ada6eb4528fe6bbdd2333a43e90b40ef8c2d64d85361d29340865b1888d633"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/alerts.py",
+    "sha256": "884bdfeb0eeeaa0b330681012b05257793a22a9f92d4bdc45b8c9cc26f7087d6"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/audit.py",
+    "sha256": "0164ffd2cd2bc996f73f924eae9d089f58c980ff18414734a11a8e3317ea26f7"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/auth.py",
+    "sha256": "7759c27214ef2bef154f2d48082ff5c8db8c3648314f2c2ce743aab84534536d"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/config.py",
+    "sha256": "2e26d26777d5257a977ec4ddd6efef0668028e6b84c2712b48734110e66125d9"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/detections.py",
+    "sha256": "18952fd1fcec255756cb4770452316e98511235edadd46e7b0ee54b4de0752c9"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/reports.py",
+    "sha256": "544fdfd695ee9acc2dd05a5196dd21f895ab9df31eb7321f46500ce6f0de2c91"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/sensors.py",
+    "sha256": "5f685b9b2393f23ae9ed4cce1bd0715cd775381d5a832fd3936350ba4b978846"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/users.py",
+    "sha256": "21706609c1b3f529e32ce68406547ac99e257cd0f9d22b5664f6185f2779e7f5"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/websocket.py",
+    "sha256": "53292c609645ab3f53b02d843d2929d50bed0632722120a1f368b53f7ef711c6"
+  },
+  {
+    "file": "backend/app/api/v1/endpoints/zones.py",
+    "sha256": "b9144625359317182e129e2ff1c6ee1e060be6294f247a3bf8a0ef5b56684965"
+  },
+  {
+    "file": "backend/app/core/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/core/config.py",
+    "sha256": "d6c6cf97f8ca657dc2e0a6a734273ed6e245bb5abb9a4958975cf9f0b1e827c3"
+  },
+  {
+    "file": "backend/app/core/database.py",
+    "sha256": "4bd36f31873d2bdcad07b09c86b568a6712f635702263ca63a082846d18a7dcf"
+  },
+  {
+    "file": "backend/app/core/security.py",
+    "sha256": "c945431323686975dd71dc863e44f1b356464a948ac52619c88e8d2845aa540e"
+  },
+  {
+    "file": "backend/app/main.py",
+    "sha256": "6c024ad4eac93b6a9bdb03cf5b7d2da82680b7d9921efa33db9194160ee24753"
+  },
+  {
+    "file": "backend/app/models/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/models/models.py",
+    "sha256": "9659ab38f345c371d75cf7c19018f6655bd602212037767abf412a3f3aa0deb1"
+  },
+  {
+    "file": "backend/app/schemas/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/services/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/app/services/ai_tactical_agent_service.py",
+    "sha256": "fac767e92797b9612888c65d1e51469216d92e6598dcd61e0f8e43bf035809d9"
+  },
+  {
+    "file": "backend/app/services/ai_vision_service.py",
+    "sha256": "e082f40d403720ccd17383e91e220bea795745c1d96bee8406741064d11183b1"
+  },
+  {
+    "file": "backend/app/services/audit_service.py",
+    "sha256": "158640ce4d44cbb379942b4991932e40864e5c8c7ecbf1f6892d2eb5568b792c"
+  },
+  {
+    "file": "backend/app/services/email_service.py",
+    "sha256": "1dec604988dda4d51e5e1ab27b70591edf6528ace903578f274acd900605adc6"
+  },
+  {
+    "file": "backend/app/services/geospatial_service.py",
+    "sha256": "f3a4c44764b3de102e49b00a744c6e88b3f194020f55a9b59cacd561a39a7aea"
+  },
+  {
+    "file": "backend/app/services/report_generator_service.py",
+    "sha256": "04f225ca969a9b40831a639a5d06d5eb33d752ef1cf08aeb5f6b998dc1e893b5"
+  },
+  {
+    "file": "backend/app/services/user_service.py",
+    "sha256": "5ff8f64d575a52c4ee29e8c7c6b47ca5f47d07b6191f85c3eb4081be9ec2e650"
+  },
+  {
+    "file": "backend/app/workers/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "backend/init.sql",
+    "sha256": "c359a2e56c7d772da6720a05637c58e14eaa9e81d5bca3a73924a43755ccf054"
+  },
+  {
+    "file": "backend/requirements-dev.txt",
+    "sha256": "d871e170e578642ed2031e0dde8d1265bcd2228130eda23b748f656eb2c32562"
+  },
+  {
+    "file": "backend/requirements-expo.txt",
+    "sha256": "fc1cb60cf286751eb90c538e774ffd5376b7d7f80fd9beb37841a4aff82ec416"
+  },
+  {
+    "file": "backend/requirements.txt",
+    "sha256": "bdeb85e130ab48fb50ce5fa2ec798e730b40ea282ab1e0dd75f55d6cae9eb9e6"
+  },
+  {
+    "file": "backend/tests/conftest.py",
+    "sha256": "18bdbaba1ca308734d0413e3725dfb90930dd7646a068d4947f1c33df164bd6f"
+  },
+  {
+    "file": "backend/tests/e2e_full_simulation.py",
+    "sha256": "502c33d9488d8c7127cb9480a756f348d4268983f9098dfebf6e5522c3f1eeeb"
+  },
+  {
+    "file": "backend/tests/test_ai_endpoint.py",
+    "sha256": "797b9a896728cc7588c1dd92e48a5fa3bd01f8f18ccf49c6e3e69745d7594378"
+  },
+  {
+    "file": "backend/tests/test_ai_tactical_agent.py",
+    "sha256": "fff0bb468d02a0994e7fd00e35fbeab81806271e8a63591aea087883e0010ed5"
+  },
+  {
+    "file": "backend/tests/test_alerts_verdict.py",
+    "sha256": "4187ce3566a2f80c024817a9b4594f296212c33fbb313efd3bb87d0c51103ae0"
+  },
+  {
+    "file": "backend/tests/test_auth.py",
+    "sha256": "b39259c8234fb8138694f1d319dc317ece029ef148cbaf69a47f2104ccf64593"
+  },
+  {
+    "file": "backend/tests/test_exposicion_lunes.py",
+    "sha256": "a43b32b3cdc01de59350f988ca209272190719ea55a90205c403506c2757115d"
+  },
+  {
+    "file": "backend/tests/test_geospatial.py",
+    "sha256": "802653c26af6e61ca4fbb36bd9cbd3b71e826d60dc4369a9b802568c35f2870a"
+  },
+  {
+    "file": "backend/tests/test_local_config.py",
+    "sha256": "1d6b1855e3c616658e0e0162b755acadc9281e6966b9d2e64c0c0e2920bf1d5f"
+  },
+  {
+    "file": "backend/tests/test_release_regressions.py",
+    "sha256": "ad91ec31d4ad4be5394c35cd917b49a5b734f3bae51a30a7c30cd94b4c604bc5"
+  },
+  {
+    "file": "backend/tests/test_reports_export.py",
+    "sha256": "dd047eb5ce87adfaf78484c1a2f4f411060fb35509f52be889d10d0ac06876d6"
+  },
+  {
+    "file": "backend/tests/test_security_regressions.py",
+    "sha256": "589eb1d2bb17b7b989efd56aae1b09d950007530bcb042f0d667b41a93506467"
+  },
+  {
+    "file": "backend/tests/test_websocket.py",
+    "sha256": "50a72ac16cad4d756299f8d21d7175cd56cdba82ce4a2f06d578625123ba90e8"
+  },
+  {
+    "file": "backend/tests/test_websocket_load.py",
+    "sha256": "600ddd0e73f24a92f0c4caf02765a25bc7ed81de254d9ba259f24d9035ac266b"
+  },
+  {
+    "file": "docker-compose.yml",
+    "sha256": "3822a034106386a8c230b9a0f4c8572865e87d4ccf912b753ae0514f5a0ffc38"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/.resources/definition.yaml",
+    "sha256": "22212f75412e7e3fa4f07c30c5a8a507173f2cfc0e96a77bde45e02d94b347b7"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/01 — Salud.request.yaml",
+    "sha256": "53012c6041d773c2a51f74fd76250b3b6fb7323551fc42deddf8e77fc5703c81"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/02 — Login JWT.request.yaml",
+    "sha256": "30af683e30d83a769a6ed1a535bfe348c6c458bd8769d6fb40a15550085b672d"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/03 — Analizar imagen.request.yaml",
+    "sha256": "9bd023ef1b59367349af433ac0f1b21200e01e90889ba341a358afbad7ddd73b"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/04 — Exportar PDF.request.yaml",
+    "sha256": "b9bb1417988d61206110cfb8c956edb5f2a4c63cd58b5b3f3509fcd77456f726"
+  },
+  {
+    "file": "docs/AeroGuard — Exposición Fase TEST/05 — Exportar Excel.request.yaml",
+    "sha256": "f4faf9648075a013351fd0d15860c351ccade7a9650cea062a3321c7618bb0ee"
+  },
+  {
+    "file": "docs/AeroGuard_OpenAPI.json",
+    "sha256": "79e771e3de2ef0e5aa5feaac2e78e6f194ddcbbbfe75fc2c196a8ed4bae8a2f7"
+  },
+  {
+    "file": "docs/AeroGuard_Postman_Collection.json",
+    "sha256": "56c55af8fcd960cdb865e0f323c3a12e46a59bbccbc54d62b560fd90fb5e2649"
+  },
+  {
+    "file": "docs/GUIA_EXPOSICION_LUNES.md",
+    "sha256": "bc398bd2789340f30d280f826c5a35930f23300ac1193885cab93b19a3e10490"
+  },
+  {
+    "file": "docs/PLANIFICACION_V1.1.md",
+    "sha256": "08454f250b291e4fce7ce423d33cc659a39ae4924f88c7304dbac6f2746f3aaa"
+  },
+  {
+    "file": "docs/RESULTADOS_TEST_TRELLO.md",
+    "sha256": "05646d42f8ab01b40153a2099f073ac90687de566ad669cada6e5b61effcb879"
+  },
+  {
+    "file": "docs/TRELLO_TEST_01.md",
+    "sha256": "4d7cee97a3457060f477ffadc6b12f5aed0cd546d15a173f4e1f2891afeaa20a"
+  },
+  {
+    "file": "docs/TRELLO_TEST_02.md",
+    "sha256": "281da55db0c15b4395d84cca57deb358de97fed16bf4d15eb641adcb922f2091"
+  },
+  {
+    "file": "docs/TRELLO_TEST_03.md",
+    "sha256": "d82ef540997aa24bc388e416a95687018ad6f8de44d3386cc9adcf82d03d5cf1"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/01_ESTADO_ACTUAL.md",
+    "sha256": "713fd977f6b38719f0c732d27fd11ddc894fcca753faa9590f4839893ccaf079"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/02_RELEASE.md",
+    "sha256": "ea07836771568ef2c3aab5df81354036e4c74313dd9f4b09fa5fbd4e07106565"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/03_INVESTIGACION_COMERCIAL.md",
+    "sha256": "b4df0a0370536a897397d0db2458ca125dd71bfc6f38f11d866b04b51967a79d"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/04_DOCUMENTACION_Y_NORMATIVA.md",
+    "sha256": "e4086b7ef04e64ce4851e2aa53205a0043ffeadf79ef8149aa3dba4752679d4e"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/05_PLAN_MAESTRO.md",
+    "sha256": "878c3539a3acedb94efe33af8f7885b75a971c8ac55efa571aefec94e024da7a"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/06_FUENTES.md",
+    "sha256": "c055f0c3b7050441d7bffd45a43166689b9867e31340933da2829dfbb3708244"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/07_GUIA_RELEASE.md",
+    "sha256": "753710ca560898188d73a661105573fbb2fa0541499908129a8ae5822fc6b9f3"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/08_NOTAS_CANDIDATA.md",
+    "sha256": "cfb8054bd2529ed0ad44262201d45ac828eb77310923404c9117b5ffc9f984ef"
+  },
+  {
+    "file": "docs/auditoria-2026-10-21/README.md",
+    "sha256": "b77af2fc3356b752a3af438b8171fee942e6d5ed796afa608fd3efa20640e686"
+  },
+  {
+    "file": "docs/evidencias/CASOS_EJECUTADOS.md",
+    "sha256": "b6201e87b04dbbfeec6cb72b1c2524aadda761a822f14eb96f62658f5201f736"
+  },
+  {
+    "file": "docs/evidencias/TEST-01/LEEME.md",
+    "sha256": "4d7cee97a3457060f477ffadc6b12f5aed0cd546d15a173f4e1f2891afeaa20a"
+  },
+  {
+    "file": "docs/evidencias/TEST-01/coverage.json",
+    "sha256": "4a43ba7213b58f9ecb4a62a77649c6a78278c0542db4863522bc0235ed9d86e7"
+  },
+  {
+    "file": "docs/evidencias/TEST-01/ejecucion.txt",
+    "sha256": "6ff83686f73d1a177d50cf327f3364a2c5d0d90b9983b6faeb9e5f8fb2c30197"
+  },
+  {
+    "file": "docs/evidencias/TEST-02/LEEME.md",
+    "sha256": "281da55db0c15b4395d84cca57deb358de97fed16bf4d15eb641adcb922f2091"
+  },
+  {
+    "file": "docs/evidencias/TEST-02/ejecucion.txt",
+    "sha256": "90ddb7d3dca03c9573fc1bbee58f40882f94eda731b1c952def323558b4f9c81"
+  },
+  {
+    "file": "docs/evidencias/TEST-02/resultados.json",
+    "sha256": "ffe17ec03fb8689b4e9e947c38f4d7532f2add15a10859d42794f68794f75d41"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/LEEME.md",
+    "sha256": "d82ef540997aa24bc388e416a95687018ad6f8de44d3386cc9adcf82d03d5cf1"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/antes_resumen.json",
+    "sha256": "be6a27870596596b09a0d8bf78fdf6072a10ed8ad6fa8f14e4fda9bf0c1a913d"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/bandit_antes.json",
+    "sha256": "f0cf7c11b4a194b25e9737cde2566936f61d356582e2f535ecefd63163f2384b"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/bandit_despues.json",
+    "sha256": "a39847992386f2e533e147b05ef75b76ed61f87c9842d72aed4d58addce9cf0f"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/bandit_media_alta.json",
+    "sha256": "afccef95eee422c8c7e4ffa3e5f68de350760bd6392e4b4271342a69479c4678"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/lanzador_smoke.txt",
+    "sha256": "cc2374c80be5beaa07b39422aef42a27edc1c72aaa1ef92a121c1cc88d70fcc2"
+  },
+  {
+    "file": "docs/evidencias/TEST-03/regresiones_despues.txt",
+    "sha256": "aea49928ec74c8013ac0532fbc58f17702a47229082d5c1eef3742c4efa3c8dc"
+  },
+  {
+    "file": "docs/evidencias/casos_ejecutados.json",
+    "sha256": "72b4cfdf2144abded0075a5b22d4a55d9396d26c9c4af131eb68ec2b31cf057f"
+  },
+  {
+    "file": "eslint.config.js",
+    "sha256": "34384d448d8291cf76042379f749df914157a1f83959a7d0da238341709922ca"
+  },
+  {
+    "file": "frontend/Dockerfile",
+    "sha256": "27556e2da891af5b715d314b45e21510403366f47b07ea10271a6ca9186b82bb"
+  },
+  {
+    "file": "frontend/index.html",
+    "sha256": "a973624c031b5d2a72760187ebd32d1bc3836fd31f220c96b9cf05ae49ca4000"
+  },
+  {
+    "file": "frontend/src/app.js",
+    "sha256": "d5f0f8c7b80239564c259546ed1fd59798c724841b992074b9eda2f332fbd6c6"
+  },
+  {
+    "file": "frontend/src/assets/css/global.css",
+    "sha256": "f394adcc8f41edcfac41b5416cf30162a6db25846a94065205bb424d7f5de0e2"
+  },
+  {
+    "file": "frontend/src/assets/css/pages.css",
+    "sha256": "6f23fa3a969de47fb3641c8c5e1dbbce9c53fcc992a15a0ae05b1f4270236c24"
+  },
+  {
+    "file": "frontend/src/assets/css/variables.css",
+    "sha256": "c54cc01d87f857edf1f9f8a618f91057a08f48edf2faf51c6e75aabaa4e932ee"
+  },
+  {
+    "file": "frontend/src/main.js",
+    "sha256": "d94afa1ac656d4be28085c68d18057e1fef3cc7b7feb4a387de8f3557f4114f3"
+  },
+  {
+    "file": "frontend/src/models/models.js",
+    "sha256": "eb361467cfee82cd4b0aff93cad32cc1cf5d04e002e8090f6f83ce0967dd8e5b"
+  },
+  {
+    "file": "frontend/src/services/api.service.js",
+    "sha256": "0755e427e530a7e4005e2c8266b23c53bc13d6ee8dbde19223e9645be6d7db73"
+  },
+  {
+    "file": "frontend/src/services/audio.service.js",
+    "sha256": "c369c258de0926ebd1a61c0cfd70fec4492836d58026ad6de6d91f04c1096b89"
+  },
+  {
+    "file": "frontend/src/viewmodels/dashboard.viewmodel.js",
+    "sha256": "bc42055b3637b6ae5df0935c1da29d3dcc65aa8b0a0ffe08195f135d9de5cbcd"
+  },
+  {
+    "file": "frontend/src/viewmodels/login.viewmodel.js",
+    "sha256": "6807f1f17f075aee618e47f44bbb898491913445b4d571175feb0cffdcf68c4b"
+  },
+  {
+    "file": "frontend/src/views/alerts.view.js",
+    "sha256": "86ddb378d848da154d008458f5425e4ff57e171edcdf82dad63b71fdc96b20cf"
+  },
+  {
+    "file": "frontend/src/views/dashboard.view.js",
+    "sha256": "aff29b63e9f3d44124e52ae93187e35025d7e56c95a774b74aec7d44c1eda6db"
+  },
+  {
+    "file": "frontend/src/views/detections.view.js",
+    "sha256": "5fa02be88486ba1257d70240afd989ddf4413852153b225073371e132c6f7d3f"
+  },
+  {
+    "file": "frontend/src/views/login.view.js",
+    "sha256": "160cb2b7e84b99989a94e846b9340c611979a54edab0f4f0e7f9726b4f384043"
+  },
+  {
+    "file": "frontend/src/views/misc.views.js",
+    "sha256": "63684ed7b81d45e390114421213775d55cd215c37938b92eeb32158ab4be3335"
+  },
+  {
+    "file": "frontend/src/views/sensors.view.js",
+    "sha256": "481c8f682f5a7996a4beddfcf351eaff2fb190c0745f5c64e46299ecd5022f80"
+  },
+  {
+    "file": "frontend/src/views/users.view.js",
+    "sha256": "891cb5af9df46d9c71a4f28b866bbaed24cccde580c4e776a3b90b573e0654c4"
+  },
+  {
+    "file": "frontend/src/views/zones.view.js",
+    "sha256": "491b288941b0b9a7aed8623408241936efec454b63cda288cee002c6bbd81b93"
+  },
+  {
+    "file": "package.json",
+    "sha256": "ae44a1d6ccc3ad8f6532e70c29eb9666dbd6d64b0902ce6947a6596fb56562bf"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/-/.resources/Root.resources/examples/Successful Response.example.yaml",
+    "sha256": "d69d5034c760c45090447de0a5650d0886eb625921db976b7b4036a58d63f880"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/-/.resources/definition.yaml",
+    "sha256": "a5426d446caa629f00da612eb86037af72631a354112d5a867cefbfaa2d63d66"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/-/Root.request.yaml",
+    "sha256": "a4431c14f224ad01b55266644d6d3e4e473c37dcd9c54fd52e3572b05222624b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/.resources/definition.yaml",
+    "sha256": "d53a0985378f0c35fba6db6d036c54d9256f32957deda37d68bfe5b639e6545e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/ai/.resources/definition.yaml",
+    "sha256": "88f0ac30aefab6243518d138a84a6ba2cc0ec1de79e8ea07fbf4a31438b15df4"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/ai/analyze/.resources/Analizar imagen con Inteligencia Artificial (RF-021 - CODE-01).resources/examples/Successful Response.example.yaml",
+    "sha256": "183780df553ed10d4228b6ad18045ab294cf8aa04f0ba85c1c319f242371ee44"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/ai/analyze/.resources/Analizar imagen con Inteligencia Artificial (RF-021 - CODE-01).resources/examples/Validation Error.example.yaml",
+    "sha256": "b336fdd0279bdf242b30696aa10f6b17cc5e4d48e7e9d6ebc2cbe20033fa4d74"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/ai/analyze/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/ai/analyze/Analizar imagen con Inteligencia Artificial (RF-021 - CODE-01).request.yaml",
+    "sha256": "ce9cd182d4fbf6058a7fcf2c9d64f506cd29337754a958e871d269b1813c06ed"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/.resources/Generar alerta (RF-013).resources/examples/Successful Response.example.yaml",
+    "sha256": "635d5d8e539f03fd63df57eb0c7a09e96c68453d2a248328966e40141d649d4e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/.resources/Generar alerta (RF-013).resources/examples/Validation Error.example.yaml",
+    "sha256": "b8d22fef04f56bfa301b71ea9cf2f4e33f1fd2529ec6fedfe05aab912214b9d4"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/.resources/Listar alertas (RF-013).resources/examples/Successful Response.example.yaml",
+    "sha256": "dded0c473908e0ca861a97b75153f36b106cb5c655342ae18bce81d3fa5f1ff7"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/.resources/Listar alertas (RF-013).resources/examples/Validation Error.example.yaml",
+    "sha256": "fc364a7dfb365d6a539a153d7d22379f1b786e3c120f0cad3191e99e3f7764bd"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/.resources/definition.yaml",
+    "sha256": "d67b5165d644316a6a08bf0ab08b51ee32a4f05a7399db4988e98f48c7c07858"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/Generar alerta (RF-013).request.yaml",
+    "sha256": "4c555213c8671de626ef6f73fcc7f9dfd52d1aa2312c7c3905ad25eaa9c02f44"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/Listar alertas (RF-013).request.yaml",
+    "sha256": "3c6b4a8ebf8f39a4bec188f6ad2a66b1f2db671c4d8fa647cc2eea906a53a911"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/.resources/Consultar último dictamen táctico de IA.resources/examples/Successful Response.example.yaml",
+    "sha256": "ae9eff381c51ae9ab6bd04e5a99b9c5fbcb984f66b7d8ccc320daae261d7a14d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/.resources/Registrar dictamen táctico de IA (n8n - Agente).resources/examples/Successful Response.example.yaml",
+    "sha256": "fa298462ab98407d74401290e562c032f1e89be2eb22fec548c24850c7b5f4dd"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/.resources/Registrar dictamen táctico de IA (n8n - Agente).resources/examples/Validation Error.example.yaml",
+    "sha256": "6eb8ae9e880d8bbedc9f4827d8dac87ea137c5fb837954b92c92cc637aa6bc67"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/Consultar último dictamen táctico de IA.request.yaml",
+    "sha256": "5271c0e4f3e00c25c1ee92f6bde901eef25059a64f4196938fd4fcc0567cdf12"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/ai-verdict/Registrar dictamen táctico de IA (n8n - Agente).request.yaml",
+    "sha256": "05a78836d9f62a2d2ec9a5a2aecdc9de72efade814e8892170fae9db375ec1a2"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/trigger-incident/.resources/Disparar análisis de incidente táctico hacia n8n - Agente IA.resources/examples/Successful Response.example.yaml",
+    "sha256": "133efc65538dd1dd7559fbb9b546e55e66130f89bc88a38633fa9dd4882add9f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/trigger-incident/.resources/Disparar análisis de incidente táctico hacia n8n - Agente IA.resources/examples/Validation Error.example.yaml",
+    "sha256": "3d760a45d9ce0e80e398a7aa6922c2eb65b51ff4498a5a94f10b5156199cd23c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/trigger-incident/.resources/definition.yaml",
+    "sha256": "d67b5165d644316a6a08bf0ab08b51ee32a4f05a7399db4988e98f48c7c07858"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/trigger-incident/Disparar análisis de incidente táctico hacia n8n - Agente IA.request.yaml",
+    "sha256": "58dc726c163c549276a341e8a7d4be6aa88b6405bfa22a61b6eeb7a590c4ef96"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/assign/.resources/Asignar alerta a operador (RF-015).resources/examples/Successful Response.example.yaml",
+    "sha256": "b8788025f01b309b5d8c36345954869b166db61b8631f5ec76f3ec91f5f8e5b3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/assign/.resources/Asignar alerta a operador (RF-015).resources/examples/Validation Error.example.yaml",
+    "sha256": "9c6645ffe0e54b905f394aa16b9dd224e5215ae69ce847e7f6f3e195cd993310"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/assign/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/assign/Asignar alerta a operador (RF-015).request.yaml",
+    "sha256": "e7dbc65e44f73de5817679149aea931ead8b45606a1c4e94cb78a1ce43630b51"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/resolve/.resources/Resolver alerta con justificación (RF-015).resources/examples/Successful Response.example.yaml",
+    "sha256": "12e935cd528eea0a79fc48e6b470ec9e7041df2b7d9e986754b9d8c9979fd42d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/resolve/.resources/Resolver alerta con justificación (RF-015).resources/examples/Validation Error.example.yaml",
+    "sha256": "05c4ec7e8214f6b913b1bf6ffee492885ead496b52192314b36c8d7e4681dd51"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/resolve/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/alerts/{alert_id}/resolve/Resolver alerta con justificación (RF-015).request.yaml",
+    "sha256": "ae5abe92f224ebcc6bf52c58a52866ffd2f232a2fd6ac1d91819c352032a3e77"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/.resources/Listar registros de auditoría (RF-029).resources/examples/Successful Response.example.yaml",
+    "sha256": "38eef58ef8cdd1d1a996642495ab5d255a18adafc38e9b6090d9b854d9b7b67c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/.resources/Listar registros de auditoría (RF-029).resources/examples/Validation Error.example.yaml",
+    "sha256": "a56a6385fb3cc7c1e56e5af4b605686f4292920adacb60301663e52f3fd1a99d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/.resources/definition.yaml",
+    "sha256": "645079f8a35b79b1e6f0157d0f5d9060354c018c7b519fd52bdaf83d26462cc3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/Listar registros de auditoría (RF-029).request.yaml",
+    "sha256": "7c11e1daa3eac8d415558eaa48f6a46afe8081ebae6617eb6f5f3011d3c884f0"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/verify/.resources/Verificar integridad criptográfica de la cadena SHA-256 (RF-029.resources/examples/Successful Response.example.yaml",
+    "sha256": "b5b76983ee29f1206b1cce4f4183b76ecbfd7deea396e9c119fe13871c53ca4d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/verify/.resources/Verificar integridad criptográfica de la cadena SHA-256 (RF-029.resources/examples/Validation Error.example.yaml",
+    "sha256": "9e016da64ad7058fe79f1c62bdca9b450d0901f95e811b1fa0d81cb3b0c1a953"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/verify/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/audit/verify/Verificar integridad criptográfica de la cadena SHA-256 (RF-029.request.yaml",
+    "sha256": "44eb48a44103d2be57ea2b027e98baff50c7eb2b6c2b4dc3542289eaeea21a66"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/change-password/.resources/RF-002- Cambiar Contraseña.resources/examples/Successful Response.example.yaml",
+    "sha256": "0acdc231c404a5cf6b8ef7a16d377d9b81b2f8b2a360d1746ffcc28565af3c03"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/change-password/.resources/RF-002- Cambiar Contraseña.resources/examples/Validation Error.example.yaml",
+    "sha256": "97fa522bad50c40024e29f5347a64939b0a6d276da7ef76d1e38ae1dd01c2a64"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/change-password/.resources/definition.yaml",
+    "sha256": "d67b5165d644316a6a08bf0ab08b51ee32a4f05a7399db4988e98f48c7c07858"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/change-password/RF-002- Cambiar Contraseña.request.yaml",
+    "sha256": "34d242e0321f832c855b04eb37099a2ddbface7907c9bd5e32d092f4fbfbb8f5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/logout/.resources/Cerrar Sesión.resources/examples/Successful Response.example.yaml",
+    "sha256": "1d340052efb8e96b4755e1d006d1cceab3186d7eee24368869259337a7714b4e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/logout/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/logout/Cerrar Sesión.request.yaml",
+    "sha256": "a65cce78094046ebee2ccc9c16259040b58259339ff432000becf4e2c5e48e19"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/me/.resources/Perfil del usuario actual.resources/examples/Successful Response.example.yaml",
+    "sha256": "871003eefca6ef7148ddb3dacd791e7d6c045dae011b5e3fd33591a7c5393c9e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/me/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/me/Perfil del usuario actual.request.yaml",
+    "sha256": "2b855fc7f49aee4acf5708bc104fafded62788fd46a5b18dcfa05e25885b44e6"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/refresh/.resources/Renovar Access Token.resources/examples/Successful Response.example.yaml",
+    "sha256": "9b805bcad53bbf3ec18600938a483e061ee6877c087948aae05f1fd80ceca91e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/refresh/.resources/Renovar Access Token.resources/examples/Validation Error.example.yaml",
+    "sha256": "e43b94f7a777e6222188660e71c734cb00adf3bf14ef3e88dba64a2575421065"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/refresh/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/refresh/Renovar Access Token.request.yaml",
+    "sha256": "3b7fb6f15017bc2ae9ad8b6a7212992407e2ade21ee3eae2d6bf687607b7a50e"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/request-reset/.resources/RF-003- Solicitar Recuperación de Contraseña.resources/examples/Successful Response.example.yaml",
+    "sha256": "2ff99350153f63da70e75fe7feab13b2a47a63aedab9bd77f86964f805dabfde"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/request-reset/.resources/RF-003- Solicitar Recuperación de Contraseña.resources/examples/Validation Error.example.yaml",
+    "sha256": "81b7759566b54864f21547329960e32fbc5530fbac90d43a300e27fb9e823cf5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/request-reset/.resources/definition.yaml",
+    "sha256": "4ee63d65a60cf6e63032ecddbfa11e923d3d8ec17c848ca9493194a00d7de430"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/request-reset/RF-003- Solicitar Recuperación de Contraseña.request.yaml",
+    "sha256": "07a18f4464d379fd3a8fcb6cd268b8b2a5bc95822b629f8731be71ec2b03bc28"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/reset-password/.resources/RF-003- Resetear Contraseña.resources/examples/Successful Response.example.yaml",
+    "sha256": "8e46bef5420f4a7a99298f47c8e656b03e91bda0b26139a4e8e79e7c4f5797f9"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/reset-password/.resources/RF-003- Resetear Contraseña.resources/examples/Validation Error.example.yaml",
+    "sha256": "6049d78ba985042e7129cc7faeda8218aec66ee2e1c3be73042f252bd0814354"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/reset-password/.resources/definition.yaml",
+    "sha256": "f19e358551a8b1f3e9db2cdaa151be81c2d86da442f4c4e8f66c2e470141628b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/reset-password/RF-003- Resetear Contraseña.request.yaml",
+    "sha256": "417c272a4b68b8c50ab705b2d7c9da9204eea0377eab4fd12484788bfe9d7444"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/token/.resources/RF-001- Iniciar Sesión.resources/examples/Successful Response.example.yaml",
+    "sha256": "a85a118a5b0bc73f9e191249d4fc36d3ff3c5aa42f95ab265a9362aa36f94e57"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/token/.resources/RF-001- Iniciar Sesión.resources/examples/Validation Error.example.yaml",
+    "sha256": "eee9b2867b9a43f88d61db94c48e8e28b253598185c18cb90287fc60648a0494"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/token/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/auth/token/RF-001- Iniciar Sesión.request.yaml",
+    "sha256": "5bb440c99227091342e928f0670dc6af05fdbbbe6974acc3ccbda89e37d99b74"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/.resources/Actualizar parámetros operativos (RF-028).resources/examples/Successful Response.example.yaml",
+    "sha256": "3b13b591ebd3eb30008b85eaac33d71fd08f21ff39a2189c7cc7a0c21cfb7084"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/.resources/Actualizar parámetros operativos (RF-028).resources/examples/Validation Error.example.yaml",
+    "sha256": "bb3fc6d252842bd8b45b96a10b8e40f2a97b1e63884e11993f635281bef6d51d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/.resources/Obtener configuración del sistema (RF-028).resources/examples/Successful Response.example.yaml",
+    "sha256": "6f8bc9395cb01d8123da7c78f1dc45c06915214a0c84f90386d23a4d119e20b7"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/.resources/definition.yaml",
+    "sha256": "119d7d6dece187ff58556475676e0d93c6bf6d361f6c077cb3ebefbd5b73c53d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/Actualizar parámetros operativos (RF-028).request.yaml",
+    "sha256": "f8fdc5eec2457d79cd44fdffb02579b31d310c791ec02aa98302d4dc6ed45c19"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/config/Obtener configuración del sistema (RF-028).request.yaml",
+    "sha256": "76eb94ecbdc55d1101561b298dd456470b1911db3b8d4bdfdbf49c52943e1b34"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/.resources/Listar detecciones con filtros (RF-009).resources/examples/Successful Response.example.yaml",
+    "sha256": "99798b15484f4cd816ee47156266e22464a114def847d0f147b910f23813e657"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/.resources/Listar detecciones con filtros (RF-009).resources/examples/Validation Error.example.yaml",
+    "sha256": "70c0111206ace778ac85d561d186d5ff93bbd86c64d415028f799ffdcef823f6"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/.resources/Registrar nueva detección (RF-005).resources/examples/Successful Response.example.yaml",
+    "sha256": "5277ab7114db72dcbc4b301a4f45aa6bf01c3a4b4f8c5be0ed194083d6eac238"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/.resources/Registrar nueva detección (RF-005).resources/examples/Validation Error.example.yaml",
+    "sha256": "93a050ae025a2be4fef173aac91aa55e96f5151c91355f49268c8c9279686bae"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/Listar detecciones con filtros (RF-009).request.yaml",
+    "sha256": "bbddc4b191f5f09fdf3df3e2bde5f5a617ae6ebb3ab1862afaa149fca53c6a3c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/Registrar nueva detección (RF-005).request.yaml",
+    "sha256": "cb8f821771beb33e6b07ea4f54b5e6fe9a62df3ec9f36e51ceccd19341d3d765"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/active/.resources/Obtener detecciones activas en tiempo real (RF-005).resources/examples/Successful Response.example.yaml",
+    "sha256": "0c6c41fcadb93be996bf3d29e9e9ac5b7c5806282f1c96c5d2de22d5411cdfe5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/active/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/active/Obtener detecciones activas en tiempo real (RF-005).request.yaml",
+    "sha256": "1c3bbd5b521557fdf2b65b78fac47f050aaf96f27c5a1707bce85fdf871bc798"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/.resources/Detalle de detección.resources/examples/Successful Response.example.yaml",
+    "sha256": "414546e0a47cbcff10282cda199c5445a04c833a11f089975f6ceff25f0a3c0b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/.resources/Detalle de detección.resources/examples/Validation Error.example.yaml",
+    "sha256": "8d3824d5fec7ce6dd1a505f938b9a7c347707a24a549e904258182e3a1769a13"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/Detalle de detección.request.yaml",
+    "sha256": "a9ef7ccab5a73bd257928ef76e7df25df02d1af9065df5e875b4ecc40be89162"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/status/.resources/Actualizar estado de detección.resources/examples/Successful Response.example.yaml",
+    "sha256": "091d035c3ece56cdb0835e1807c0e7d3713d51cd04fab356044b12f8250e662c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/status/.resources/Actualizar estado de detección.resources/examples/Validation Error.example.yaml",
+    "sha256": "4037c972046ee35d903f5fbbef7742d50269a78318de20fd6b93496ecebe0a64"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/status/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/status/Actualizar estado de detección.request.yaml",
+    "sha256": "3e0bcc9ee40b0f64b5dcbc1c96aea785e1dbf9fbeff11b1f2bcd3f4fde7d2cfc"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/trajectory/.resources/Consultar trayectoria histórica (RF-011).resources/examples/Successful Response.example.yaml",
+    "sha256": "584f42ffc1ad6c147aab2e66f291fbea7795f60e5cc11f80dba5ece12c258cc3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/trajectory/.resources/Consultar trayectoria histórica (RF-011).resources/examples/Validation Error.example.yaml",
+    "sha256": "61a14876b272c93bdd7bbb439bed1c5bed0c84a8a25de5848214ebbdf9ff79fc"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/trajectory/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/detections/{detection_id}/trajectory/Consultar trayectoria histórica (RF-011).request.yaml",
+    "sha256": "bd6d199799c3b077743a53b95eb00b5c264328b1d01a266026e8950c555861de"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/.resources/Listar informes generados (RF-024).resources/examples/Successful Response.example.yaml",
+    "sha256": "24d700e1c2682af3e3f82fe0b7e6a0d72739402c3b997d920fa0162736b0fdb6"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/.resources/Listar informes generados (RF-024).resources/examples/Validation Error.example.yaml",
+    "sha256": "17891fafed5aca8b22c5a93fdc0f9082a4042184cea079b721131e81170a13ba"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/.resources/Solicitar generación de reporte (RF-024).resources/examples/Successful Response.example.yaml",
+    "sha256": "bbc033045b189d35b9459b65c0c695dbb009852a7af77a801fb575648c785ff2"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/.resources/Solicitar generación de reporte (RF-024).resources/examples/Validation Error.example.yaml",
+    "sha256": "a54ccee2836d8edc9f6005d7257449335ac099842e718fc2bcd1cda226ed6075"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/.resources/definition.yaml",
+    "sha256": "f19e358551a8b1f3e9db2cdaa151be81c2d86da442f4c4e8f66c2e470141628b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/Listar informes generados (RF-024).request.yaml",
+    "sha256": "e2a62c0589fc5402e678dcad75d1a818682822213caea38855c7cc003cd876a6"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/Solicitar generación de reporte (RF-024).request.yaml",
+    "sha256": "690c0e8b56b1b279e456d31f719c181084a188b80fc36eb826d8b52b88e975e5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/.resources/Exportar reporte genérico (POST).resources/examples/Successful Response.example.yaml",
+    "sha256": "79f21a9f8bc58bb52e940f306f0a3720d00801a1786902028976ac84bbd8b9d0"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/.resources/Exportar reporte genérico (POST).resources/examples/Validation Error.example.yaml",
+    "sha256": "bcf1db4d98fe00a407f5105c69fb770fe7363b7efcd639b4313d9c814716b929"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/Exportar reporte genérico (POST).request.yaml",
+    "sha256": "3dc1e7279a1c89c0352c5188252caad2262a016f0bcf66a605cc2796432c575b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/excel/.resources/Descargar telemetría histórica en Excel (.xlsx) (HU-02 - Escen.resources/examples/Successful Response.example.yaml",
+    "sha256": "dfcd329dd3457efbe51f90360c42b3ce6cc18c8205245cf02b77c67ebd732751"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/excel/.resources/Descargar telemetría histórica en Excel (.xlsx) (HU-02 - Escen.resources/examples/Validation Error.example.yaml",
+    "sha256": "3e377c16c5aac05f462fad0b0d3a88cd1f27a0210d2bdb048ad0e039dc57ff38"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/excel/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/excel/Descargar telemetría histórica en Excel (.xlsx) (HU-02 - Escen.request.yaml",
+    "sha256": "9d384c61df9d2997225fa8668e43ef900edd838e284dff48c12763646abd124a"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/pdf/.resources/Descargar reporte táctico en PDF con SHA-256 (HU-02 - Escenario.resources/examples/Successful Response.example.yaml",
+    "sha256": "67cbfad2d62f7c6501a4f6adfd682f84132ab459efadbc28b4f2a905206e0e1a"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/pdf/.resources/Descargar reporte táctico en PDF con SHA-256 (HU-02 - Escenario.resources/examples/Validation Error.example.yaml",
+    "sha256": "bcd69c70faa3ec9e55f083a6dc85ce3b95b8eb845b30b9a6c9709d0e0ae64cd2"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/pdf/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/export/pdf/Descargar reporte táctico en PDF con SHA-256 (HU-02 - Escenario.request.yaml",
+    "sha256": "b8aee40cd494c258c892f454f0cd153ebea177250c3d210609a4e108a3daf335"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/.resources/Detalle de informe.resources/examples/Successful Response.example.yaml",
+    "sha256": "22391bf85034cf833efc2feebf35043307a1968aea78388cd8e408f2610f4d02"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/.resources/Detalle de informe.resources/examples/Validation Error.example.yaml",
+    "sha256": "091fc276de562e4ae34c5d8d10a01299071e02fa63759ab73cf8611608bd9c82"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/Detalle de informe.request.yaml",
+    "sha256": "07198d47b700c44e0a32d1841752b2f48ce4d3b0c2ddbd6a1dd9b06664f62632"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/download/.resources/Descargar archivo físico por ID.resources/examples/Successful Response.example.yaml",
+    "sha256": "b81ff089069ec821115606e3e0aa42de246b114a7422ff75f48912a493ae4020"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/download/.resources/Descargar archivo físico por ID.resources/examples/Validation Error.example.yaml",
+    "sha256": "6afe68b19ee8d131910e8fe4cecbdc11c7be101cda2cb801919964512ef2ec33"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/download/.resources/definition.yaml",
+    "sha256": "d45e3ad98ce4c36ebd0c62196c812d92e99ed53a81d49d4b386f9957bfc69684"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/reports/{report_id}/download/Descargar archivo físico por ID.request.yaml",
+    "sha256": "184b7325b6e093918720f735f6b214080460b65c29c577d485d5bd3f05788d79"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/.resources/Listar todos los sensores (RF-020).resources/examples/Successful Response.example.yaml",
+    "sha256": "563afc228e6c6e278f6ba28091e63b7694ff5245e0fdb8477d0cd7fa4fcaa13f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/.resources/Registrar nuevo sensor (RF-021).resources/examples/Successful Response.example.yaml",
+    "sha256": "151bd54da55384cbf4c72712807324b04b0713f29d17dffa24f1da0742a3c77a"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/.resources/Registrar nuevo sensor (RF-021).resources/examples/Validation Error.example.yaml",
+    "sha256": "160c18e0cc85adadaaae06bec94865fb2dbe58dfc02a724a3bcc275c16f80b4b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/Listar todos los sensores (RF-020).request.yaml",
+    "sha256": "a566cb95a56d352864d833dc12e8c6249e70b5334c51307653ab00486c516f1c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/Registrar nuevo sensor (RF-021).request.yaml",
+    "sha256": "4f51bec1339c88fe90c991cf471d3a4e15c5c0329b52d35256908e85a29f95b5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/telemetry/.resources/Ingesta de telemetría de sensores (RF-020).resources/examples/Successful Response.example.yaml",
+    "sha256": "0476d8d0acb2ed30bd695b819483cf95389455644df7bc1c47ae0abad2de05d7"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/telemetry/.resources/Ingesta de telemetría de sensores (RF-020).resources/examples/Validation Error.example.yaml",
+    "sha256": "bf45670027d596d901b84e31e3cafd55f7e0e7b0dfdcf62b1cde562ef6213d86"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/telemetry/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/telemetry/Ingesta de telemetría de sensores (RF-020).request.yaml",
+    "sha256": "79d21a4897c912d3af5a4c889574087c094c47dbbd2cd60feb1160839cff09e3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Actualizar sensor.resources/examples/Successful Response.example.yaml",
+    "sha256": "c057e2e54d65eda8fb7cc9f75628312b6a7bee4750586da0de07a9e5633484f7"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Actualizar sensor.resources/examples/Validation Error.example.yaml",
+    "sha256": "a31e3616eeec2419624a504f9c01417331adc479092c99338b9bf4083ceb42bc"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Detalle de sensor.resources/examples/Successful Response.example.yaml",
+    "sha256": "5542ed32e22b001c08a3753067587c0a002ba5ad3f5c1ba7de1aaef0ea744039"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Detalle de sensor.resources/examples/Validation Error.example.yaml",
+    "sha256": "5d62b05a527d3bd2c328e510050bc45a00ee9adcbff1032151ac2e4ac4a15680"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Eliminar sensor.resources/examples/Successful Response.example.yaml",
+    "sha256": "2b916370a05c0c7b88bb4de946b443f5245174876fced48d85bc180aef23f001"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/Eliminar sensor.resources/examples/Validation Error.example.yaml",
+    "sha256": "d60e45768443af0f5ee6eca353ea250f3bc557567865fac9fa68ee1d7c821116"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/Actualizar sensor.request.yaml",
+    "sha256": "9e0325d151f8510f4387a8bdfc697ad72d899c2cf9ed8aad59bf3f91d7a27b23"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/Detalle de sensor.request.yaml",
+    "sha256": "97a893f9b420fc676795068936e46987278fb8cd51ba48ed37b42dc59c48c03c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/sensors/{sensor_id}/Eliminar sensor.request.yaml",
+    "sha256": "1e8eaac0081e28ef86dfeb4006aa2936636ec7e40b94a9594455f7f37440fc86"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/.resources/Crear usuario (RBAC- users-write).resources/examples/Successful Response.example.yaml",
+    "sha256": "067fc99c4651213a9c6a827b0644b93147f7937f3bdbebf6bf6f4cfa2b111616"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/.resources/Crear usuario (RBAC- users-write).resources/examples/Validation Error.example.yaml",
+    "sha256": "12f74310b83af55c86ddde16b1c505b02a52a7957d170f98d4e178deb18cdba9"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/.resources/Listar usuarios (RBAC- users-read).resources/examples/Successful Response.example.yaml",
+    "sha256": "b8461eba3c0cbb1758fb0453f72ebe32d8d8c36a52498ac936c72c75f86db18f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/.resources/Listar usuarios (RBAC- users-read).resources/examples/Validation Error.example.yaml",
+    "sha256": "58b7a91cd40007dfc7f92d2b90ccfe98d9da85234a3130270628ba09cbf00ae5"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/Crear usuario (RBAC- users-write).request.yaml",
+    "sha256": "0737af6e28002a9f06a6d83003b71a0d4afbf03639b271d68bf576226a028fa4"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/Listar usuarios (RBAC- users-read).request.yaml",
+    "sha256": "28b46f6407a8d8405ba000436c0ae502ce557b0b07da6ea5d80ee32d8e139e5d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/.resources/Obtener detalle de usuario.resources/examples/Successful Response.example.yaml",
+    "sha256": "70b5473f789fa3a1348dc8b36fa88bf3df817057693c8cf93171e50818d95c41"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/.resources/Obtener detalle de usuario.resources/examples/Validation Error.example.yaml",
+    "sha256": "af40d48477022b301399e12ec736e075205a4c9135a1dd20fceac605b01624a1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/Obtener detalle de usuario.request.yaml",
+    "sha256": "e33c68b43d43843dfa4a7a0f1b2db364c699a9ff78f905dcda54bb9eeb4143cb"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/status/.resources/Activar-Desactivar usuario.resources/examples/Successful Response.example.yaml",
+    "sha256": "14bc9de0f8e0ca165ab1535c0033f877d5273bcc9d94cccaa58e27de47a7f0d3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/status/.resources/Activar-Desactivar usuario.resources/examples/Validation Error.example.yaml",
+    "sha256": "50d0c96cdafb2ec88755c92480d42b4f30e0d9c34d3e6e3eef860c363290b895"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/status/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/users/{user_id}/status/Activar-Desactivar usuario.request.yaml",
+    "sha256": "29f89846abb29bcc55e97210321b252d0f610f0ba3f6fbf2f74eda2a491f463f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/.resources/Crear zona restringida (RF-017).resources/examples/Successful Response.example.yaml",
+    "sha256": "be71f3b00f8cc0a67497238c9cf936d43a01e302a5b955f19a100758da3f0de0"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/.resources/Crear zona restringida (RF-017).resources/examples/Validation Error.example.yaml",
+    "sha256": "ef4df7b6d3587ddb073a02bea41fcc45107a62030fa532f71fd6d110b2d84037"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/.resources/Listar zonas restringidas (RF-017).resources/examples/Successful Response.example.yaml",
+    "sha256": "67cabf9b0622893c4ec7c679ec4f89a89be3e94e2465500ad723c19bec82fe7f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/.resources/definition.yaml",
+    "sha256": "4ee63d65a60cf6e63032ecddbfa11e923d3d8ec17c848ca9493194a00d7de430"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/Crear zona restringida (RF-017).request.yaml",
+    "sha256": "55c04e8eec0b7c27e71f05b3956063bf78f7ac52af7cb2cc774203568c2df869"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/Listar zonas restringidas (RF-017).request.yaml",
+    "sha256": "6d562c556d8df354c997cf956f5b43b5c3bdbaaff50d207f18bd11c2e36ad3b6"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/check-breach/.resources/Verificación geoespacial de invasión de zona (RF-012, RF-017).resources/examples/Successful Response.example.yaml",
+    "sha256": "6492fce7b3adbba048ed4f460a555c2646304135b89b63fd959450aae9f9173c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/check-breach/.resources/Verificación geoespacial de invasión de zona (RF-012, RF-017).resources/examples/Validation Error.example.yaml",
+    "sha256": "c00f9f6d02011ed5f9533bd539482f05d608df7d00317cc05fa939c2778bad66"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/check-breach/.resources/definition.yaml",
+    "sha256": "386abca9b6cebce84f267f4645b3876c86ee4bc894f57d9f02af4908c249f10d"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/check-breach/Verificación geoespacial de invasión de zona (RF-012, RF-017).request.yaml",
+    "sha256": "9d1d41ff6aabad362c8dba74f88604a8850ddd3642bad145485841a11382a404"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Actualizar zona restringida.resources/examples/Successful Response.example.yaml",
+    "sha256": "e2985bf0bc1fae74935a9889691d1f99ff0dea38d828342041de199bff1dcff2"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Actualizar zona restringida.resources/examples/Validation Error.example.yaml",
+    "sha256": "7efdb1285693570f49eb552f4011ee1e5f54aad0f32a3f9c0b26c43ff517d93c"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Detalle de zona restringida.resources/examples/Successful Response.example.yaml",
+    "sha256": "c39f6d8932dfc8e704f459a3a12742a60a7ba921fa5ef666dca621e2c8053119"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Detalle de zona restringida.resources/examples/Validation Error.example.yaml",
+    "sha256": "37e52be2543569391ccbce951038a066c56cb956f818d041016accccfa420f5f"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Eliminar zona.resources/examples/Successful Response.example.yaml",
+    "sha256": "ea9350fa7e90b0c27d9da448c9792bbef78b12d940ccc46bf59cc726a8018742"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/Eliminar zona.resources/examples/Validation Error.example.yaml",
+    "sha256": "ac8f998a3e638de7d80815f49acc4d53b591d7785ef7791d2907880b04229e63"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/.resources/definition.yaml",
+    "sha256": "3cbbbf648b9367f8044cc26eeae4c3635b54f334b101f306c4ae246c3a9c24c1"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/Actualizar zona restringida.request.yaml",
+    "sha256": "6b29c795708677e0ace13ce1cd0a781d57681ea9b8428ced72ac85754e62484b"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/Detalle de zona restringida.request.yaml",
+    "sha256": "c5a1d9c2488b9e325ee604ab81f1a74d37ed0fa9946d46fa7f55605c452e7cf3"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/api/v1/zones/{zone_id}/Eliminar zona.request.yaml",
+    "sha256": "e0b0144150ab71d99ab4320072bbacfd1ce7c5e1e7a91402fcd9a7f31037cb46"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/health/.resources/Health check.resources/examples/Successful Response.example.yaml",
+    "sha256": "2cb84de5ace29c418faef58dbb323b255c46cadec69e725e94dbb4b28e0e9570"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/health/.resources/definition.yaml",
+    "sha256": "b817b4a830aece2560a251b2cf070b967f1f962c2cc7cf680046259817ef9574"
+  },
+  {
+    "file": "postman/collections/AeroGuard API/health/Health check.request.yaml",
+    "sha256": "dc28bb5cce1598c059a8a0156d9791f9cc2ae39e2df1d7794c29b3b6aa135c40"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/.resources/definition.yaml",
+    "sha256": "8114753f8b8991c509bdc8f14a6e985393bd4d05fb7172369e53f9b7264112b2"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/01 — Salud.request.yaml",
+    "sha256": "53012c6041d773c2a51f74fd76250b3b6fb7323551fc42deddf8e77fc5703c81"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/02 — Login JWT.request.yaml",
+    "sha256": "30af683e30d83a769a6ed1a535bfe348c6c458bd8769d6fb40a15550085b672d"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/03 — Analizar imagen.request.yaml",
+    "sha256": "82fb79c2173f290c2927a672a45641fd431cff65f97de76e32faab61e81560a9"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/04 — Exportar PDF.request.yaml",
+    "sha256": "fe10a6eb0e25c5d819bd857a7a8b0f9fbf7c2f42f3ca7f21bf740b0fe9d7de36"
+  },
+  {
+    "file": "postman/collections/AeroGuard — Exposición Fase TEST Copy/05 — Exportar Excel.request.yaml",
+    "sha256": "a2194bd94972fb5aa2d9460cc3e67819c9c0ec0bb3fb533e92f1c4b0eea357a2"
+  },
+  {
+    "file": "postman/specs/AeroGuard API/AeroGuard_OpenAPI.json",
+    "sha256": "79e771e3de2ef0e5aa5feaac2e78e6f194ddcbbbfe75fc2c196a8ed4bae8a2f7"
+  },
+  {
+    "file": "pyproject.toml",
+    "sha256": "13a0671730e9a9b6d9b4877dc8609a9172da6afd04ec2b7e88119e23287e7c45"
+  },
+  {
+    "file": "pyrightconfig.json",
+    "sha256": "912876f10398a80370863fe0e37e81e3ac1b710d4f8b9477eeb7c2797b53bcea"
+  },
+  {
+    "file": "run_dev_server.py",
+    "sha256": "2ad63e6134d2f1a71ac81984f5c929804c683202c852d477d4484d83923128a5"
+  },
+  {
+    "file": "scripts/check_js_syntax.js",
+    "sha256": "8181c30ce66b4ea90f465d6dfdf83308adab782bfc5e11dd7dba5fab8d08cc50"
+  },
+  {
+    "file": "scripts/check_python_syntax.py",
+    "sha256": "3f5a4177fdc0eed4c856864f33823b0a2aacb98952c0a5ff888fc611ad71955f"
+  },
+  {
+    "file": "scripts/expo_local.py",
+    "sha256": "6a851756496f1b2dba4eb8babd67142fc38efd2679827d33798efb7317774d58"
+  },
+  {
+    "file": "scripts/release_checks.py",
+    "sha256": "d936b010422f6f84ead22930e2c1bb018df7c770c9c31dbfcb2d93ccaab95c6d"
+  },
+  {
+    "file": "sensor_simulator/Dockerfile",
+    "sha256": "b187f16983c97d40702e72360a3050d23386611e3912be9812fd563c907f7241"
+  },
+  {
+    "file": "sensor_simulator/requirements.txt",
+    "sha256": "b23f2f57331188e0544f3b0072f00bd84d8ce3d9cb15e19837c8767dd1832f2c"
+  },
+  {
+    "file": "sensor_simulator/simulator.py",
+    "sha256": "1e53c62a5500290ce0b1a39e9a873d2f66eabf0d845680710463c5c1ecb91579"
+  },
+  {
+    "file": "tests/demo_selenium_lunes.py",
+    "sha256": "bb5a6f208aa9721fe0d1b88c20a98ab76adcc7d01b693173a2bfc8aaca294325"
+  }
+]

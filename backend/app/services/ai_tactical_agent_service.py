@@ -37,7 +37,7 @@ class AITacticalAgentService:
 
         drone_id = drone_data.get("drone_id", "UAV-HK-402")
         dispatched_to_n8n = False
-        execution_source = "embedded_tactical_ai_engine"
+        execution_source = "embedded_rules"
         ai_verdict = ""
         threat_level = "CRITICAL"
 
@@ -62,7 +62,7 @@ class AITacticalAgentService:
         # 2. Fallback: Generación determinística con el Agente IA Embebido
         if not ai_verdict:
             ai_verdict, threat_level = self._generate_embedded_tactical_verdict(drone_data, zone_data)
-            execution_source = "embedded_tactical_ai_engine"
+            execution_source = "embedded_rules"
 
         result = {
             "incident_id": incident_id,
@@ -88,7 +88,7 @@ class AITacticalAgentService:
         Genera el dictamen táctico con tono militar profesional según las reglas de la sección 4.2:
         1. Vector de amenaza (altitud vs techo de zona, velocidad).
         2. Hipótesis de comportamiento (automatizado vs errático).
-        3. Recomendación operativa inmediata (monitoreo, patrulla, inhibición RF).
+        3. Recomendación defensiva: verificación visual y aviso a seguridad.
         (Menos de 55 palabras, máximo 3 oraciones).
         """
         drone_id = drone.get("drone_id", "UAV-402")
@@ -108,7 +108,7 @@ class AITacticalAgentService:
         alt_diff = round(alt - max_allowed_alt)
 
         if is_ceiling_breached:
-            vector_text = f"{drone_id} mantiene rumbo {heading_dir} a {int(alt)}m superando el techo legal de {int(max_allowed_alt)}m (+{alt_diff}m) sobre {zone_name}."
+            vector_text = f"{drone_id}: {int(alt)}m, rumbo {heading_dir}; supera el umbral configurado de {int(max_allowed_alt)}m en {zone_name}."
             threat_level = "CRITICAL"
         else:
             vector_text = f"{drone_id} detectado a {int(alt)}m de altitud con rumbo {heading_dir} a {speed_kmh:.1f} km/h en {zone_name}."
@@ -116,15 +116,15 @@ class AITacticalAgentService:
 
         # Hipótesis de comportamiento
         if speed_ms > 15.0:
-            behavior_text = f"Vector cinemático constante a {speed_kmh:.0f} km/h sugiere vuelo automatizado con perfil de penetración premeditada."
+            behavior_text = f"Velocidad de {speed_kmh:.0f} km/h; intención y autorización no verificadas."
         elif speed_ms < 5.0:
-            behavior_text = "Comportamiento estacionario con oscilación mínima, compatible con vigilancia o toma de coordenadas."
+            behavior_text = "Velocidad baja; intención y autorización no verificadas."
         else:
-            behavior_text = "Cinemática de crucero regular con telemetría C2 activa."
+            behavior_text = "Intención y autorización no verificadas con esta telemetría."
 
         # Recomendación operativa inmediata
         if is_ceiling_breached:
-            action_text = "Acción: Declarar alerta perimetral táctica e iniciar protocolo de inhibición RF en 2.4/5.8 GHz."
+            action_text = "Acción: Verificación visual y aviso al responsable de seguridad."
         else:
             action_text = "Acción: Alerta perimetral a patrulla de seguridad física y seguimiento visual continuo."
 

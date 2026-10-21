@@ -273,7 +273,9 @@ def test_sensor_telemetry_triggers_geospatial_breach(client: TestClient):
         "heading": 180.0
     }
 
-    response = client.post("/api/v1/sensors/telemetry", json=payload)
+    token = create_access_token({"sub": "operator_test", "role": "operator"})
+    response = client.post("/api/v1/sensors/telemetry", json=payload,
+                           headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 202
     data = response.json()
     assert data["status"] == "processed"

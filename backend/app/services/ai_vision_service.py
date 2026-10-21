@@ -100,7 +100,7 @@ class AIVisionService:
 
                 confidence = float(result.confidence)
                 is_drone = bool(result.is_drone)
-                engine_name = "YOLOv8n-OpenCV-Real" if "YOLO" in result.model_used else "OpenCV-Heuristic-Real"
+                engine_name = result.model_used
 
                 return self._build_response(
                     sensor_id=sensor_id,
@@ -169,7 +169,7 @@ class AIVisionService:
 
             return self._build_response(
                 sensor_id=sensor_id,
-                engine="YOLOv8n-OpenCV-Real",
+                engine="Pillow-Heuristic",
                 is_drone=is_drone,
                 confidence=confidence,
                 x_min=x_min,
@@ -181,17 +181,7 @@ class AIVisionService:
         except Exception as e:
             logger.error("Error al procesar imagen con motor visual", error=str(e))
             elapsed_ms = (time.perf_counter() - start_time) * 1000
-            return self._build_response(
-                sensor_id=sensor_id,
-                engine="YOLOv8n-OpenCV-Real",
-                is_drone=False,
-                confidence=0.0,
-                x_min=0,
-                y_min=0,
-                width=0,
-                height=0,
-                elapsed_ms=elapsed_ms,
-            )
+            raise ValueError("El contenido no es una imagen JPEG, PNG o WEBP válida.") from e
 
     def _build_response(
         self,
@@ -214,6 +204,8 @@ class AIVisionService:
             "sensor_id": sensor_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "engine": engine,
+            "model_validated": False,
+            "confidence_kind": "uncalibrated_score",
             "detection": {
                 "is_drone": is_drone,
                 "label": label,

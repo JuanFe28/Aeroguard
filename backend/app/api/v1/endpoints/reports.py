@@ -55,13 +55,13 @@ async def export_pdf_report(
     current_user = Depends(require_permission("reports:read")),
 ):
     """
-    Genera físicamente un documento PDF binario compilado con ReportLab.
+    Genera un PDF académico con datos sintéticos, no una consulta de incidentes reales.
     Incluye:
     - Membrete institucional UTS.
     - Resumen ejecutivo de KPIs.
     - Dictamen de Inteligencia Artificial táctico.
     - Tabla detallada de telemetría e incursiones en zonas protegidas.
-    - Firma criptográfica SHA-256 al pie para cadena de custodia.
+    - Huella SHA-256 del dataset; no equivale a firma digital ni cadena de custodia acreditada.
     """
     operator_name = getattr(current_user, "username", "Operador C-UAS")
     pdf_bytes, sha256_hash = report_generator_service.generate_pdf(operator=operator_name)
@@ -83,6 +83,7 @@ async def export_pdf_report(
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
             "X-Report-SHA256": sha256_hash,
+            "X-AeroGuard-Data-Source": "synthetic_demo",
             "Access-Control-Expose-Headers": "Content-Disposition, X-Report-SHA256",
         },
     )
@@ -96,7 +97,7 @@ async def export_excel_report(
     current_user = Depends(require_permission("reports:read")),
 ):
     """
-    Genera físicamente una hoja de cálculo Excel binaria (.xlsx) con OpenPyXL.
+    Genera una hoja de cálculo (.xlsx) con datos sintéticos, sin consulta histórica de BD.
     Incluye:
     - Hoja 1: Telemetría e Incursiones tabuladas con formato táctico militar.
     - Hoja 2: Resumen ejecutivo y registro de auditoría con firma SHA-256.
@@ -121,6 +122,7 @@ async def export_excel_report(
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
             "X-Report-SHA256": sha256_hash,
+            "X-AeroGuard-Data-Source": "synthetic_demo",
             "Access-Control-Expose-Headers": "Content-Disposition, X-Report-SHA256",
         },
     )

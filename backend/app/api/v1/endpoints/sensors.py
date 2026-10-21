@@ -147,6 +147,7 @@ class TelemetryPacketSchema(BaseModel):
 async def ingest_telemetry(
     packet: TelemetryPacketSchema,
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(require_permission("detections:write")),
 ):
     """
     Procesa telemetría proveniente de sensores físicos o simuladores.
@@ -174,9 +175,9 @@ async def ingest_telemetry(
         heading=packet.heading,
         status=DetectionStatus.ACTIVE,
         threat_level=ThreatLevel.MEDIUM if packet.altitude < 300 else ThreatLevel.LOW,
-        is_drone=True,
-        ai_analyzed=True,
-        ai_confidence=0.88,
+        is_drone=False,
+        ai_analyzed=False,
+        ai_confidence=None,
     )
     db.add(detection)
     await db.flush()

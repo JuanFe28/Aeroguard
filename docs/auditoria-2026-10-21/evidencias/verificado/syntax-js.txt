@@ -1,0 +1,22 @@
+======================================================================
+ [AEROGUARD C-UAS] Validacion de Sintaxis JavaScript (Node V8 engine)
+======================================================================
+  [OK]   frontend/src/app.js
+  [OK]   frontend/src/main.js
+  [OK]   frontend/src/models/models.js
+  [OK]   frontend/src/services/api.service.js
+  [OK]   frontend/src/services/audio.service.js
+  [OK]   frontend/src/viewmodels/dashboard.viewmodel.js
+  [OK]   frontend/src/viewmodels/login.viewmodel.js
+  [OK]   frontend/src/views/alerts.view.js
+  [OK]   frontend/src/views/dashboard.view.js
+  [OK]   frontend/src/views/detections.view.js
+  [OK]   frontend/src/views/login.view.js
+  [OK]   frontend/src/views/misc.views.js
+  [OK]   frontend/src/views/sensors.view.js
+  [OK]   frontend/src/views/users.view.js
+  [OK]   frontend/src/views/zones.view.js
+----------------------------------------------------------------------
+ Total auditados: 15 archivos JS | Errores: 0
+======================================================================
+[SUCCESS] Sintaxis JavaScript 100% valida en todos los modulos SPA.

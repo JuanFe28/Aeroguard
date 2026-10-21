@@ -43,13 +43,13 @@ export class DashboardView {
     <div style="display:flex;align-items:center;gap:var(--spacing-md);flex-wrap:wrap;">
       <span style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:var(--font-size-xs);font-weight:700;color:var(--text-accent);letter-spacing:1.2px;text-transform:uppercase;">
         <span class="status-dot status-online" style="width:8px;height:8px;box-shadow:0 0 8px #00e676"></span>
-        DEFCON MONITORING V1.1
+        ${window.AEROGUARD_DEMO_MODE !== false ? 'DEMO ACADÉMICA — DATOS SIMULADOS' : 'MONITOREO EXPERIMENTAL'}
       </span>
       <span style="color:var(--text-muted);font-size:var(--font-size-xs);display:flex;align-items:center;gap:6px">
         <span style="opacity:0.4">|</span>
         🛰️ VIGILANCIA C-UAS ACTIVA
         <span style="opacity:0.4">|</span>
-        TECHO CIVIL UAEAC: <b style="color:var(--danger)">120m AGL</b>
+        UMBRAL DE EJEMPLO: <b style="color:var(--danger)">120m AGL</b>
       </span>
     </div>
     <div style="display:flex;align-items:center;gap:var(--spacing-sm);">

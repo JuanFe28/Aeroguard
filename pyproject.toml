@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aeroguard-cuas"
 version = "1.1.0"
-description = "AeroGuard C-UAS — Sistema de Detección y Neutralización de Drones"
+description = "AeroGuard — Prototipo académico de detección experimental y monitoreo de drones"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
