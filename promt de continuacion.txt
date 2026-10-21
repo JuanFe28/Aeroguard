@@ -1,0 +1,94 @@
+CONTINUAR AEROGUARD — CIERRE DEL 21/10/2026
+
+Repositorio: https://github.com/JuanFe28/Aeroguard
+Carpeta local: D:\aeroguard
+Rama: fix/release-readiness
+Commit del código corregido: fb1a8669105b116eded1f183b3aaf0708caf2f54
+Versión de trabajo: 1.2.0, todavía sin release oficial.
+
+La subida del código se confirmó en GitHub usando camachoab21-cmd. La cuenta AlejandroGuevara-hub no tenía permiso de escritura. Main no se modificó. Este archivo se incorpora después, en un commit de documentación.
+
+El usuario pidió cerrar su sesión de GitHub después de subir este archivo. No asumir que las credenciales de camachoab21-cmd siguen guardadas: volver a autorizar cuando haga falta, sin solicitar contraseñas por el chat.
+
+TRABAJO REALIZADO
+
+- Dependencias actualizadas: cero vulnerabilidades conocidas en el entorno auditado.
+- Revocación persistente de sesiones, recuperación de contraseña de un solo uso, límites de intentos y protección de tokens en logs.
+- Producción sin datos/tokens demo ni fallback silencioso a SQLite.
+- Reportes PDF, Excel y CSV consultados en BD, archivos originales recuperables por ID y comprobación de integridad.
+- Programación persistente de reportes en UTC.
+- Configuración operativa validada y persistida.
+- Telemetría vinculada con sensores y objetos, trayectorias acumuladas y alertas activas sin duplicados.
+- PostGIS con geometría, trigger, índice GiST y consultas espaciales.
+- Worker RabbitMQ con persistencia idempotente, reintentos y cola de errores.
+- Corregidas rutas, login real, formatos de respuesta y escapes HTML del frontend.
+- Prometheus, métricas autenticadas, alerta de sensor vencido y dashboard Grafana.
+- Cuatro imágenes construidas; integración PostgreSQL/PostGIS/RabbitMQ comprobada.
+- Backup PostgreSQL restaurado en una base nueva; también respaldados los archivos de reportes.
+- README, changelog, manual operativo, versionado y workflows actualizados.
+
+VERIFICACIONES
+
+97 pruebas aprobadas en Windows y 97 en Docker/Linux.
+Carga de 10, 50 y 100 WebSockets sin pérdida de mensajes.
+Navegador: login, mapa, sensores, reportes, descarga CSV y escape de HTML persistido.
+Bandit: 0 hallazgos medios/altos y 40 bajos conservados.
+Cobertura medida del backend ampliado: aproximadamente 70,97 %.
+
+Evidencias:
+D:\aeroguard\docs\correcciones-2026-10-21
+El manifiesto de cierre está en evidencias/cierre.json.
+
+PENDIENTES PARA RETOMAR
+
+1. Revisar el resultado de GitHub Actions:
+   https://github.com/JuanFe28/Aeroguard/actions/runs/39636764645
+   Al cerrar el código estaba en ejecución. Corregir cualquier fallo antes de integrar. Revisar también la ejecución correspondiente al commit que agregó este archivo.
+
+2. Revisar los ejemplos tácticos que todavía quedan:
+   - _latest_verdict inicial en alerts.py.
+   - Payload de prueba del botón SOAR del dashboard: aún puede usar confianza, objeto o zona de ejemplo.
+   - Algunos valores iniciales del widget táctico.
+   Evitar presentarlos como incidentes o resultados reales.
+
+3. Completar revisión de validación de UUID y referencias inválidas en endpoints, cuentas demo de bases reutilizadas y los 40 hallazgos bajos de Bandit.
+
+4. Revisar el diff y preparar el PR hacia main. No existe todavía una release/tag oficial ni imágenes publicadas. El workflow publish.yml es manual y aún no se ejecutó.
+
+5. Pendientes externos: VM académica/TLS, SMTP real, n8n desplegado, receptor externo de alertas, aceptación docente y validación con sensores físicos.
+
+6. La visión sigue siendo experimental. No existe modelo de drones validado con dataset independiente ni métricas de campo. No atribuir fabricante, intención hostil ni precisión calibrada.
+
+7. Las programaciones evitan duplicados, pero una caída después de adquirir un trabajo puede omitir una ejecución. Revisar recuperación/reintentos antes de exigir garantías operativas.
+
+8. La auditoría tiene checkpoint en la misma BD; falta anclaje externo contra manipulación por un administrador de esa BD.
+
+9. La antigua clave Google Maps fue retirada del frontend, pero su propietario debe revocarla o restringirla; permanece en el historial Git.
+
+TRELLO
+
+No se modificó el tablero.
+Con evidencia local para revisar y marcar:
+RELEASE-01, OPERATE-01, OPERATE-02,
+MONITOR-01, MONITOR-02, MONITOR-03,
+CODE-02, CODE-06, BUILD-01 y TEST-01/02/03.
+
+DEPLOY-01 requiere confirmar Actions.
+RELEASE-02 sigue pendiente de publicación.
+DEPLOY-02 sigue pendiente de VM externa.
+No marcar como terminada la validación real de IA ni la integración externa con n8n.
+
+RESPALDOS
+
+D:\aeroguard\backups\
+- aeroguard-20261021.bundle: historial Git completo al cierre del código, verificado.
+- aeroguard-cierre-20261021.dump y su manifiesto.
+- aeroguard-cierre-20261021.reports: archivos originales.
+- ZIP del código/historial y ZIP separado de datos privados.
+- Copias privadas de configuración.
+
+Los respaldos anteriores al commit de este archivo no incluyen este prompt. El código sí está respaldado en ellos; el archivo de continuación queda además en GitHub.
+No subir los datos privados ni archivos .env a GitHub.
+Los contenedores de prueba quedaron detenidos, conservando sus volúmenes.
+
+Al retomar, comprobar rama/commit y Actions. Continuar sobre este trabajo sin reiniciar el proyecto ni descartar cambios.
