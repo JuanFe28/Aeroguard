@@ -36,7 +36,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY backend/requirements.txt .
 COPY constraints.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip wheel \
+    pip install --upgrade pip wheel setuptools==84.1.0 \
     && pip install -c constraints.txt -r requirements.txt
 
 # ------------------------------------------------------------

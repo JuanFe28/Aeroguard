@@ -17,7 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip wheel \
+    pip install --upgrade pip wheel setuptools==84.1.0 \
     && pip install -r requirements.txt
 
 # ------------------------------------------------------------

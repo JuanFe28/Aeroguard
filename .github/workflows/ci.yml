@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: python -m pip install --upgrade setuptools==84.1.0
       - run: python -m pip install -c constraints.txt -r backend/requirements-expo.txt pip-audit==2.9.0
       # La auditoría de dependencias bloquea si hay avisos; no se silencian.
       - run: python scripts/release_checks.py --output tmp/ci-evidence --audit-dependencies

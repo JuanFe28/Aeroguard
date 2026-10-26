@@ -15,7 +15,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    pip install --upgrade setuptools==84.1.0 && pip install -r requirements.txt
 
 # ------------------------------------------------------------
 FROM python:${PYTHON_VERSION}-slim AS runtime
