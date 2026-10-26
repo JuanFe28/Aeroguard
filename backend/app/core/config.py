@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # ====== App ======
     APP_NAME: str = "AeroGuard"
-    APP_VERSION: str = "1.2.0"
+    APP_VERSION: str = "1.2.0-rc.1"
     APP_ENV: str = "development"
     DEBUG: bool = True
     ALLOW_DEMO_TOKENS: bool = False

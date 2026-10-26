@@ -41,8 +41,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 
 WORKDIR /app
-COPY --chown=aeroguard:aeroguard detector.py .
+COPY --chown=aeroguard:aeroguard detector.py http_api.py ./ai_service/
 
 USER aeroguard
 
-CMD ["python", "detector.py"]
+EXPOSE 8001
+ENV AI_HTTP_HOST=0.0.0.0
+CMD ["python", "-m", "ai_service.detector"]

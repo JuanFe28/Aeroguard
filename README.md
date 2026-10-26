@@ -1,6 +1,6 @@
 # AeroGuard
 
-Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Versión de trabajo **1.2.0**, todavía sin publicación oficial.
+Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Candidata académica **1.2.0-rc.1**, identificada y publicada mediante el flujo de Release en GitHub Actions y GHCR. La política de versiones está en [VERSIONING.md](VERSIONING.md).
 
 La API y el frontend usan datos persistidos por defecto. La exposición local puede sembrar ejemplos de forma explícita. La visión usa heurísticas OpenCV/Pillow o un adaptador YOLO opcional: **no existe un modelo de drones validado con un conjunto de prueba independiente**. No se han probado sensores físicos, identificación de fabricante ni funciones de neutralización.
 

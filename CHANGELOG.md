@@ -2,7 +2,16 @@
 
 Este registro describe el código y la preparación local. No prueba que haya versiones publicadas. La política SemVer propuesta está en `docs/auditoria-2026-10-21/02_RELEASE.md`.
 
-## [Unreleased]
+## [1.2.0-rc.1] — 2026-10-26
+
+### Release académica
+
+- Definida la política SemVer y alineada la identificación de la candidata en la API, la plantilla de configuración y los metadatos Python.
+- Automatizada la validación, construcción y publicación de backend, frontend, ai-service y simulator en GHCR mediante GitHub Actions.
+- Conservadas las pruebas en Linux, la auditoría de dependencias, los digests de las imágenes y los artefactos de cada ejecución.
+- La candidata reúne las correcciones del 21 de octubre descritas a continuación. Sigue siendo un prototipo académico y no una versión operativa validada.
+
+## Historial de preparación de la candidata
 
 ### Candidata de trabajo 1.2.0 — 21-10-2026
 
