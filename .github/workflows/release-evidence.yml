@@ -1,0 +1,44 @@
+name: Capturas de microservicios de Release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Capturar endpoints reales de los contenedores
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p evidence
+          TOKEN="$(openssl rand -hex 32)"
+          echo "::add-mask::$TOKEN"
+          AI="ghcr.io/${OWNER,,}/aeroguard-ai-service:1.2.0-rc.1"
+          BACKEND="ghcr.io/${OWNER,,}/aeroguard-backend:1.2.0-rc.1"
+          docker pull "$AI"
+          docker run -d --name ai -e AI_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8001:8001 "$AI" python -m ai_service.http_api
+          for i in $(seq 1 24); do if docker pull "$BACKEND"; then break; fi; sleep 5; done
+          docker run -d --name api -e APP_ENV=development -e DEBUG=false -e SECRET_KEY="$TOKEN" -e DATABASE_URL=sqlite+aiosqlite:////tmp/release.db -e REPORT_SCHEDULER_ENABLED=false -p 127.0.0.1:8000:8000 "$BACKEND"
+          for PORT in 8000 8001; do
+            for i in $(seq 1 45); do if curl -fsS http://127.0.0.1:$PORT/health -o evidence/health-$PORT.json; then break; fi; sleep 1; done
+            test -s evidence/health-$PORT.json
+            google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1400,800 --screenshot=evidence/endpoint-$PORT.png http://127.0.0.1:$PORT/health
+          done
+          curl -fsS -H "Authorization: Bearer $TOKEN" --data-binary @docs/assets/drone_demo.jpg http://127.0.0.1:8001/analyze -o evidence/analysis-result.json
+          google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1400,800 --screenshot=evidence/analysis-result.png file://$PWD/evidence/analysis-result.json
+          google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1400,1000 --virtual-time-budget=7000 --screenshot=evidence/github-actions.png https://github.com/JuanFe28/Aeroguard/actions/runs/40342511908
+          docker ps --format '{{.Names}} {{.Image}} {{.Ports}}' > evidence/containers.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-screenshots
+          path: evidence
