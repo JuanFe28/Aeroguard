@@ -10,6 +10,8 @@ Las claves SSH se quedan en el equipo que ya tiene acceso. Este repositorio no c
 
 ## 1. Revisar el servidor antes de cambiarlo
 
+Si el destino Ubuntu todavía no tiene Docker, seguir primero la [preparación de Docker rootless](ubuntu-rootless.md). Es un procedimiento por etapas, pendiente de validar en el destino real, que propone una cuenta exclusiva y conserva los servicios personales existentes.
+
 Entra utilizando la conexión SSH que ya tienes configurada. Conserva la validación de la huella del servidor. Revisa arquitectura, RAM disponible, espacio, Docker y servicios existentes con:
 
 ```sh

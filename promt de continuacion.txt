@@ -41,7 +41,13 @@ DEPLOY PREPARADO Y ENSAYADO LOCALMENTE
 
 SIGUIENTE PASO REAL
 
-DEPLOY-02 NO está terminado. Falta inspeccionar el servidor Linux desde el portátil autorizado: arquitectura x86_64, RAM disponible, espacio, versión Docker/Compose, puerto elegido y servicios existentes. Este equipo del laboratorio no tiene la identidad SSH necesaria y el servidor no figura entre sus peers Tailscale accesibles. No pedir que envíen la clave por el chat. El destino físico y una VM son alternativas; no se requieren ambos.
+Los doce archivos de preparación están subidos en deploy/academic-vm, commit 431ccc1. PR en borrador: https://github.com/JuanFe28/Aeroguard/pull/1. Aprobaron la verificación académica https://github.com/JuanFe28/Aeroguard/actions/runs/40587895419 y el ensayo privado https://github.com/JuanFe28/Aeroguard/actions/runs/40587895628. Main no se ha modificado con este despliegue.
+
+El operador ya mostró capturas del servidor desde su portátil autorizado: Ubuntu 24.04 LTS x86_64, CPU/RAM/espacio suficientes para un ensayo pequeño y puerto 8080 libre. Docker no está disponible. UFW activo con bloqueo entrante por defecto y reglas específicas; SSH, Samba y Tailscale están en uso. Las capturas no constituyen una revisión completa del router, las reglas efectivas de Tailscale ni las ACL de la tailnet. No publicar las capturas, direcciones ni datos de acceso en el repositorio.
+
+Se propone Docker rootless bajo una cuenta exclusiva sin sudo ni acceso a los archivos personales. Plan y comprobación inicial en deploy/ubuntu-rootless.md. Se solicitó al usuario comprobar cgroup v2, existencia de la cuenta, unidades Docker/containerd y una simulación de dependencias de Apt. Esperar ese resultado antes de instalar. No se ha instalado Docker ni creado cuentas en el servidor durante esta preparación.
+
+DEPLOY-02 NO está terminado. Este equipo del laboratorio no tiene la identidad SSH necesaria; las operaciones del servidor se realizan desde el portátil autorizado. No pedir que envíen la clave por el chat. El destino físico y una VM son alternativas; no se requieren ambos. Falta instalar y verificar rootless, delegación/límites efectivos y acceso privado antes de continuar con la aplicación.
 
 Después de revisar el destino, seguir deploy/README.md para una instalación nueva con nombre de proyecto y volúmenes propios, acceso por túnel privado, prueba de persistencia y recuperación. No modificar firewall, ACL de Tailscale, Docker global ni servicios anteriores sin comprobar primero su estado y el efecto concreto.
 
