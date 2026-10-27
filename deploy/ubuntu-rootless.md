@@ -50,6 +50,8 @@ AEROGUARD
 
 Revisar la salida antes de ejecutar una instalación real del motor. Si algún paso falla, no borrar archivos ni repetir el bloque automáticamente: inspeccionar lo que sí llegó a crearse. No quitar `--simulate` todavía; falta impedir el arranque de las nuevas unidades globales y preparar la cuenta de rootless.
 
+El operador confirmó esta etapa el 27/10/2026: se descargó el catálogo firmado del repositorio oficial y terminó la simulación, sin instalar el motor. El plan proponía cinco paquetes nuevos, cero eliminaciones y cero actualizaciones: Docker CE/CLI y rootless extras 29.9.2, containerd.io 2.4.2 y Compose 5.6.1. Esas son las versiones propuestas entonces, no una instalación comprobada; volver a revisar el plan al retomar. Permanecían 16 paquetes sin actualizar. No repetir el bloque de creación del repositorio, porque los archivos de la fuente y su clave ya existen.
+
 ## Etapas posteriores, pendientes de ejecutar y comprobar
 
 1. Revisar la simulación, paquetes existentes y repositorios. Preparar el repositorio oficial de Docker y comprobar su clave. Instalar únicamente los paquetes necesarios, impidiendo el arranque automático de las nuevas unidades Docker del sistema antes de instalar el motor. No deshabilitar servicios previos de otro proyecto.

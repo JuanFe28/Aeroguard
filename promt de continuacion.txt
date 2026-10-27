@@ -7,7 +7,7 @@ Base de main revisada: f3a32a5c843ca11f9c7d128900d5513d3df262ba
 
 PRIORIDAD DEL USUARIO
 
-Mantener el servidor privado. No abrir puertos del router, no activar Tailscale Funnel, no desactivar comprobaciones de huellas SSH y no copiar claves privadas al laboratorio ni a GitHub. Primero revisar recursos y servicios existentes mediante el equipo que ya tiene acceso. No se ha accedido ni instalado nada en el servidor personal durante esta sesión.
+Mantener el servidor privado. No abrir puertos del router, no activar Tailscale Funnel, no desactivar comprobaciones de huellas SSH y no copiar claves privadas al laboratorio ni a GitHub. El agente no accedió al servidor: el operador ejecutó desde su portátil autorizado las consultas, instalación de dependencias y preparación de Apt descritas abajo. No se desplegó AeroGuard ni se cambiaron intencionadamente reglas de firewall, SSH o Tailscale.
 
 RELEASE YA COMPLETADA
 
@@ -45,7 +45,9 @@ Los doce archivos de preparación están subidos en deploy/academic-vm, commit 4
 
 El operador ya mostró capturas del servidor desde su portátil autorizado: Ubuntu 24.04 LTS x86_64, CPU/RAM/espacio suficientes para un ensayo pequeño y puerto 8080 libre. Docker no está disponible. UFW activo con bloqueo entrante por defecto y reglas específicas; SSH, Samba y Tailscale están en uso. Las capturas no constituyen una revisión completa del router, las reglas efectivas de Tailscale ni las ACL de la tailnet. No publicar las capturas, direcciones ni datos de acceso en el repositorio.
 
-Se propone Docker rootless bajo una cuenta exclusiva sin sudo ni acceso a los archivos personales. Plan en deploy/ubuntu-rootless.md. El operador confirmó cgroup2fs, cuenta aeroguard inexistente y unidades Docker/containerd inactivas. Instaló cinco dependencias nuevas de la simulación, sin eliminar/actualizar paquetes ni necesidad de reiniciar servicios. Hay 16 paquetes pendientes de revisión de actualizaciones. No se ha instalado Docker ni creado cuentas todavía. El siguiente bloque añade el repositorio oficial y simula los paquetes del motor: revisar su salida antes de instalar y mantener impedido el arranque de nuevas unidades globales durante la instalación posterior.
+Se propone Docker rootless bajo una cuenta exclusiva sin sudo ni acceso a los archivos personales. Plan en deploy/ubuntu-rootless.md. El operador confirmó cgroup2fs, cuenta aeroguard inexistente y unidades Docker/containerd inactivas. Instaló cinco dependencias nuevas: libslirp0, libsubid4, slirp4netns, systemd-container y uidmap; sin eliminar/actualizar paquetes ni necesidad de reiniciar servicios. ca-certificates, curl y dbus-user-session ya estaban instalados.
+
+La última captura confirma que el operador añadió /etc/apt/keyrings/docker.asc y /etc/apt/sources.list.d/docker.sources para Ubuntu noble amd64, actualizó el catálogo y terminó la simulación del motor. El plan proponía Docker CE/CLI/rootless extras 29.9.2, containerd.io 2.4.2 y Compose 5.6.1: cinco paquetes nuevos, cero eliminaciones y cero actualizaciones. Hay 16 paquetes pendientes de revisión, incluyendo determinar cuáles corresponden a seguridad. No se instaló el motor ni se crearon cuentas. NO repetir el bloque que crea la fuente Docker: sus archivos ya existen. Al volver, inspeccionar esa configuración y repetir únicamente la simulación actualizada antes de una instalación real.
 
 DEPLOY-02 NO está terminado. Este equipo del laboratorio no tiene la identidad SSH necesaria; las operaciones del servidor se realizan desde el portátil autorizado. No pedir que envíen la clave por el chat. El destino físico y una VM son alternativas; no se requieren ambos. Falta instalar y verificar rootless, delegación/límites efectivos y acceso privado antes de continuar con la aplicación.
 
@@ -68,3 +70,28 @@ Los respaldos anteriores siguen en D:\aeroguard\backups, fuera de Git. Incluyen 
 Docker Desktop falló al arrancar por sockets temporales de Inference/Secrets Engine. Se recuperó conservando las carpetas de runtime en cuarentena y la configuración previa en backups/docker-desktop-20261027. Se desactivaron Docker AI/Model Runner opcionales; los volúmenes anteriores permanecieron presentes. La actualización de la versión antigua de Docker Desktop queda pendiente, sin restablecer datos.
 
 Al retomar, consultar el PR de deploy/academic-vm y sus checks. No declarar desplegado el servidor por haber pasado un ensayo local. No mezclar credenciales privadas, IP del servidor ni llaves con el código público.
+
+PUNTO DE CIERRE Y CONTINUACIÓN DESDE CUALQUIER EQUIPO
+
+El avance se conserva en el PR #1 y en su rama; este Deploy NO se fusionó a main. Los cambios funcionales de preparación están en 431ccc1; 3809b61 y 30bc6c2 registran el procedimiento y las etapas iniciales. Los dos workflows de 30bc6c2 aprobaron: https://github.com/JuanFe28/Aeroguard/actions/runs/40590174841 y https://github.com/JuanFe28/Aeroguard/actions/runs/40590174809. El último commit de cierre es documental: consultar el HEAD del PR para su SHA y sus checks, sin confundirlo con esos runs anteriores.
+
+En un equipo sin copia del proyecto:
+git clone --branch deploy/academic-vm https://github.com/JuanFe28/Aeroguard.git
+cd Aeroguard
+
+Si ya existe una copia: revisar primero git status; conservar los cambios locales sin reset ni limpiezas. Después hacer fetch, cambiar a deploy/academic-vm y actualizar con pull --ff-only cuando el árbol de trabajo lo permita. Leer este archivo, deploy/README.md y deploy/ubuntu-rootless.md. La carpeta D:\aeroguard solo corresponde al laboratorio; no es un requisito para otros equipos.
+
+Orden para continuar:
+1. Verificar el HEAD y los checks del PR, y el estado actual del servidor por el portátil autorizado. Consultar los archivos de Apt ya creados; no sobrescribirlos. Revisar las 16 actualizaciones pendientes sin ejecutar una actualización indiscriminada ni reiniciar el servidor durante una sesión de trabajo sin revisar efectos.
+2. Repetir la simulación de los cinco paquetes Docker, revisar versiones, dependencias y cualquier cambio desde hoy. Todavía NO hay un motor Docker funcionando en el servidor por este procedimiento.
+3. Instalar Docker impidiendo antes el arranque automático de nuevas unidades globales, sin detener servicios anteriores de otros proyectos. Crear la cuenta exclusiva sin acceso remoto por contraseña ni sudo y con carpeta privada.
+4. Preparar rootless con systemd, verificar AppArmor/RootlessKit, cgroup v2 y delegación de CPU/memoria/procesos solo para esa cuenta. Aplicar y probar límites efectivos, incluidos límites agregados para proteger el anfitrión.
+5. Descargar la rama y preparar el .env privado bajo esa cuenta. Instalar las imágenes fijadas; comprobar loopback, túnel, autenticación, salud, persistencia, respaldo y recuperación. Conservar Samba, SSH, Tailscale y el firewall existentes. No cerrar DEPLOY-02 hasta verificar el destino real.
+
+Para acceder al servidor se necesita un equipo autorizado; este texto no contiene credenciales. Los respaldos locales, .env y datos privados no están en GitHub. Se mantiene un bundle actualizado en backups/aeroguard-cierre-20261027.bundle, privado y fuera de Git. Las evidencias públicas saneadas sí están en deploy/evidence.
+
+CIERRE DE SESIONES
+
+Después de subir este punto de cierre, retirar la credencial Git local de camachoab21-cmd con Git Credential Manager y comprobar que ya no figura. No tocar credenciales de otras personas. Eso no cierra cookies del navegador ni desconecta por sí mismo la integración de GitHub de Codex.
+
+El control del navegador se detuvo al no poder determinar con suficiente confianza la URL actual; no se ha confirmado el cierre de la sesión web. El usuario debe cerrar GitHub en el navegador que utilizó (posiblemente Chrome), y cualquier sesión de correo o Codex abierta en un equipo compartido. En la terminal SSH del portátil autorizado, ejecutar sudo -k y después exit para invalidar el caché de sudo de esa terminal y cerrar la conexión. No cerrar Tailscale ni detener SSH/Samba del servidor: son servicios persistentes, no sesiones web abiertas por este trabajo.
