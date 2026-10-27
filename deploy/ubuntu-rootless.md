@@ -17,6 +17,39 @@ sudo apt-get --simulate --no-remove install --no-install-recommends ca-certifica
 
 La primera salida debe indicar `cgroup2fs` para la estrategia propuesta. Una cuenta `aeroguard` preexistente requiere revisar su uso antes de reutilizarla; no modificarla automáticamente. Las unidades del sistema se consultan para detectar instalaciones previas. La simulación de Apt no instala ni elimina paquetes; no añadir Docker a esa orden hasta revisar el origen y el plan de paquetes. Si falla, conservar el error y revisar la causa.
 
+El 27/10/2026 el operador confirmó `cgroup2fs`, ausencia de la cuenta y tres unidades inactivas. Instaló los cinco paquetes nuevos de la simulación: `libslirp0`, `libsubid4`, `slirp4netns`, `systemd-container` y `uidmap`. No se eliminaron ni actualizaron paquetes; la salida no solicitó reinicios de servicios. Los 16 paquetes pendientes de actualización requieren una revisión separada, incluyendo cuáles corresponden a seguridad.
+
+## Segunda etapa: repositorio oficial y simulación del motor
+
+El siguiente bloque corresponde exclusivamente a Ubuntu 24.04 `amd64`, como el destino revisado. Añade la clave pública descargada por HTTPS del sitio oficial y la fuente de Apt; actualiza el catálogo y **solo simula** instalar Docker. No ejecuta scripts descargados. Se detiene si detecta una fuente Docker o los archivos de destino existentes, para evitar sobrescribir configuraciones previas.
+
+```sh
+bash <<'AEROGUARD'
+set -euo pipefail
+if [ -e /etc/apt/keyrings/docker.asc ] || [ -e /etc/apt/sources.list.d/docker.sources ] || grep -RqsF 'download.docker.com' /etc/apt/sources.list /etc/apt/sources.list.d; then
+  printf 'Ya existe configuración de Docker. Revisarla antes de continuar.\n'
+  exit 1
+fi
+aeroguard_key_file=$(mktemp)
+trap 'rm -f -- "$aeroguard_key_file"' EXIT
+curl --proto '=https' --tlsv1.2 -fsS https://download.docker.com/linux/ubuntu/gpg -o "$aeroguard_key_file"
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo install -m 0644 "$aeroguard_key_file" /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources >/dev/null <<'DOCKER_SOURCE'
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/docker.asc
+DOCKER_SOURCE
+sudo apt-get update
+sudo apt-get --simulate --no-remove install --no-install-recommends docker-ce docker-ce-cli containerd.io docker-ce-rootless-extras docker-compose-plugin
+AEROGUARD
+```
+
+Revisar la salida antes de ejecutar una instalación real del motor. Si algún paso falla, no borrar archivos ni repetir el bloque automáticamente: inspeccionar lo que sí llegó a crearse. No quitar `--simulate` todavía; falta impedir el arranque de las nuevas unidades globales y preparar la cuenta de rootless.
+
 ## Etapas posteriores, pendientes de ejecutar y comprobar
 
 1. Revisar la simulación, paquetes existentes y repositorios. Preparar el repositorio oficial de Docker y comprobar su clave. Instalar únicamente los paquetes necesarios, impidiendo el arranque automático de las nuevas unidades Docker del sistema antes de instalar el motor. No deshabilitar servicios previos de otro proyecto.
