@@ -1,0 +1,68 @@
+{
+  "scope": "Ensayo local Docker Desktop; no servidor personal",
+  "application_smoke": {
+    "checked_utc": "2026-10-27T21:20:16.647402+00:00",
+    "origin": "http://localhost:18081",
+    "frontend": true,
+    "backend_environment": "production",
+    "version": "1.2.0-rc.1",
+    "anonymous_access_blocked": true,
+    "bootstrap_login": true,
+    "test_session_revoked": true
+  },
+  "persistence_and_runtime": {
+    "date_utc": "2026-10-27T21:24:17.437467+00:00",
+    "scope": "Ensayo local Docker Desktop; no servidor personal",
+    "application_version": "1.2.0-rc.1",
+    "report_survives_full_stack_restart": true,
+    "report_sha256": "4ccef8cd783ef5993de6a1c872950918b2e429bda922b033ffd0b953781d84fd",
+    "backend_isolation": {
+      "uid": 1000,
+      "default_route_present": false
+    },
+    "runtime": [
+      {
+        "service": "backend",
+        "health": "healthy",
+        "published_ports": {},
+        "memory_limit_bytes": 1073741824,
+        "root_filesystem_read_only": true
+      },
+      {
+        "service": "frontend",
+        "health": "healthy",
+        "published_ports": {
+          "80/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "18081"
+            }
+          ]
+        },
+        "memory_limit_bytes": 134217728,
+        "root_filesystem_read_only": true
+      },
+      {
+        "service": "postgres",
+        "health": "healthy",
+        "published_ports": {},
+        "memory_limit_bytes": 805306368,
+        "root_filesystem_read_only": false
+      },
+      {
+        "service": "rabbitmq",
+        "health": "healthy",
+        "published_ports": {},
+        "memory_limit_bytes": 536870912,
+        "root_filesystem_read_only": false
+      }
+    ]
+  },
+  "focused_tests_passed": 11,
+  "new_scripts_bandit": {
+    "LOW": 5,
+    "MEDIUM": 0,
+    "HIGH": 0
+  },
+  "remote_server_deployed": false
+}
