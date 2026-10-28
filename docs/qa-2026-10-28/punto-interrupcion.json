@@ -1,0 +1,8 @@
+{
+  "fecha": "2026-10-28",
+  "estado": "PAUSADO_POR_USUARIO",
+  "pantalla": "Usuarios",
+  "punto": "Modal Editar Usuario de QA UI Operador abierto. No se guardaron cambios. Continuar pruebas de edición, usuarios y roles, detecciones, alertas, trayectorias, reportes, historial y auditoría.",
+  "qaUrl": "http://localhost:18082/",
+  "produccionUrl": "http://localhost:8080/"
+}

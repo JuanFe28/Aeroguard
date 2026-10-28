@@ -17,6 +17,10 @@ La API y el frontend usan datos persistidos por defecto. La exposición local pu
 
 Las evidencias y el estado de Trello están en [correcciones del 21-10-2026](docs/correcciones-2026-10-21/README.md). Los [informes iniciales de auditoría](docs/auditoria-2026-10-21/README.md) son históricos: sus pendientes pueden haber quedado resueltos en esta revisión.
 
+## Preparación de Deploy privado
+
+La candidata publicada utiliza [el paquete de despliegue privado](deploy/README.md), con imágenes fijadas por digest, credenciales generadas localmente y un único puerto en `127.0.0.1`, accesible mediante túnel SSH. El 28 de octubre se verificó una instalación nueva en el servidor real con Docker rootless, límites efectivos, autenticación, persistencia y restauración de respaldo. [Evidencia saneada del servidor](deploy/evidence/2026-10-28-server.json). DEPLOY-02 cuenta con estas comprobaciones para el stack básico; las integraciones externas y la validación operativa de sensores e IA siguen pendientes.
+
 ## Exposición local en Windows
 
 Requiere Python 3.11 y Node para los controles de sintaxis.

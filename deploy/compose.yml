@@ -1,0 +1,138 @@
+# Ejecutar desde la raíz: docker compose --env-file deploy/.env -f deploy/compose.yml ...
+# Los volúmenes se aíslan por COMPOSE_PROJECT_NAME; no reutiliza nombres del ensayo anterior.
+name: ${COMPOSE_PROJECT_NAME:-aeroguard-academic}
+services:
+  postgres:
+    image: postgis/postgis:16-3.5@sha256:94146ac37bc61e2322f88016056c5920729cb8c64c8542ed590af8fc2abdac07
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 0.75
+    environment:
+      POSTGRES_DB: aeroguard
+      POSTGRES_USER: aeroguard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Genera deploy/.env con prepare_deploy.py}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U aeroguard -d aeroguard']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4.3.6-management-alpine@sha256:3505b6096cdbc083bcc363e74366f575ecd0c1a55be4dadcbc60fa08e34647e1
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+    environment:
+      RABBITMQ_DEFAULT_USER: aeroguard
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Genera deploy/.env con prepare_deploy.py}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 2:2"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  backend:
+    image: ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.1@sha256:e0162c6efeba03c18331507da89d59092e185ed71a4abe718922c8544fcf233e
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=128m"]
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      ALLOW_DEMO_TOKENS: "false"
+      SEED_DEMO_DATA: "false"
+      ALLOW_SQLITE_FALLBACK: "false"
+      DATABASE_URL: postgresql+asyncpg://aeroguard:${POSTGRES_PASSWORD}@postgres:5432/aeroguard
+      RABBITMQ_URL: amqp://aeroguard:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+      SECRET_KEY: ${SECRET_KEY:?Genera deploy/.env con prepare_deploy.py}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Genera deploy/.env con prepare_deploy.py}
+      PUBLIC_FRONTEND_URL: ${PUBLIC_FRONTEND_URL:-http://localhost:8080}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:8080"]}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Genera deploy/.env con prepare_deploy.py}
+      REPORTS_DIR: /tmp/aeroguard/reports
+      SOAR_AI_AGENT_ENABLED: "false"
+      OPENBLAS_NUM_THREADS: "2"
+      OMP_NUM_THREADS: "2"
+    volumes:
+      - reports_data:/tmp/aeroguard/reports
+    depends_on:
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=5)"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  frontend:
+    image: ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.1@sha256:e9f63aa07bee5e5f3df1ffc680c0fb66163217bb617516eff6654191ac707727
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,nodev,size=32m
+      - /var/run:rw,noexec,nosuid,nodev,size=4m
+    networks: [default, entry]
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:80"
+    depends_on:
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1/health]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  ai-worker:
+    profiles: [ai]
+    image: ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.1@sha256:77103c34eafde7f4931837940af6fd00f6290ff159bc221e2bd782752322d24a
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      RABBITMQ_URL: amqp://aeroguard:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+      BACKEND_URL: http://backend:8000/api/v1
+      AI_WORKER_TOKEN: ${AI_WORKER_TOKEN:-}
+      AI_USE_YOLO: "false"
+    depends_on:
+      backend: {condition: service_healthy}
+
+  simulator:
+    profiles: [demo]
+    image: ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.1@sha256:1ef125089ea8d8dd57ba887459ad7c332198d1c8d43f0546ed017daf0df6360a
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
+    security_opt: [no-new-privileges:true]
+    environment:
+      BACKEND_URL: http://backend:8000/api/v1
+      SIMULATOR_TOKEN: ${SIMULATOR_TOKEN:-}
+    depends_on:
+      backend: {condition: service_healthy}
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  reports_data:
+
+networks:
+  default:
+    internal: true
+  entry:

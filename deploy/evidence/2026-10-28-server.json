@@ -1,0 +1,113 @@
+{
+  "checked_utc": "2026-10-28T13:17:21.033066+00:00",
+  "scope": "Servidor real Ubuntu 24.04 x86_64, instalacion privada nueva",
+  "deployment_source_commit": "2f1971ffbb40e590a8025226f24690a1240213cf",
+  "application_version": "1.2.0-rc.1",
+  "docker_engine": "29.9.2",
+  "docker_compose": "5.6.1",
+  "rootless": true,
+  "cgroup_driver": "systemd",
+  "cgroup_version": 2,
+  "dedicated_account_without_sudo": true,
+  "aggregate_limits": {
+    "memory.max": "4294967296",
+    "memory.swap.max": "1073741824",
+    "cpu.max": "200000 100000",
+    "pids.max": "768"
+  },
+  "container_limit_probe": {
+    "memory_bytes": 67108864,
+    "swap_bytes": 0,
+    "cpu_quota": "25000 100000",
+    "pids": 32,
+    "passed": true
+  },
+  "application_smoke": {
+    "checked_utc": "2026-10-28T13:11:33.145032+00:00",
+    "origin": "http://localhost:8080",
+    "frontend": true,
+    "backend_environment": "production",
+    "version": "1.2.0-rc.1",
+    "anonymous_access_blocked": true,
+    "bootstrap_login": true,
+    "test_session_revoked": true
+  },
+  "after_restart_smoke": {
+    "checked_utc": "2026-10-28T13:13:33.087128+00:00",
+    "origin": "http://localhost:8080",
+    "frontend": true,
+    "backend_environment": "production",
+    "version": "1.2.0-rc.1",
+    "anonymous_access_blocked": true,
+    "bootstrap_login": false,
+    "test_session_revoked": false
+  },
+  "services": [
+    {
+      "service": "postgres",
+      "health": "healthy",
+      "image": "postgis/postgis:16-3.5@sha256:94146ac37bc61e2322f88016056c5920729cb8c64c8542ed590af8fc2abdac07",
+      "published_ports": {},
+      "memory_limit_bytes": 805306368,
+      "root_filesystem_read_only": false
+    },
+    {
+      "service": "rabbitmq",
+      "health": "healthy",
+      "image": "rabbitmq:4.3.6-management-alpine@sha256:3505b6096cdbc083bcc363e74366f575ecd0c1a55be4dadcbc60fa08e34647e1",
+      "published_ports": {},
+      "memory_limit_bytes": 536870912,
+      "root_filesystem_read_only": false
+    },
+    {
+      "service": "backend",
+      "health": "healthy",
+      "image": "ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.1@sha256:e0162c6efeba03c18331507da89d59092e185ed71a4abe718922c8544fcf233e",
+      "published_ports": {},
+      "memory_limit_bytes": 1073741824,
+      "root_filesystem_read_only": true
+    },
+    {
+      "service": "frontend",
+      "health": "healthy",
+      "image": "ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.1@sha256:e9f63aa07bee5e5f3df1ffc680c0fb66163217bb617516eff6654191ac707727",
+      "published_ports": {
+        "80/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "8080"
+          }
+        ]
+      },
+      "memory_limit_bytes": 134217728,
+      "root_filesystem_read_only": true
+    }
+  ],
+  "persistence": {
+    "report_survives_full_stack_restart": true,
+    "sha256": "3ef3f270a6a9b8f193ce1402bd28eb640b52129a77063d073ef87fe32e6ffc49",
+    "bytes": 17,
+    "note": "CSV de comprobacion, sin detecciones operativas"
+  },
+  "backup": {
+    "bytes": 41234,
+    "sha256": "35aef9a102fb4620e485292906148f78d79a6086d663684ada757e7b977639e9",
+    "restore_verified": true,
+    "row_counts": {
+      "users": 1,
+      "sensors": 0,
+      "detections": 0,
+      "audit_logs": 6,
+      "reports": 1
+    },
+    "report_files_verified": true
+  },
+  "existing_services_active": {
+    "ssh": true,
+    "samba": true,
+    "tailscale": true
+  },
+  "remote_server_deployed": true,
+  "public_internet_exposure": false,
+  "access": "Tunel SSH privado a loopback; no dominio ni puerto publico"
+}

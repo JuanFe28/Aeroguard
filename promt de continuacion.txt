@@ -1,94 +1,118 @@
-CONTINUAR AEROGUARD — CIERRE DEL 21/10/2026
+PRIORIDAD AL RETOMAR EN LA UNIVERSIDAD - PAUSA DEL 28/10/2026
+
+El usuario pidió detener la revisión y guardar el punto de continuación. Esta sección tiene prioridad sobre el historial inferior. NO considerar terminada la prueba de toda la aplicación.
 
 Repositorio: https://github.com/JuanFe28/Aeroguard
-Carpeta local: D:\aeroguard
-Rama: fix/release-readiness
-Commit del código corregido: fb1a8669105b116eded1f183b3aaf0708caf2f54
-Versión de trabajo: 1.2.0, todavía sin release oficial.
+Rama de trabajo: deploy/academic-vm
+PR #1 en borrador, sin fusionar. Main no se actualizó con esta rama.
+Código previo a este cierre: b72b4db. Consultar git log para el commit que agrega este registro.
+Informe parcial y capturas: docs/qa-2026-10-28/README.md
+Resultados individuales: docs/qa-2026-10-28/casos.json
 
-La subida del código se confirmó en GitHub usando camachoab21-cmd. La cuenta AlejandroGuevara-hub no tenía permiso de escritura. Main no se modificó. Este archivo se incorpora después, en un commit de documentación.
+PARA EMPEZAR EN LA U
 
-El usuario pidió cerrar su sesión de GitHub después de subir este archivo. No asumir que las credenciales de camachoab21-cmd siguen guardadas: volver a autorizar cuando haga falta, sin solicitar contraseñas por el chat.
+1. En el clon de la universidad, ejecutar git status y conservar cualquier cambio local antes de actualizar. No usar reset --hard.
+2. Ejecutar git fetch origin, cambiar a deploy/academic-vm (o crearla siguiendo origin/deploy/academic-vm si no existe) y git pull --ff-only.
+3. Leer este archivo y el informe parcial. No repetir la instalación del servidor ni regenerar secretos o volúmenes.
+4. Continuar las correcciones y pruebas en una copia aislada. La universidad no tiene automáticamente una identidad SSH autorizada. No copiar la clave privada del portátil. Si no hay acceso autorizado, avanzar con QA local y reservar las operaciones del servidor para el equipo autorizado.
 
-TRABAJO REALIZADO
+ESTADO DE QA AL PAUSAR
 
-- Dependencias actualizadas: cero vulnerabilidades conocidas en el entorno auditado.
-- Revocación persistente de sesiones, recuperación de contraseña de un solo uso, límites de intentos y protección de tokens en logs.
-- Producción sin datos/tokens demo ni fallback silencioso a SQLite.
-- Reportes PDF, Excel y CSV consultados en BD, archivos originales recuperables por ID y comprobación de integridad.
-- Programación persistente de reportes en UTC.
-- Configuración operativa validada y persistida.
-- Telemetría vinculada con sensores y objetos, trayectorias acumuladas y alertas activas sin duplicados.
-- PostGIS con geometría, trigger, índice GiST y consultas espaciales.
-- Worker RabbitMQ con persistencia idempotente, reintentos y cola de errores.
-- Corregidas rutas, login real, formatos de respuesta y escapes HTML del frontend.
-- Prometheus, métricas autenticadas, alerta de sensor vencido y dashboard Grafana.
-- Cuatro imágenes construidas; integración PostgreSQL/PostGIS/RabbitMQ comprobada.
-- Backup PostgreSQL restaurado en una base nueva; también respaldados los archivos de reportes.
-- README, changelog, manual operativo, versionado y workflows actualizados.
+Los cuatro contenedores del proyecto aeroguard-qa20261028 quedaron detenidos con sus volúmenes conservados. El túnel local 18082 se cerró. La instalación principal siguió funcionando y sus cuatro servicios estaban saludables en la última comprobación. El túnel de producción del portátil no es permanente ni estará disponible por sí solo en la universidad.
 
-VERIFICACIONES
+QA usa /home/aeroguard/qa-20261028/.env privado. La contraseña del operador sintético queda en /home/aeroguard/qa-20261028/users.private.json, permiso 600. No imprimirlas, incluirlas en prompts ni subirlas a GitHub. El admin de QA usa la configuración privada de QA, no la de producción.
 
-97 pruebas aprobadas en Windows y 97 en Docker/Linux.
-Carga de 10, 50 y 100 WebSockets sin pérdida de mensajes.
-Navegador: login, mapa, sensores, reportes, descarga CSV y escape de HTML persistido.
-Bandit: 0 hallazgos medios/altos y 40 bajos conservados.
-Cobertura medida del backend ampliado: aproximadamente 70,97 %.
+Para reanudar QA desde una identidad autorizada y bajo la cuenta del motor rootless:
+cd /home/aeroguard/AeroGuard
+docker compose --env-file /home/aeroguard/qa-20261028/.env -f deploy/compose.yml up -d --wait --wait-timeout 180
 
-Evidencias:
-D:\aeroguard\docs\correcciones-2026-10-21
-El manifiesto de cierre está en evidencias/cierre.json.
+Confirmar primero que COMPOSE_PROJECT_NAME de ese archivo sea aeroguard-qa20261028. Abrir un túnel local 18082 al puerto de QA con la conexión SSH autorizada y comprobación de huella. No publicar direcciones privadas ni cambiar las restricciones de SSH. No ejecutar down -v.
 
-PENDIENTES PARA RETOMAR
+PUNTO EXACTO Y PRÓXIMO TRABAJO
 
-1. Revisar el resultado de GitHub Actions:
-   https://github.com/JuanFe28/Aeroguard/actions/runs/39636764645
-   Al cerrar el código estaba en ejecución. Corregir cualquier fallo antes de integrar. Revisar también la ejecución correspondiente al commit que agregó este archivo.
+La pantalla quedó en Usuarios, modal Editar Usuario de QA UI Operador abierto, sin cambios guardados. La sesión puede haber caducado al retomar. Se conservaron el operador qa_ui_operador_20261028 y el sensor QA-UI-SENSOR-EDITADO inactivo. La zona QA-UI-ZONA-EDITADA ya se eliminó con permiso del usuario.
 
-2. Revisar los ejemplos tácticos que todavía quedan:
-   - _latest_verdict inicial en alerts.py.
-   - Payload de prueba del botón SOAR del dashboard: aún puede usar confianza, objeto o zona de ejemplo.
-   - Algunos valores iniciales del widget táctico.
-   Evitar presentarlos como incidentes o resultados reales.
+Atender los fallos del informe, priorizando Guardar/Restablecer configuración, incidente ficticio y SOAR, desactivación involuntaria al editar sensores, altitudes de zonas y pérdida del formulario de usuario ante un error. No se corrigieron aún estos fallos. Reproducir, corregir y verificar cada uno con evidencia nueva.
 
-3. Completar revisión de validación de UUID y referencias inválidas en endpoints, cuentas demo de bases reutilizadas y los 40 hallazgos bajos de Bandit.
+Falta revisar edición y estados de usuarios, permisos por rol, detecciones, alertas, trayectorias, reportes, historial y auditoría. No marcar toda la prueba de escritorio como aprobada. Conservar los resultados originales y distinguir observaciones de fallos confirmados. La API sí rechazó los cuatro valores inválidos de sensores; el fallo registrado corresponde a validación HTML.
 
-4. Revisar el diff y preparar el PR hacia main. No existe todavía una release/tag oficial ni imágenes publicadas. El workflow publish.yml es manual y aún no se ejecutó.
+El servidor sigue usando imágenes de la versión 1.2.0-rc.1 del commit 33f1cfd. Un commit documental no actualiza esas imágenes. Para desplegar futuros arreglos preparar otra versión y verificarla; no sobrescribir una etiqueta publicada. No fusionar el PR automáticamente. El problema de latencia local con 100 clientes sigue pendiente, como se detalla abajo.
 
-5. Pendientes externos: VM académica/TLS, SMTP real, n8n desplegado, receptor externo de alertas, aceptación docente y validación con sensores físicos.
+--- HISTORIAL DEL DESPLIEGUE Y PRUEBAS ANTERIORES ---
 
-6. La visión sigue siendo experimental. No existe modelo de drones validado con dataset independiente ni métricas de campo. No atribuir fabricante, intención hostil ni precisión calibrada.
+CONTINUAR AEROGUARD - CIERRE DEL 28/10/2026
 
-7. Las programaciones evitan duplicados, pero una caída después de adquirir un trabajo puede omitir una ejecución. Revisar recuperación/reintentos antes de exigir garantías operativas.
+Repositorio: https://github.com/JuanFe28/Aeroguard
+Rama: deploy/academic-vm
+PR en borrador: https://github.com/JuanFe28/Aeroguard/pull/1
+Main se conserva en f3a32a5. Deploy no se ha fusionado.
+Consultar el HEAD del PR y sus checks al retomar; este cierre agrega documentos y una correccion de aislamiento de pruebas.
 
-8. La auditoría tiene checkpoint en la misma BD; falta anclaje externo contra manipulación por un administrador de esa BD.
+ESTADO REAL DEL SERVIDOR
 
-9. La antigua clave Google Maps fue retirada del frontend, pero su propietario debe revocarla o restringirla; permanece en el historial Git.
+DEPLOY-02 cuenta ahora con comprobacion del destino real para el stack basico. El servidor es privado. No abrir router, Tailscale Funnel ni puertos publicos y no desactivar las huellas SSH. No copiar claves privadas ni secretos a GitHub.
 
-TRELLO
+El operador autorizo desde su portatil la instalacion con sudo. Se instalaron solo los cinco paquetes Docker simulados, sin actualizar ni eliminar otros paquetes. Las unidades globales nuevas de Docker/containerd se bloquearon antes de instalar para evitar un motor privilegiado. SSH, Samba, Tailscale y AppArmor permanecieron activos. No se cambiaron firewall, router ni ACL de Tailscale.
 
-No se modificó el tablero.
-Con evidencia local para revisar y marcar:
-RELEASE-01, OPERATE-01, OPERATE-02,
-MONITOR-01, MONITOR-02, MONITOR-03,
-CODE-02, CODE-06, BUILD-01 y TEST-01/02/03.
+Se creo la cuenta exclusiva aeroguard sin sudo, sin contrasena de acceso y con carpeta privada. Su clave publica de acceso esta restringida al portatil autorizado. La politica global de SSH se conserva. La clave privada permanece en el portatil.
 
-DEPLOY-01 requiere confirmar Actions.
-RELEASE-02 sigue pendiente de publicación.
-DEPLOY-02 sigue pendiente de VM externa.
-No marcar como terminada la validación real de IA ni la integración externa con n8n.
+Docker Engine 29.9.2 funciona en modo rootless como servicio de usuario con linger y arranque habilitado. Compose es 5.6.1. Cgroups v2 y driver systemd comprobados. Limites agregados de la cuenta: 4 GiB RAM, 1 GiB swap, dos CPU equivalentes y 768 tareas. Un contenedor temporal comprobo limites propios de memoria, swap, CPU y procesos.
 
-RESPALDOS
+INSTALACION DE LA APLICACION
 
-D:\aeroguard\backups\
-- aeroguard-20261021.bundle: historial Git completo al cierre del código, verificado.
-- aeroguard-cierre-20261021.dump y su manifiesto.
-- aeroguard-cierre-20261021.reports: archivos originales.
-- ZIP del código/historial y ZIP separado de datos privados.
-- Copias privadas de configuración.
+Carpeta del servidor: /home/aeroguard/AeroGuard
+Proyecto Compose: aeroguard-server
+Configuracion: deploy/.env privado, generado una sola vez.
+Preparacion de repositorio instalada: 2f1971ffbb40e590a8025226f24690a1240213cf.
+Las imagenes originales contienen la candidata del commit 33f1cfd5aa9f7ef3d059c2dbc054f293ae4e7db1 y estan fijadas por digest en deploy/release.json. No se reconstruyeron.
 
-Los respaldos anteriores al commit de este archivo no incluyen este prompt. El código sí está respaldado en ellos; el archivo de continuación queda además en GitHub.
-No subir los datos privados ni archivos .env a GitHub.
-Los contenedores de prueba quedaron detenidos, conservando sus volúmenes.
+PostgreSQL/PostGIS, RabbitMQ, backend y frontend estan saludables. Solo se publica 127.0.0.1:8080. El acceso directo al puerto por la red privada fue rechazado y el tunel SSH desde el portatil abrio la interfaz y el health de produccion. Worker y simulador son perfiles opcionales y permanecen desactivados.
 
-Al retomar, comprobar rama/commit y Actions. Continuar sobre este trabajo sin reiniciar el proyecto ni descartar cambios.
+El usuario inicial es admin. Su contrasena se consulta exclusivamente en el .env privado del servidor. No inventar ni reutilizar la contrasena de exposicion. La base es nueva: sin sensores ni detecciones demo. Hay un reporte CSV claramente identificado como comprobacion de persistencia.
+
+COMPROBACIONES Y RESPALDO
+
+- Login correcto y acceso anonimo a usuarios bloqueado.
+- Reinicio completo del stack de esta instalacion, conservando el mismo reporte y hash.
+- Backup PostgreSQL restaurado en una base nueva; conteos coincidentes.
+- Copia del archivo original de reporte con hash coincidente.
+- No se reinicio el anfitrion ni se probo una caida electrica.
+
+Evidencia publica saneada: deploy/evidence/2026-10-28-server.json.
+Informe: deploy/RESULTADO_2026_10_28.md.
+Los backups y evidencias privadas quedan en /home/aeroguard/AeroGuard/backups. No subir dumps, reportes originales ni .env. La restauracion de prueba es una base nueva dentro del PostgreSQL de esta instalacion y no reemplazo la base activa.
+
+Antes de operar desde otro equipo, comprobar identidad SSH autorizada y estado actual del servidor. El tunel de este portatil no es permanente: abrirlo de nuevo con la conexion habitual y -L 127.0.0.1:8080:127.0.0.1:8080 -N, manteniendo ExitOnForwardFailure y comprobacion de huella. No reutilizar un puerto local ocupado.
+
+DESARROLLO Y PRUEBAS DEL PORTATIL
+
+Se preparo .venv con constraints.txt y backend/requirements-expo.txt. No se borro el entorno antiguo venv ni entrega_release/.
+
+Se corrigio test_production_rejects_demo_and_default_secret para no leer .env privado y probar el secreto predeterminado explicitamente. La validacion de produccion de la aplicacion no cambio. La causa se reprodujo antes del ajuste.
+
+99 pruebas funcionales aprobaron, incluidas las cinco del adaptador HTTP de vision. Las once pruebas enfocadas de Deploy aprobaron. Sintaxis: 55 Python y 16 JavaScript sin errores.
+
+Carga local Windows: 10 y 50 clientes aprobaron. Con 100 clientes hubo P95 113,154 ms, superior al objetivo de 100 ms, sin errores ni mensajes perdidos. Una ejecucion anterior midio 111,689 ms. No se relajo el umbral. No declarar 102 pruebas aprobadas en este portatil. Investigar el rendimiento y medir el destino real antes de prometer esa capacidad.
+
+Checks anteriores del commit 2f1971f aprobados:
+https://github.com/JuanFe28/Aeroguard/actions/runs/40591568345
+https://github.com/JuanFe28/Aeroguard/actions/runs/40591568343
+Consultar los checks del nuevo HEAD despues del cierre; no asumir que los resultados anteriores corresponden a los cambios de hoy.
+
+RELEASE
+
+Release v1.2.0-rc.1 ya completada y cuatro imagenes GHCR publicadas. RELEASE-01/02 tienen evidencia. No es un sistema de drones validado operativamente. El tablero Trello no se modifico.
+
+SIGUIENTE TRABAJO
+
+1. Confirmar los checks del HEAD del PR y revisar los cambios antes de integrar a main.
+2. Corregir los datos sinteticos del dictamen inicial y del boton SOAR: no presentarlos como un incidente real.
+3. Revisar recuperacion de trabajos del scheduler, que puede omitir una ejecucion despues de adquirirla.
+4. Reproducir y resolver la latencia local de 100 clientes sin debilitar el criterio y medir rendimiento en el destino.
+5. Probar UUID y referencias inexistentes sobre PostgreSQL y revisar los hallazgos bajos pendientes.
+6. SMTP, n8n externo, receptor de alertas, sensores fisicos y validacion independiente de vision siguen pendientes.
+7. La auditoria conserva el checkpoint en la misma BD y necesita anclaje externo para otro nivel de garantia.
+8. Revisar las actualizaciones pendientes del anfitrion por separado, sin actualizar indiscriminadamente ni interrumpir otros servicios.
+9. El propietario debe confirmar revocacion/restriccion de la antigua clave Google Maps, retirada del frontend pero presente en el historial.
+
+No regenerar configuracion, reinstalar Docker ni recrear volumenes por seguir instrucciones historicas. No declarar completadas las integraciones o validaciones que siguen pendientes. Conservar secretos, respaldos y datos de conexion fuera del repositorio.
