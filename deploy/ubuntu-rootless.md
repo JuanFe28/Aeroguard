@@ -1,6 +1,8 @@
 # Preparación de Ubuntu con Docker rootless
 
-Este procedimiento está en preparación. El ensayo de `compose.yml` aprobado en CI no valida todavía una instalación rootless en el servidor real. No ejecutar directamente la instalación general de Docker: en Ubuntu sus paquetes pueden arrancar un motor del sistema automáticamente.
+La preparación rootless se completó y verificó en el servidor real el 28 de octubre de 2026. Se conservaron los servicios existentes y se bloquearon las unidades globales nuevas antes de instalar los cinco paquetes previstos. La cuenta exclusiva no tiene sudo y dispone de límites agregados de 4 GiB de RAM, 1 GiB de swap, dos CPU equivalentes y 768 tareas. Un contenedor temporal confirmó la aplicación de límites propios de memoria, swap, CPU y procesos. [Evidencia del servidor](evidence/2026-10-28-server.json).
+
+Los pasos siguientes conservan el historial del procedimiento. No deben repetirse sobre la instalación existente. El ensayo de CI por sí solo no reemplaza las comprobaciones del destino. No ejecutar directamente la instalación general de Docker: sus paquetes pueden arrancar un motor global automáticamente.
 
 El destino revisado mediante capturas del operador es Ubuntu 24.04 LTS, `x86_64`, con capacidad suficiente para un ensayo pequeño. Docker aún no está disponible. UFW figura activo con bloqueo de entrada por defecto y permisos específicos; SSH, Samba y Tailscale ya prestan servicios. Las capturas no comprueban las reglas completas de Tailscale, los permisos de la tailnet ni el router. Conservar esta configuración y el acceso SSH existente.
 
@@ -52,7 +54,7 @@ Revisar la salida antes de ejecutar una instalación real del motor. Si algún p
 
 El operador confirmó esta etapa el 27/10/2026: se descargó el catálogo firmado del repositorio oficial y terminó la simulación, sin instalar el motor. El plan proponía cinco paquetes nuevos, cero eliminaciones y cero actualizaciones: Docker CE/CLI y rootless extras 29.9.2, containerd.io 2.4.2 y Compose 5.6.1. Esas son las versiones propuestas entonces, no una instalación comprobada; volver a revisar el plan al retomar. Permanecían 16 paquetes sin actualizar. No repetir el bloque de creación del repositorio, porque los archivos de la fuente y su clave ya existen.
 
-## Etapas posteriores, pendientes de ejecutar y comprobar
+## Etapas posteriores realizadas y verificadas el 28 de octubre
 
 1. Revisar la simulación, paquetes existentes y repositorios. Preparar el repositorio oficial de Docker y comprobar su clave. Instalar únicamente los paquetes necesarios, impidiendo el arranque automático de las nuevas unidades Docker del sistema antes de instalar el motor. No deshabilitar servicios previos de otro proyecto.
 2. Crear una cuenta exclusiva sin contraseña de acceso remoto, sin sudo ni grupos de archivos compartidos, con carpeta privada. No dar acceso al socket de Docker del sistema a la cuenta personal. Conservar las claves SSH en el portátil autorizado.
@@ -61,7 +63,7 @@ El operador confirmó esta etapa el 27/10/2026: se descargó el catálogo firmad
 5. Guardar el repositorio y los secretos bajo la cuenta exclusiva. Continuar con la validación de `compose.yml`, las imágenes fijadas y la instalación nueva descrita en [README.md](README.md).
 6. Comprobar acceso por túnel, escucha solo en loopback, salud, autenticación, persistencia y recuperación. Comparar UFW, SSH, Tailscale y acceso a archivos con el estado anterior. No publicar la API de Docker por TCP.
 
-Los límites de recursos del modo rootless requieren cgroup v2 y systemd; su presencia en Compose no demuestra que el host los aplique. Docker rootless reduce privilegios del motor y de los contenedores; no certifica la seguridad completa del servidor. DEPLOY-02 continúa pendiente.
+Los límites de recursos del modo rootless requieren cgroup v2 y systemd; su presencia en Compose no demuestra que el host los aplique. En este destino se comprobaron los valores agregados y los límites dentro de un contenedor. Docker rootless reduce privilegios del motor y de los contenedores; no certifica la seguridad completa del servidor. El cierre del stack básico y sus límites se documenta en [la guía de Deploy](README.md#criterio-de-cierre-de-deploy).
 
 ## Fuentes oficiales
 

@@ -1,97 +1,76 @@
-CONTINUAR AEROGUARD — ESTADO DEL 27/10/2026
+CONTINUAR AEROGUARD - CIERRE DEL 28/10/2026
 
 Repositorio: https://github.com/JuanFe28/Aeroguard
-Carpeta de esta sesión: D:\aeroguard
-Rama de preparación de Deploy: deploy/academic-vm
-Base de main revisada: f3a32a5c843ca11f9c7d128900d5513d3df262ba
+Rama: deploy/academic-vm
+PR en borrador: https://github.com/JuanFe28/Aeroguard/pull/1
+Main se conserva en f3a32a5. Deploy no se ha fusionado.
+Consultar el HEAD del PR y sus checks al retomar; este cierre agrega documentos y una correccion de aislamiento de pruebas.
 
-PRIORIDAD DEL USUARIO
+ESTADO REAL DEL SERVIDOR
 
-Mantener el servidor privado. No abrir puertos del router, no activar Tailscale Funnel, no desactivar comprobaciones de huellas SSH y no copiar claves privadas al laboratorio ni a GitHub. El agente no accedió al servidor: el operador ejecutó desde su portátil autorizado las consultas, instalación de dependencias y preparación de Apt descritas abajo. No se desplegó AeroGuard ni se cambiaron intencionadamente reglas de firewall, SSH o Tailscale.
+DEPLOY-02 cuenta ahora con comprobacion del destino real para el stack basico. El servidor es privado. No abrir router, Tailscale Funnel ni puertos publicos y no desactivar las huellas SSH. No copiar claves privadas ni secretos a GitHub.
 
-RELEASE YA COMPLETADA
+El operador autorizo desde su portatil la instalacion con sudo. Se instalaron solo los cinco paquetes Docker simulados, sin actualizar ni eliminar otros paquetes. Las unidades globales nuevas de Docker/containerd se bloquearon antes de instalar para evitar un motor privilegiado. SSH, Samba, Tailscale y AppArmor permanecieron activos. No se cambiaron firewall, router ni ACL de Tailscale.
 
-El usuario completó desde su portátil el 26/10/2026 la candidata v1.2.0-rc.1. Los cambios se recuperaron de GitHub, no de archivos del portátil.
+Se creo la cuenta exclusiva aeroguard sin sudo, sin contrasena de acceso y con carpeta privada. Su clave publica de acceso esta restringida al portatil autorizado. La politica global de SSH se conserva. La clave privada permanece en el portatil.
 
-- 05b0f35: versión candidata, servicio HTTP de IA y publicación.
-- 33f1cfd: corrección de herramientas de empaquetado; commit de la candidata.
-- f3a32a5: workflow de capturas adicionales.
-- Tag v1.2.0-rc.1 y prerelease apuntan a 33f1cfd5aa9f7ef3d059c2dbc054f293ae4e7db1.
-- Release y cuatro publicaciones en GHCR correctas: https://github.com/JuanFe28/Aeroguard/actions/runs/40342511908
-- Se comprobaron las cuatro imágenes públicas, sus digests y etiquetas de revisión/versionado. El manifiesto está en deploy/release.json.
-- 102 pruebas aprobaron al revisar main el 27/10/2026.
-- Las capturas adicionales se cancelaron, pero conservaron artefactos. No bloquean RELEASE-01/02.
+Docker Engine 29.9.2 funciona en modo rootless como servicio de usuario con linger y arranque habilitado. Compose es 5.6.1. Cgroups v2 y driver systemd comprobados. Limites agregados de la cuenta: 4 GiB RAM, 1 GiB swap, dos CPU equivalentes y 768 tareas. Un contenedor temporal comprobo limites propios de memoria, swap, CPU y procesos.
 
-RELEASE-01 y RELEASE-02 pueden marcarse completas según las dos tarjetas del JSON de Trello aportado. El tablero no se modificó. Sigue siendo una candidata académica, no un sistema operativo de drones validado.
+INSTALACION DE LA APLICACION
 
-DEPLOY PREPARADO Y ENSAYADO LOCALMENTE
+Carpeta del servidor: /home/aeroguard/AeroGuard
+Proyecto Compose: aeroguard-server
+Configuracion: deploy/.env privado, generado una sola vez.
+Preparacion de repositorio instalada: 2f1971ffbb40e590a8025226f24690a1240213cf.
+Las imagenes originales contienen la candidata del commit 33f1cfd5aa9f7ef3d059c2dbc054f293ae4e7db1 y estan fijadas por digest en deploy/release.json. No se reconstruyeron.
 
-- deploy/compose.yml: consume imágenes publicadas por digest, sin reconstruirlas.
-- PostgreSQL/PostGIS y RabbitMQ también fijados por digest. RabbitMQ 4.3.6 utiliza un volumen nuevo: no migrar un broker existente directamente.
-- Solo frontend publica un puerto, siempre en 127.0.0.1. Backend, PostgreSQL, RabbitMQ y perfiles opcionales permanecen en la red interna.
-- Backend no root, raíz de solo lectura, capacidades reducidas y límites de recursos.
-- scripts/prepare_deploy.py genera .env privado; no imprime secretos ni sobrescribe configuraciones existentes.
-- scripts/check_deploy_layout.py rechaza puertos públicos, servicios privilegiados, redes de datos externas y montajes del host fuera del init.sql conocido.
-- scripts/check_deploy.py verifica salud y autenticación sin seguir redirecciones ni usar proxies del entorno. Login de bootstrap solo con opción explícita; revoca sesiones del administrador al finalizar.
-- deploy/preflight.sh solo consulta recursos, versión y servicios del destino. Exige Docker Engine 28 o posterior.
-- .github/workflows/deploy-check.yml ensaya la instalación en un runner de GitHub; no se conecta a un servidor remoto ni contiene claves SSH.
-- Once pruebas enfocadas aprobaron y Bandit no reportó hallazgos medios/altos en los tres scripts nuevos.
-- Ensayo local completo con credenciales nuevas, login real, cuatro servicios saludables, puertos inspeccionados y reporte conservado tras reiniciar todo el stack.
-- Evidencias públicas saneadas en deploy/evidence/2026-10-27-local.json.
+PostgreSQL/PostGIS, RabbitMQ, backend y frontend estan saludables. Solo se publica 127.0.0.1:8080. El acceso directo al puerto por la red privada fue rechazado y el tunel SSH desde el portatil abrio la interfaz y el health de produccion. Worker y simulador son perfiles opcionales y permanecen desactivados.
 
-SIGUIENTE PASO REAL
+El usuario inicial es admin. Su contrasena se consulta exclusivamente en el .env privado del servidor. No inventar ni reutilizar la contrasena de exposicion. La base es nueva: sin sensores ni detecciones demo. Hay un reporte CSV claramente identificado como comprobacion de persistencia.
 
-Los doce archivos de preparación están subidos en deploy/academic-vm, commit 431ccc1. PR en borrador: https://github.com/JuanFe28/Aeroguard/pull/1. Aprobaron la verificación académica https://github.com/JuanFe28/Aeroguard/actions/runs/40587895419 y el ensayo privado https://github.com/JuanFe28/Aeroguard/actions/runs/40587895628. Main no se ha modificado con este despliegue.
+COMPROBACIONES Y RESPALDO
 
-El operador ya mostró capturas del servidor desde su portátil autorizado: Ubuntu 24.04 LTS x86_64, CPU/RAM/espacio suficientes para un ensayo pequeño y puerto 8080 libre. Docker no está disponible. UFW activo con bloqueo entrante por defecto y reglas específicas; SSH, Samba y Tailscale están en uso. Las capturas no constituyen una revisión completa del router, las reglas efectivas de Tailscale ni las ACL de la tailnet. No publicar las capturas, direcciones ni datos de acceso en el repositorio.
+- Login correcto y acceso anonimo a usuarios bloqueado.
+- Reinicio completo del stack de esta instalacion, conservando el mismo reporte y hash.
+- Backup PostgreSQL restaurado en una base nueva; conteos coincidentes.
+- Copia del archivo original de reporte con hash coincidente.
+- No se reinicio el anfitrion ni se probo una caida electrica.
 
-Se propone Docker rootless bajo una cuenta exclusiva sin sudo ni acceso a los archivos personales. Plan en deploy/ubuntu-rootless.md. El operador confirmó cgroup2fs, cuenta aeroguard inexistente y unidades Docker/containerd inactivas. Instaló cinco dependencias nuevas: libslirp0, libsubid4, slirp4netns, systemd-container y uidmap; sin eliminar/actualizar paquetes ni necesidad de reiniciar servicios. ca-certificates, curl y dbus-user-session ya estaban instalados.
+Evidencia publica saneada: deploy/evidence/2026-10-28-server.json.
+Informe: deploy/RESULTADO_2026_10_28.md.
+Los backups y evidencias privadas quedan en /home/aeroguard/AeroGuard/backups. No subir dumps, reportes originales ni .env. La restauracion de prueba es una base nueva dentro del PostgreSQL de esta instalacion y no reemplazo la base activa.
 
-La última captura confirma que el operador añadió /etc/apt/keyrings/docker.asc y /etc/apt/sources.list.d/docker.sources para Ubuntu noble amd64, actualizó el catálogo y terminó la simulación del motor. El plan proponía Docker CE/CLI/rootless extras 29.9.2, containerd.io 2.4.2 y Compose 5.6.1: cinco paquetes nuevos, cero eliminaciones y cero actualizaciones. Hay 16 paquetes pendientes de revisión, incluyendo determinar cuáles corresponden a seguridad. No se instaló el motor ni se crearon cuentas. NO repetir el bloque que crea la fuente Docker: sus archivos ya existen. Al volver, inspeccionar esa configuración y repetir únicamente la simulación actualizada antes de una instalación real.
+Antes de operar desde otro equipo, comprobar identidad SSH autorizada y estado actual del servidor. El tunel de este portatil no es permanente: abrirlo de nuevo con la conexion habitual y -L 127.0.0.1:8080:127.0.0.1:8080 -N, manteniendo ExitOnForwardFailure y comprobacion de huella. No reutilizar un puerto local ocupado.
 
-DEPLOY-02 NO está terminado. Este equipo del laboratorio no tiene la identidad SSH necesaria; las operaciones del servidor se realizan desde el portátil autorizado. No pedir que envíen la clave por el chat. El destino físico y una VM son alternativas; no se requieren ambos. Falta instalar y verificar rootless, delegación/límites efectivos y acceso privado antes de continuar con la aplicación.
+DESARROLLO Y PRUEBAS DEL PORTATIL
 
-Después de revisar el destino, seguir deploy/README.md para una instalación nueva con nombre de proyecto y volúmenes propios, acceso por túnel privado, prueba de persistencia y recuperación. No modificar firewall, ACL de Tailscale, Docker global ni servicios anteriores sin comprobar primero su estado y el efecto concreto.
+Se preparo .venv con constraints.txt y backend/requirements-expo.txt. No se borro el entorno antiguo venv ni entrega_release/.
 
-PENDIENTES DE APLICACIÓN Y OPERACIÓN
+Se corrigio test_production_rejects_demo_and_default_secret para no leer .env privado y probar el secreto predeterminado explicitamente. La validacion de produccion de la aplicacion no cambio. La causa se reprodujo antes del ajuste.
 
-- Ejemplos tácticos iniciales y payload del botón SOAR todavía requieren revisar sus valores sintéticos.
-- Revisar UUID/referencias inválidas y hallazgos bajos del análisis estático.
-- No existe modelo de drones validado ni sensores físicos comprobados.
-- SMTP, n8n externo y receptor de alertas siguen pendientes.
-- El scheduler puede omitir una ejecución si cae después de adquirirla; revisar recuperación.
-- El checkpoint de auditoría permanece en la misma BD; falta anclaje externo.
-- El propietario debe revocar/restringir la antigua clave Google Maps retirada del frontend pero presente en el historial.
+99 pruebas funcionales aprobaron, incluidas las cinco del adaptador HTTP de vision. Las once pruebas enfocadas de Deploy aprobaron. Sintaxis: 55 Python y 16 JavaScript sin errores.
 
-RESPALDOS Y EQUIPO LOCAL
+Carga local Windows: 10 y 50 clientes aprobaron. Con 100 clientes hubo P95 113,154 ms, superior al objetivo de 100 ms, sin errores ni mensajes perdidos. Una ejecucion anterior midio 111,689 ms. No se relajo el umbral. No declarar 102 pruebas aprobadas en este portatil. Investigar el rendimiento y medir el destino real antes de prometer esa capacidad.
 
-Los respaldos anteriores siguen en D:\aeroguard\backups, fuera de Git. Incluyen bundle, dump PostgreSQL, reportes y configuración privada. No subirlos al repositorio.
+Checks anteriores del commit 2f1971f aprobados:
+https://github.com/JuanFe28/Aeroguard/actions/runs/40591568345
+https://github.com/JuanFe28/Aeroguard/actions/runs/40591568343
+Consultar los checks del nuevo HEAD despues del cierre; no asumir que los resultados anteriores corresponden a los cambios de hoy.
 
-Docker Desktop falló al arrancar por sockets temporales de Inference/Secrets Engine. Se recuperó conservando las carpetas de runtime en cuarentena y la configuración previa en backups/docker-desktop-20261027. Se desactivaron Docker AI/Model Runner opcionales; los volúmenes anteriores permanecieron presentes. La actualización de la versión antigua de Docker Desktop queda pendiente, sin restablecer datos.
+RELEASE
 
-Al retomar, consultar el PR de deploy/academic-vm y sus checks. No declarar desplegado el servidor por haber pasado un ensayo local. No mezclar credenciales privadas, IP del servidor ni llaves con el código público.
+Release v1.2.0-rc.1 ya completada y cuatro imagenes GHCR publicadas. RELEASE-01/02 tienen evidencia. No es un sistema de drones validado operativamente. El tablero Trello no se modifico.
 
-PUNTO DE CIERRE Y CONTINUACIÓN DESDE CUALQUIER EQUIPO
+SIGUIENTE TRABAJO
 
-El avance se conserva en el PR #1 y en su rama; este Deploy NO se fusionó a main. Los cambios funcionales de preparación están en 431ccc1; 3809b61 y 30bc6c2 registran el procedimiento y las etapas iniciales. Los dos workflows de 30bc6c2 aprobaron: https://github.com/JuanFe28/Aeroguard/actions/runs/40590174841 y https://github.com/JuanFe28/Aeroguard/actions/runs/40590174809. El último commit de cierre es documental: consultar el HEAD del PR para su SHA y sus checks, sin confundirlo con esos runs anteriores.
+1. Confirmar los checks del HEAD del PR y revisar los cambios antes de integrar a main.
+2. Corregir los datos sinteticos del dictamen inicial y del boton SOAR: no presentarlos como un incidente real.
+3. Revisar recuperacion de trabajos del scheduler, que puede omitir una ejecucion despues de adquirirla.
+4. Reproducir y resolver la latencia local de 100 clientes sin debilitar el criterio y medir rendimiento en el destino.
+5. Probar UUID y referencias inexistentes sobre PostgreSQL y revisar los hallazgos bajos pendientes.
+6. SMTP, n8n externo, receptor de alertas, sensores fisicos y validacion independiente de vision siguen pendientes.
+7. La auditoria conserva el checkpoint en la misma BD y necesita anclaje externo para otro nivel de garantia.
+8. Revisar las actualizaciones pendientes del anfitrion por separado, sin actualizar indiscriminadamente ni interrumpir otros servicios.
+9. El propietario debe confirmar revocacion/restriccion de la antigua clave Google Maps, retirada del frontend pero presente en el historial.
 
-En un equipo sin copia del proyecto:
-git clone --branch deploy/academic-vm https://github.com/JuanFe28/Aeroguard.git
-cd Aeroguard
-
-Si ya existe una copia: revisar primero git status; conservar los cambios locales sin reset ni limpiezas. Después hacer fetch, cambiar a deploy/academic-vm y actualizar con pull --ff-only cuando el árbol de trabajo lo permita. Leer este archivo, deploy/README.md y deploy/ubuntu-rootless.md. La carpeta D:\aeroguard solo corresponde al laboratorio; no es un requisito para otros equipos.
-
-Orden para continuar:
-1. Verificar el HEAD y los checks del PR, y el estado actual del servidor por el portátil autorizado. Consultar los archivos de Apt ya creados; no sobrescribirlos. Revisar las 16 actualizaciones pendientes sin ejecutar una actualización indiscriminada ni reiniciar el servidor durante una sesión de trabajo sin revisar efectos.
-2. Repetir la simulación de los cinco paquetes Docker, revisar versiones, dependencias y cualquier cambio desde hoy. Todavía NO hay un motor Docker funcionando en el servidor por este procedimiento.
-3. Instalar Docker impidiendo antes el arranque automático de nuevas unidades globales, sin detener servicios anteriores de otros proyectos. Crear la cuenta exclusiva sin acceso remoto por contraseña ni sudo y con carpeta privada.
-4. Preparar rootless con systemd, verificar AppArmor/RootlessKit, cgroup v2 y delegación de CPU/memoria/procesos solo para esa cuenta. Aplicar y probar límites efectivos, incluidos límites agregados para proteger el anfitrión.
-5. Descargar la rama y preparar el .env privado bajo esa cuenta. Instalar las imágenes fijadas; comprobar loopback, túnel, autenticación, salud, persistencia, respaldo y recuperación. Conservar Samba, SSH, Tailscale y el firewall existentes. No cerrar DEPLOY-02 hasta verificar el destino real.
-
-Para acceder al servidor se necesita un equipo autorizado; este texto no contiene credenciales. Los respaldos locales, .env y datos privados no están en GitHub. Se mantiene un bundle actualizado en backups/aeroguard-cierre-20261027.bundle, privado y fuera de Git. Las evidencias públicas saneadas sí están en deploy/evidence.
-
-CIERRE DE SESIONES
-
-Después de subir este punto de cierre, retirar la credencial Git local de camachoab21-cmd con Git Credential Manager y comprobar que ya no figura. No tocar credenciales de otras personas. Eso no cierra cookies del navegador ni desconecta por sí mismo la integración de GitHub de Codex.
-
-El control del navegador se detuvo al no poder determinar con suficiente confianza la URL actual; no se ha confirmado el cierre de la sesión web. El usuario debe cerrar GitHub en el navegador que utilizó (posiblemente Chrome), y cualquier sesión de correo o Codex abierta en un equipo compartido. En la terminal SSH del portátil autorizado, ejecutar sudo -k y después exit para invalidar el caché de sudo de esa terminal y cerrar la conexión. No cerrar Tailscale ni detener SSH/Samba del servidor: son servicios persistentes, no sesiones web abiertas por este trabajo.
+No regenerar configuracion, reinstalar Docker ni recrear volumenes por seguir instrucciones historicas. No declarar completadas las integraciones o validaciones que siguen pendientes. Conservar secretos, respaldos y datos de conexion fuera del repositorio.

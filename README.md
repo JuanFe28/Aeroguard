@@ -19,7 +19,7 @@ Las evidencias y el estado de Trello están en [correcciones del 21-10-2026](doc
 
 ## Preparación de Deploy privado
 
-La candidata publicada puede ensayarse con [el paquete de despliegue privado](deploy/README.md). Utiliza imágenes fijadas por digest, credenciales generadas localmente, redes separadas y un único puerto en `127.0.0.1`, accesible mediante túnel SSH. La preparación no instala nada en un servidor remoto. **DEPLOY-02 permanece pendiente de la comprobación en el servidor real.**
+La candidata publicada utiliza [el paquete de despliegue privado](deploy/README.md), con imágenes fijadas por digest, credenciales generadas localmente y un único puerto en `127.0.0.1`, accesible mediante túnel SSH. El 28 de octubre se verificó una instalación nueva en el servidor real con Docker rootless, límites efectivos, autenticación, persistencia y restauración de respaldo. [Evidencia saneada del servidor](deploy/evidence/2026-10-28-server.json). DEPLOY-02 cuenta con estas comprobaciones para el stack básico; las integraciones externas y la validación operativa de sensores e IA siguen pendientes.
 
 ## Exposición local en Windows
 

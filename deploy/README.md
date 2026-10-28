@@ -75,6 +75,10 @@ Esto conserva los volúmenes. Evitar `down -v`, limpiezas de volúmenes y cambio
 
 El manifiesto `release.json` permite comprobar las imágenes exactas. Para regresar a una versión anterior, conservar su manifiesto y evaluar la compatibilidad del esquema antes de arrancarla. No restaurar una base sobre otra activa sin una recuperación ensayada.
 
+En la instalación real del 28 de octubre, el proyecto quedó bajo la cuenta exclusiva `aeroguard`, en `/home/aeroguard/AeroGuard`, con el nombre Compose `aeroguard-server`. Utiliza el contexto Docker rootless de esa cuenta. Los respaldos y la contraseña inicial permanecen privados en el servidor. No regenerar `.env`, reutilizar sus volúmenes en otro proyecto ni repetir los pasos de instalación como si fueran una máquina nueva.
+
 ## Criterio de cierre de Deploy
 
-La validación local y el workflow `deploy-check.yml` son ensayos. **DEPLOY-02 sigue pendiente** hasta verificar en el servidor real: recursos, imágenes, salud, acceso por túnel, bloqueo de accesos anónimos, persistencia tras reinicio de contenedores y recuperación. No se ha instalado este paquete en el servidor de casa durante la preparación.
+La validación local y el workflow `deploy-check.yml` son ensayos. El 28 de octubre de 2026 se comprobó además el servidor real: Docker rootless 29.9.2, cgroups v2 con systemd y límites efectivos, cuatro servicios saludables, acceso por túnel, login y bloqueo anónimo, reporte conservado tras reiniciar el stack y respaldo restaurado en una base nueva. El puerto 8080 escucha solo en loopback y no admite acceso directo por la red privada. SSH, Samba y Tailscale permanecieron activos. [Evidencia saneada](evidence/2026-10-28-server.json).
+
+**DEPLOY-02 puede cerrarse para esta instalación privada del stack básico.** No se reinició el anfitrión ni se validaron sensores físicos, SMTP, n8n externo o precisión de visión. Los perfiles opcionales de worker y simulador permanecen desactivados. El primer usuario es `admin`; la contraseña generada se consulta de forma privada en `deploy/.env` y no se publica aquí.
