@@ -1,3 +1,45 @@
+PRIORIDAD AL RETOMAR EN LA UNIVERSIDAD - PAUSA DEL 28/10/2026
+
+El usuario pidió detener la revisión y guardar el punto de continuación. Esta sección tiene prioridad sobre el historial inferior. NO considerar terminada la prueba de toda la aplicación.
+
+Repositorio: https://github.com/JuanFe28/Aeroguard
+Rama de trabajo: deploy/academic-vm
+PR #1 en borrador, sin fusionar. Main no se actualizó con esta rama.
+Código previo a este cierre: b72b4db. Consultar git log para el commit que agrega este registro.
+Informe parcial y capturas: docs/qa-2026-10-28/README.md
+Resultados individuales: docs/qa-2026-10-28/casos.json
+
+PARA EMPEZAR EN LA U
+
+1. En el clon de la universidad, ejecutar git status y conservar cualquier cambio local antes de actualizar. No usar reset --hard.
+2. Ejecutar git fetch origin, cambiar a deploy/academic-vm (o crearla siguiendo origin/deploy/academic-vm si no existe) y git pull --ff-only.
+3. Leer este archivo y el informe parcial. No repetir la instalación del servidor ni regenerar secretos o volúmenes.
+4. Continuar las correcciones y pruebas en una copia aislada. La universidad no tiene automáticamente una identidad SSH autorizada. No copiar la clave privada del portátil. Si no hay acceso autorizado, avanzar con QA local y reservar las operaciones del servidor para el equipo autorizado.
+
+ESTADO DE QA AL PAUSAR
+
+Los cuatro contenedores del proyecto aeroguard-qa20261028 quedaron detenidos con sus volúmenes conservados. El túnel local 18082 se cerró. La instalación principal siguió funcionando y sus cuatro servicios estaban saludables en la última comprobación. El túnel de producción del portátil no es permanente ni estará disponible por sí solo en la universidad.
+
+QA usa /home/aeroguard/qa-20261028/.env privado. La contraseña del operador sintético queda en /home/aeroguard/qa-20261028/users.private.json, permiso 600. No imprimirlas, incluirlas en prompts ni subirlas a GitHub. El admin de QA usa la configuración privada de QA, no la de producción.
+
+Para reanudar QA desde una identidad autorizada y bajo la cuenta del motor rootless:
+cd /home/aeroguard/AeroGuard
+docker compose --env-file /home/aeroguard/qa-20261028/.env -f deploy/compose.yml up -d --wait --wait-timeout 180
+
+Confirmar primero que COMPOSE_PROJECT_NAME de ese archivo sea aeroguard-qa20261028. Abrir un túnel local 18082 al puerto de QA con la conexión SSH autorizada y comprobación de huella. No publicar direcciones privadas ni cambiar las restricciones de SSH. No ejecutar down -v.
+
+PUNTO EXACTO Y PRÓXIMO TRABAJO
+
+La pantalla quedó en Usuarios, modal Editar Usuario de QA UI Operador abierto, sin cambios guardados. La sesión puede haber caducado al retomar. Se conservaron el operador qa_ui_operador_20261028 y el sensor QA-UI-SENSOR-EDITADO inactivo. La zona QA-UI-ZONA-EDITADA ya se eliminó con permiso del usuario.
+
+Atender los fallos del informe, priorizando Guardar/Restablecer configuración, incidente ficticio y SOAR, desactivación involuntaria al editar sensores, altitudes de zonas y pérdida del formulario de usuario ante un error. No se corrigieron aún estos fallos. Reproducir, corregir y verificar cada uno con evidencia nueva.
+
+Falta revisar edición y estados de usuarios, permisos por rol, detecciones, alertas, trayectorias, reportes, historial y auditoría. No marcar toda la prueba de escritorio como aprobada. Conservar los resultados originales y distinguir observaciones de fallos confirmados. La API sí rechazó los cuatro valores inválidos de sensores; el fallo registrado corresponde a validación HTML.
+
+El servidor sigue usando imágenes de la versión 1.2.0-rc.1 del commit 33f1cfd. Un commit documental no actualiza esas imágenes. Para desplegar futuros arreglos preparar otra versión y verificarla; no sobrescribir una etiqueta publicada. No fusionar el PR automáticamente. El problema de latencia local con 100 clientes sigue pendiente, como se detalla abajo.
+
+--- HISTORIAL DEL DESPLIEGUE Y PRUEBAS ANTERIORES ---
+
 CONTINUAR AEROGUARD - CIERRE DEL 28/10/2026
 
 Repositorio: https://github.com/JuanFe28/Aeroguard

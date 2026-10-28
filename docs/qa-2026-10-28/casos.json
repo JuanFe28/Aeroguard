@@ -1,0 +1,258 @@
+[
+  {
+    "id": "LOGIN-01",
+    "resultado": "APROBADO",
+    "detalle": "Campos vacíos bloqueados con mensaje de usuario obligatorio"
+  },
+  {
+    "id": "VISUAL-01",
+    "resultado": "FALLO",
+    "detalle": "Pie del acceso muestra v1.0 para la candidata 1.2.0-rc.1"
+  },
+  {
+    "id": "LOGIN-QA-01",
+    "resultado": "APROBADO",
+    "detalle": "⚠️\nEl nombre de usuario es obligatorio."
+  },
+  {
+    "id": "LOGIN-QA-02",
+    "resultado": "APROBADO",
+    "detalle": "⚠️\nLa contraseña es obligatoria."
+  },
+  {
+    "id": "LOGIN-QA-03",
+    "resultado": "APROBADO",
+    "detalle": "Mostrar contraseña de prueba"
+  },
+  {
+    "id": "LOGIN-QA-04",
+    "resultado": "APROBADO",
+    "detalle": "⚠️\nCredenciales incorrectas."
+  },
+  {
+    "id": "RECUP-01",
+    "resultado": "APROBADO",
+    "detalle": "Correo vacío rechazado con aviso visible"
+  },
+  {
+    "id": "RECUP-02",
+    "resultado": "OBSERVACION",
+    "detalle": "Campo marca typeMismatch pero el botón llegó a enviar el correo mal formado; revisar mensaje 422",
+    "aclaracion": "Observación pendiente de reproducción. No se verificó el código HTTP exacto ni un envío de correo real."
+  },
+  {
+    "id": "LOGIN-QA-05",
+    "resultado": "APROBADO",
+    "detalle": "Login real de QA redirige al dashboard"
+  },
+  {
+    "id": "DASH-01",
+    "resultado": "FALLO",
+    "detalle": "Base de QA sin detecciones muestra un dictamen CRITICAL e incidente UAV-HK-402 precargado"
+  },
+  {
+    "id": "DASH-02",
+    "resultado": "APROBADO",
+    "detalle": "Capas, centrar, ajustar y zoom ejercitados; mapa visible"
+  },
+  {
+    "id": "DASH-03",
+    "resultado": "FALLO",
+    "detalle": "Mute cambia visualmente, pero Probar Sirena en MUTE genera TypeError: Toast.warning is not a function"
+  },
+  {
+    "id": "DASH-04",
+    "resultado": "FALLO",
+    "detalle": "SOAR se ejecuta con cero detecciones mediante datos de ejemplo"
+  },
+  {
+    "id": "SHELL-01",
+    "resultado": "FALLO",
+    "detalle": "El botón Perfil de usuario no abre vista ni diálogo"
+  },
+  {
+    "id": "SHELL-02",
+    "resultado": "OBSERVACION",
+    "detalle": "Sidebar colapsa y expande, pero su etiqueta accesible sigue diciendo Colapsar al estar contraído"
+  },
+  {
+    "id": "SENSOR-01",
+    "resultado": "APROBADO",
+    "detalle": "Alta vacía bloqueada por campos obligatorios"
+  },
+  {
+    "id": "SENSOR-LIMITE-Latitud *",
+    "resultado": "FALLO",
+    "detalle": "{\"max\":\"\",\"min\":\"\",\"valid\":true}",
+    "aclaracion": "Falta una restricción inmediata en el cliente HTML. La API sí rechazó estos valores; no se confirmó almacenamiento de sensores inválidos."
+  },
+  {
+    "id": "SENSOR-LIMITE-Longitud *",
+    "resultado": "FALLO",
+    "detalle": "{\"max\":\"\",\"min\":\"\",\"valid\":true}",
+    "aclaracion": "Falta una restricción inmediata en el cliente HTML. La API sí rechazó estos valores; no se confirmó almacenamiento de sensores inválidos."
+  },
+  {
+    "id": "SENSOR-LIMITE-Altitud (m)",
+    "resultado": "FALLO",
+    "detalle": "{\"max\":\"\",\"min\":\"\",\"valid\":true}",
+    "aclaracion": "Falta una restricción inmediata en el cliente HTML. La API sí rechazó estos valores; no se confirmó almacenamiento de sensores inválidos."
+  },
+  {
+    "id": "SENSOR-LIMITE-Rango (km)",
+    "resultado": "FALLO",
+    "detalle": "{\"max\":\"\",\"min\":\"\",\"valid\":true}",
+    "aclaracion": "Falta una restricción inmediata en el cliente HTML. La API sí rechazó estos valores; no se confirmó almacenamiento de sensores inválidos."
+  },
+  {
+    "id": "SENSOR-02",
+    "resultado": "APROBADO",
+    "detalle": "Sensor válido creado en QA y mostrado en lista"
+  },
+  {
+    "id": "SENSOR-VALIDACION-API",
+    "resultado": "OBSERVACION",
+    "detalle": "Valores fuera de rango rechazados por API con avisos en inglés; se revisan restricciones HTML"
+  },
+  {
+    "id": "SENSOR-03A",
+    "resultado": "APROBADO",
+    "detalle": "Cancelar activación conserva sensor inactivo"
+  },
+  {
+    "id": "SENSOR-03",
+    "resultado": "APROBADO",
+    "detalle": "Activación confirmada termina en En línea"
+  },
+  {
+    "id": "SENSOR-ESTADISTICAS",
+    "resultado": "FALLO",
+    "detalle": "Los contadores no se recalculan automáticamente después de crear o activar un sensor",
+    "aclaracion": "Actualizar manualmente sí recalculó los contadores."
+  },
+  {
+    "id": "SENSOR-04",
+    "resultado": "APROBADO",
+    "detalle": "Cancelar edición conserva el nombre anterior"
+  },
+  {
+    "id": "SENSOR-05",
+    "resultado": "APROBADO",
+    "detalle": "Edición confirmada tras Actualizar: nombre EDITADO y rango 2 km"
+  },
+  {
+    "id": "SENSOR-06",
+    "resultado": "FALLO",
+    "detalle": "Editar un sensor activo lo cambia a Inactivo sin que el usuario cambie su estado"
+  },
+  {
+    "id": "ZONA-01",
+    "resultado": "APROBADO",
+    "detalle": "Nombre obligatorio al crear zona"
+  },
+  {
+    "id": "ZONA-02",
+    "resultado": "FALLO",
+    "detalle": "Se creó zona con altitud mínima 600m mayor que máxima 500m"
+  },
+  {
+    "id": "ZONA-03",
+    "resultado": "OBSERVACION",
+    "detalle": "Zona recién creada figura activa con 0 puntos antes de dibujar polígono"
+  },
+  {
+    "id": "ZONA-04",
+    "resultado": "APROBADO",
+    "detalle": "Edición guarda nombre, severidad, altitudes y descripción; HTML se representa como texto literal"
+  },
+  {
+    "id": "ZONA-MAPA",
+    "resultado": "FALLO",
+    "detalle": "El proveedor de teselas CARTO muestra API KEY REQUIRED en lugar del mapa"
+  },
+  {
+    "id": "ZONA-05",
+    "resultado": "OBSERVACION",
+    "detalle": "Guardar polígono sin vértices cierra modo dibujo y la zona sigue activa con 0 puntos"
+  },
+  {
+    "id": "ZONA-06",
+    "resultado": "APROBADO",
+    "detalle": "Tres clics reales en mapa guardan polígono de 3 vértices"
+  },
+  {
+    "id": "ZONA-07",
+    "resultado": "APROBADO",
+    "detalle": "Desactivar zona cambia a Zona inactiva; botones de ciudades y Ver Todas responden"
+  },
+  {
+    "id": "ZONA-08",
+    "resultado": "APROBADO",
+    "detalle": "Eliminación irreversible de la zona QA autorizada por el usuario; lista queda vacía"
+  },
+  {
+    "id": "CONFIG-LIMITE-Altitud máxima",
+    "resultado": "APROBADO",
+    "detalle": "{\"max\":\"5000\",\"min\":\"50\",\"valid\":false}"
+  },
+  {
+    "id": "CONFIG-LIMITE-Umbral de detección de anomalías",
+    "resultado": "APROBADO",
+    "detalle": "{\"max\":\"5\",\"min\":\"1\",\"valid\":false}"
+  },
+  {
+    "id": "CONFIG-LIMITE-Velocidad mínima",
+    "resultado": "APROBADO",
+    "detalle": "{\"max\":\"\",\"min\":\"0\",\"valid\":false}"
+  },
+  {
+    "id": "CONFIG-LIMITE-Velocidad máxima",
+    "resultado": "APROBADO",
+    "detalle": "{\"max\":\"\",\"min\":\"10\",\"valid\":false}"
+  },
+  {
+    "id": "CONFIG-01",
+    "resultado": "APROBADO",
+    "detalle": "Slider llega a 99 y 50; controles numéricos bloquean valores bajo sus mínimos"
+  },
+  {
+    "id": "CONFIG-02",
+    "resultado": "FALLO",
+    "detalle": "Guardar configuración con valores válidos falla: Cannot read properties of null (reading checked)"
+  },
+  {
+    "id": "CONFIG-03",
+    "resultado": "FALLO",
+    "detalle": "Restablecer lanza TypeError: Cannot set properties of null (setting checked)"
+  },
+  {
+    "id": "USUARIO-01",
+    "resultado": "APROBADO",
+    "detalle": "Campos requeridos bloquean alta vacía"
+  },
+  {
+    "id": "USUARIO-02",
+    "resultado": "APROBADO",
+    "detalle": "Correo mal formado se bloquea por validación HTML"
+  },
+  {
+    "id": "USUARIO-03",
+    "resultado": "APROBADO",
+    "detalle": "Contraseña débil no crea usuario"
+  },
+  {
+    "id": "USUARIO-04",
+    "resultado": "FALLO",
+    "detalle": "Un error del backend cierra el formulario y pierde los campos ingresados"
+  },
+  {
+    "id": "USUARIO-05",
+    "resultado": "APROBADO",
+    "detalle": "Operador de QA creado y visible en tabla"
+  },
+  {
+    "id": "USUARIO-06",
+    "resultado": "APROBADO",
+    "detalle": "Búsqueda inexistente muestra Sin usuarios"
+  }
+]
