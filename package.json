@@ -1,6 +1,6 @@
 {
   "name": "aeroguard-cuas",
-  "version": "1.1.0",
+  "version": "1.2.0-rc.1",
   "description": "AeroGuard — Prototipo académico de detección experimental y monitoreo de drones",
   "private": true,
   "type": "module",
@@ -15,10 +15,15 @@
     "format:check": "prettier --check \"frontend/src/**/*.{js,css}\"",
     "format:write": "prettier --write \"frontend/src/**/*.{js,css}\"",
     "lint": "npm run check:syntax",
-    "test:backend": "python -m pytest backend/tests -q"
+    "test:backend": "python -m pytest backend/tests -q",
+    "test:frontend": "node --test tests/frontend_qa.test.js",
+    "test:app": "playwright test",
+    "test:app:report": "playwright show-report tmp/qa-app/html"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "^9.14.0",
+    "@playwright/test": "1.64.1",
     "eslint": "^9.14.0",
     "prettier": "^3.3.3"
   },

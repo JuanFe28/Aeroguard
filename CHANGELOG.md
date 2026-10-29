@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased] — aceptación completa de interfaz
+
+- Batería de 51 casos de navegador con Playwright/axe: once módulos a tres tamaños, formularios, botones, roles, descargas, WebSocket, contraste, excepciones y recortes interiores; informe y galería privados para aceptación visual humana.
+- El TXT del servidor ejecuta la batería al terminar el arranque de QA; proyecto/versión de QA validados antes de crear datos sintéticos.
+- Corregidos enlaces de detecciones/alertas, mensajes de alertas y selector de sensores reales en IA; logout revoca la sesión en backend.
+- Mejorados contraste, semántica ARIA y diseño móvil; mapas cancelan animaciones al salir. Dashboard usa OSM y describe 120 m como referencia visual de ejemplo.
+
+## [Unreleased] — QA del 29-10-2026
+
+- Corregidos configuración, edición de sensores/usuarios, Perfil y mapas; trayectorias históricas con tabla y estados explícitos.
+- Eliminados incidentes iniciales y telemetría de respaldo ficticios de SOAR.
+- Reportes programados y avance del cron confirmados juntos para permitir recuperación tras errores.
+- Añadidas validaciones de UUID, referencias, límites numéricos/paginación y notas de resolución; detección manual y alerta asociada persistidas juntas tras validar la geocerca.
+- Ampliadas las regresiones de roles, sesiones y recorrido integrado de telemetría a auditoría; preparados comandos de servidor y Compose privados de Monitor/QA.
+- Cambios aún sin release nueva ni actualización del servidor. Ver `docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md` para aceptación y límites.
+
 Este registro describe el código y la preparación local. No prueba que haya versiones publicadas. La política SemVer propuesta está en `docs/auditoria-2026-10-21/02_RELEASE.md`.
 
 ## [1.2.0-rc.1] — 2026-10-26

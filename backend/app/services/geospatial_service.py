@@ -30,8 +30,8 @@ class GeospatialService:
         normalized: List[List[float]] = []
         for item in raw_coords:
             if isinstance(item, dict):
-                lat = item.get("lat") or item.get("latitude")
-                lng = item.get("lng") or item.get("longitude")
+                lat = item.get("lat", item.get("latitude"))
+                lng = item.get("lng", item.get("longitude"))
                 if lat is not None and lng is not None:
                     normalized.append([float(lat), float(lng)])
             elif isinstance(item, (list, tuple)) and len(item) >= 2:
@@ -274,7 +274,8 @@ class GeospatialService:
         in_polygon = cls.is_point_in_polygon(lat, lng, coords)
         
         min_alt = float(getattr(zone, "min_altitude", 0.0) or 0.0)
-        max_alt = float(getattr(zone, "max_altitude", 500.0) or 500.0)
+        configured_max = getattr(zone, "max_altitude", None)
+        max_alt = 500.0 if configured_max is None else float(configured_max)
         in_altitude = (min_alt <= alt <= max_alt)
 
         is_breached = in_polygon and in_altitude

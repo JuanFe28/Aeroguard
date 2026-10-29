@@ -1,0 +1,25 @@
+# Solo junto al .env de QA y compose.source-qa.yml; nunca producción.
+services:
+  browser-qa:
+    profiles: [qa-ui]
+    build:
+      context: ..
+      dockerfile: tests/e2e/Dockerfile
+    init: true
+    restart: "no"
+    mem_limit: 1g
+    cpus: 1
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    shm_size: 256m
+    environment:
+      AEROGUARD_QA_URL: http://frontend
+      AEROGUARD_QA_CONFIRM: isolated
+      AEROGUARD_QA_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Se requiere .env de QA}
+      AEROGUARD_QA_OUTPUT: /evidence/results
+      AEROGUARD_QA_HTML: /evidence/html
+      AEROGUARD_QA_JSON: /evidence/results.json
+    volumes:
+      - ${AEROGUARD_QA_EVIDENCE:?Se requiere carpeta nueva de evidencia}:/evidence
+    networks: [default, entry]

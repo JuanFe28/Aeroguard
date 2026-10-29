@@ -84,6 +84,10 @@ reports/*.xlsx
 .env.development
 .env.production
 .env.test
+deploy/.env.monitoring
+deploy/secrets/
+deploy/qa-private/
+/ENTREGA_CASA_20261029.zip
 # Permitir explícitamente el archivo de plantilla
 !.env.example
 

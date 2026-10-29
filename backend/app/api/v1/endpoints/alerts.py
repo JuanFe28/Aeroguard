@@ -6,7 +6,7 @@ Gestión del ciclo de vida de alertas: emisión, asignación, resolución y noti
 from typing import List, Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 import structlog
@@ -15,29 +15,30 @@ from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
 from app.models.models import Alert, AlertStatus, AlertSeverity, AlertType
 from app.services.audit_service import log_audit
+from app.core.validation import UUIDText, valid_uuid
 
 router = APIRouter()
 logger = structlog.get_logger("AeroGuard-Alerts")
 
 
 class AlertCreateSchema(BaseModel):
-    detection_id: Optional[str] = None
+    detection_id: Optional[UUIDText] = None
     type: AlertType = AlertType.RESTRICTED_ZONE
     severity: AlertSeverity = AlertSeverity.HIGH
-    title: str
-    message: str
+    title: str = Field(min_length=1, max_length=255)
+    message: str = Field(min_length=1, max_length=10000)
 
 
 class AlertResolveSchema(BaseModel):
-    notes: str
+    notes: str = Field(min_length=1, max_length=10000, pattern=r'\S')
 
 
 @router.get("", summary="Listar alertas (RF-013)")
 async def list_alerts(
     status: Optional[AlertStatus] = None,
     severity: Optional[AlertSeverity] = None,
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("alerts:read")),
 ):
@@ -59,6 +60,9 @@ async def create_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Crea una nueva alerta de seguridad."""
+    from app.models.models import Detection
+    if body.detection_id and await db.get(Detection, body.detection_id) is None:
+        raise HTTPException(404, 'Detección no encontrada.')
     alert = Alert(
         detection_id=body.detection_id,
         type=body.type,
@@ -81,13 +85,21 @@ async def assign_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Asigna la alerta al operador especificado o al usuario actual si no se provee ID."""
-    query = select(Alert).where(Alert.id == alert_id)
+    query = select(Alert).where(Alert.id == valid_uuid(alert_id))
     result = await db.execute(query)
     alert = result.scalar_one_or_none()
     if not alert:
         raise HTTPException(status_code=404, detail="Alerta no encontrada.")
 
     assigned_target = user_id or str(getattr(current_user, "id", ""))
+    from app.models.models import User
+    from app.core.security import has_permission
+    assigned_target = valid_uuid(assigned_target)
+    target = await db.get(User, assigned_target)
+    if target is None:
+        raise HTTPException(404, 'Usuario asignado no encontrado.')
+    if not target.is_active or not has_permission(target.role, 'alerts:write'):
+        raise HTTPException(422, 'El destinatario debe estar activo y autorizado para gestionar alertas.')
     setattr(alert, "assigned_to_id", assigned_target)
     setattr(alert, "status", AlertStatus.ASSIGNED)
 
@@ -114,7 +126,7 @@ async def resolve_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Marca la alerta como resuelta e incluye notas de resolución obligatorias."""
-    query = select(Alert).where(Alert.id == alert_id)
+    query = select(Alert).where(Alert.id == valid_uuid(alert_id))
     result = await db.execute(query)
     alert = result.scalar_one_or_none()
     if not alert:
@@ -147,20 +159,16 @@ async def resolve_alert(
 class AIVerdictSchema(BaseModel):
     incident_id: str
     ai_verdict: str
-    drone_id: Optional[str] = "UAV-HK-402"
-    threat_level: Optional[str] = "CRITICAL"
+    drone_id: Optional[str] = None
+    threat_level: Optional[str] = None
 
 
 _latest_verdict: dict = {
-    "incident_id": "INC-2026-0891",
-    "timestamp": datetime.now(timezone.utc).isoformat(),
-    "ai_verdict": (
-        "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida "
-        "de Bucaramanga Centro. Vector constante y cinemática automatizada. "
-        "Acción: Verificar visualmente y notificar al responsable de seguridad."
-    ),
-    "threat_level": "CRITICAL",
-    "drone_id": "UAV-HK-402"
+    "incident_id": None,
+    "timestamp": None,
+    "ai_verdict": "Sin dictámenes registrados.",
+    "threat_level": None,
+    "drone_id": None
 }
 
 
@@ -181,8 +189,8 @@ async def register_ai_verdict(
         "incident_id": body.incident_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "ai_verdict": body.ai_verdict,
-        "threat_level": body.threat_level or "CRITICAL",
-        "drone_id": body.drone_id or "UAV-HK-402"
+        "threat_level": body.threat_level,
+        "drone_id": body.drone_id
     }
 
     try:
@@ -198,26 +206,28 @@ async def register_ai_verdict(
 
 
 class DroneTelemetrySchema(BaseModel):
-    drone_id: str = "UAV-HK-402"
-    latitude: float = 7.1193
-    longitude: float = -73.1227
-    altitude_m: float = 145.0
-    speed_ms: float = 19.4
-    heading_deg: float = 182.0
-    ai_confidence: Optional[float] = 0.94
+    model_config = ConfigDict(allow_inf_nan=False)
+    drone_id: str = Field(min_length=1)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    altitude_m: float = Field(ge=0, le=15000)
+    speed_ms: float = Field(ge=0)
+    heading_deg: float = Field(ge=0, le=360)
+    ai_confidence: Optional[float] = Field(default=None, ge=0, le=1)
 
 
 class ZoneInfoSchema(BaseModel):
-    name: str = "Perímetro Seguridad UTS / Bucaramanga Centro"
-    max_allowed_altitude_m: float = 120.0
+    model_config = ConfigDict(allow_inf_nan=False)
+    name: str = Field(min_length=1)
+    max_allowed_altitude_m: float = Field(ge=0, le=15000)
     restriction_type: Optional[str] = "NO_FLY_ZONE"
 
 
 class TriggerIncidentSchema(BaseModel):
-    event_type: Optional[str] = "GEOFENCE_BREACH_CRITICAL"
+    event_type: Optional[str] = "TELEMETRY_REVIEW"
     incident_id: Optional[str] = None
-    drone: Optional[DroneTelemetrySchema] = None
-    zone: Optional[ZoneInfoSchema] = None
+    drone: DroneTelemetrySchema
+    zone: ZoneInfoSchema
 
 
 @router.post("/trigger-incident", summary="Disparar análisis de incidente táctico hacia n8n / Agente IA")
@@ -234,23 +244,11 @@ async def trigger_tactical_incident(
     from app.services.ai_tactical_agent_service import ai_tactical_service
 
     payload = {
-        "event_type": body.event_type or "GEOFENCE_BREACH_CRITICAL",
+        "event_type": body.event_type or "TELEMETRY_REVIEW",
         "incident_id": body.incident_id or f"INC-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "drone": body.drone.model_dump() if body.drone else {
-            "drone_id": "UAV-HK-402",
-            "latitude": 7.1193,
-            "longitude": -73.1227,
-            "altitude_m": 145.0,
-            "speed_ms": 19.4,
-            "heading_deg": 182.0,
-            "ai_confidence": 0.94
-        },
-        "zone": body.zone.model_dump() if body.zone else {
-            "name": "Perímetro Seguridad UTS / Bucaramanga Centro",
-            "max_allowed_altitude_m": 120.0,
-            "restriction_type": "NO_FLY_ZONE"
-        }
+        "drone": body.drone.model_dump(),
+        "zone": body.zone.model_dump()
     }
 
     result = await ai_tactical_service.analyze_incident(payload)

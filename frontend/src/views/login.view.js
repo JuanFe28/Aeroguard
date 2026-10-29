@@ -202,7 +202,7 @@ export class LoginView {
       </div>
 
       <div class="login-footer">
-        AeroGuard v1.0 — Prototipo Académico · UTS<br>
+        AeroGuard v1.2.0-rc.1 — Prototipo Académico · UTS<br>
         <span style="opacity:0.5">© 2026 — Solo para uso educativo</span>
       </div>
     </div>

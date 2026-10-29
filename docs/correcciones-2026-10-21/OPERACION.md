@@ -1,5 +1,7 @@
 # Operación académica de AeroGuard 1.2.0
 
+Revisión del 29/10/2026 para la rama `codex/qa-continuation`: incorpora los cambios de QA aún no instalados en el servidor privado. La candidata allí documentada sigue siendo rc.1; el apartado de recuperación del scheduler actualizado describe el código nuevo. La aceptación por entorno está en [la lista del servidor](../qa-2026-10-29/ACEPTACION_SERVIDOR.md).
+
 Este procedimiento corresponde al código corregido el 21-10-2026. La instalación integrada se ensayó en contenedores locales aislados; no equivale a un despliegue aceptado en una VM externa.
 
 ## Antes de iniciar
@@ -24,7 +26,33 @@ Una API no disponible produce un error visible. La interfaz no debe aceptarse co
 
 Consultar historial y auditoría con los filtros requeridos. Exportar CSV, Excel o PDF y conservar el archivo original y su SHA-256. Una huella detecta cambios; no es firma digital ni certificación pericial. La fuente es la BD, que también puede contener muestras sembradas en desarrollo. Los reportes se limitan a 5.000 filas e indican truncamiento; dividir el rango cuando corresponda.
 
-Las fechas de la interfaz abarcan días completos en UTC. La API recibe instantes ISO 8601. Las programaciones usan cron de cinco campos y UTC; revisar `next_run`, `last_run` y la lista de reportes. La adquisición evita ejecución duplicada; una caída tras adquirir el trabajo puede omitir una ejecución, que debe regenerarse manualmente. No hay entrega automática por correo ni garantía de ejecución exactamente una vez.
+Las fechas de los filtros de reportes abarcan días completos en UTC. La API recibe instantes ISO 8601. Las programaciones usan cron de cinco campos y UTC; revisar `next_run`, `last_run` y la lista de reportes. En el código corregido del 29/10, reporte y avance del cron se confirman en una transacción; los errores con rollback conservan la fecha vencida para reintentar. No se reconstruyen todos los intervalos históricos perdidos. Una caída puede dejar archivos sin registro y un corte durante el commit tiene resultado incierto: revisar antes de regenerar manualmente. No hay entrega automática por correo ni garantía distribuida de ejecución exactamente una vez. Véanse [las pruebas de recuperación y sus límites](../qa-2026-10-29/SCHEDULER_RECUPERACION.md). La imagen antigua rc.1 aún presenta el riesgo anterior de omitir una ejecución.
+
+## Roles y estados de usuario
+
+| Rol | Operaciones disponibles en la API |
+|---|---|
+| Administrador | Usuarios, configuración, sensores, zonas, detecciones, alertas, reportes y auditoría |
+| Operador | Consulta detecciones/zonas/sensores; ingesta telemetría; gestiona detecciones y alertas; consulta historial |
+| Analista | Consulta detecciones, alertas, zonas e historial; genera/descarga reportes y consulta auditoría |
+
+El operador no genera ni descarga reportes; el analista no asigna ni resuelve alertas. La restricción la aplica la API aunque alguien abra una ruta de interfaz manualmente. Desactivar una cuenta o cambiar su rol revoca las sesiones anteriores. Reactivarla requiere un login nuevo. Un administrador no puede desactivar ni cambiar el rol de su propia sesión; debe conservarse al menos un administrador activo.
+
+## Trayectorias y datos recibidos
+
+Seleccionar una detección y cargar la trayectoria. La vista muestra las muestras históricas en 2D, los puntos inicial/final y la tabla con fecha, posición, altitud, velocidad y rumbo. Una única muestra no permite reconstruir un recorrido; la pantalla lo indica. Actualizar el selector consulta hasta 50 detecciones recientes. No hay reproducción temporal ni predicción.
+
+Conservar un `object_id` estable por sensor para acumular un seguimiento. La fecha enviada por el sensor se normaliza a UTC; si no incluye zona horaria se interpreta como UTC. Esto no acredita la sincronización de su reloj. La tabla se presenta en la hora local del navegador. La distancia es horizontal y la velocidad media corresponde al promedio de las muestras, no a una estimación por distancia/tiempo.
+
+Cada adaptador debe documentar unidades y referencia vertical AGL/MSL. No tratar una coincidencia con un polígono configurado como una infracción aeronáutica ni una identificación del piloto. La matriz de entidades y fuentes está en [Trayectorias y autoridades](../qa-2026-10-29/TRAYECTORIAS_Y_AUTORIDADES.md).
+
+## Gestión de errores y alertas
+
+El código de QA rechaza UUID inválidos con 422 y referencias inexistentes con 404 en los recursos comprobados. No alterar IDs para evitar estos errores. Las listas de detecciones, alertas, usuarios y auditoría aceptan `skip` no negativo y `limit` entre 1 y 500. En actualización de sensores y campos obligatorios de zonas, omitir conserva el valor; `null` explícito se rechaza.
+
+Antes de asignar una alerta, verificar que el destinatario exista, esté activo y tenga permiso de gestión de alertas. Resolver requiere una nota con contenido. El reporte y la auditoría conservan lo registrado; un resultado de prueba debe identificarse como sintético. El endpoint de detección manual valida la existencia de sensor/zona y exige que la posición coincida con la geocerca activa indicada antes de generar la alerta asociada.
+
+En la interfaz, Perfil consulta la identidad de la sesión; no cambia la contraseña. Ante un error de correo duplicado, corregir el formulario conservado y reenviar. No interpretar un mensaje de éxito de la interfaz como aceptación del despliegue si no corresponde al commit y entorno previstos.
 
 La verificación de auditoría indica si revisó toda la cadena o solo un prefijo. Su punto de control está en la misma BD: un administrador de esa BD podría modificar ambos. La protección contra ese actor requiere anclaje externo, todavía pendiente.
 

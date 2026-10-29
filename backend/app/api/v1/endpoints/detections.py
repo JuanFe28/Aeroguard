@@ -6,7 +6,8 @@ Gestión, consulta y actualización de detecciones de drones.
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from app.core.validation import UUIDText, valid_uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
@@ -53,25 +54,26 @@ async def save_ai_analysis(detection_id: str, body: AIAnalysisSchema, db: AsyncS
 @router.get('/{detection_id}/ai-analysis')
 async def get_ai_analysis(detection_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('detections:read'))):
     from app.models.models import Event
-    event = (await db.execute(select(Event).where(Event.detection_id == detection_id, Event.event_type == 'ai_analysis').order_by(Event.timestamp.desc()).limit(1))).scalar_one_or_none()
+    event = (await db.execute(select(Event).where(Event.detection_id == valid_uuid(detection_id), Event.event_type == 'ai_analysis').order_by(Event.timestamp.desc()).limit(1))).scalar_one_or_none()
     if event is None:
         raise HTTPException(404, 'Sin análisis visual asociado.')
     return event.data
 
 
 class DetectionCreateSchema(BaseModel):
-    sensor_id: Optional[str] = None
-    latitude: float
-    longitude: float
-    altitude: float
-    speed: float
-    heading: float
+    model_config = ConfigDict(allow_inf_nan=False)
+    sensor_id: Optional[UUIDText] = None
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    altitude: float = Field(ge=0, le=15000)
+    speed: float = Field(ge=0, le=1000)
+    heading: float = Field(ge=0, le=360)
     threat_level: ThreatLevel = ThreatLevel.LOW
     ai_analyzed: bool = False
-    ai_confidence: Optional[float] = None
+    ai_confidence: Optional[float] = Field(default=None, ge=0, le=1)
     is_drone: bool = False
     image_url: Optional[str] = None
-    zone_id: Optional[str] = None
+    zone_id: Optional[UUIDText] = None
     notes: Optional[str] = None
 
 
@@ -80,8 +82,8 @@ async def list_detections(
     status: Optional[DetectionStatus] = None,
     threat_level: Optional[ThreatLevel] = None,
     is_drone: Optional[bool] = None,
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("detections:read")),
 ):
@@ -116,7 +118,7 @@ async def get_detection(
     current_user = Depends(require_permission("detections:read")),
 ):
     """Obtiene el detalle completo de una detección."""
-    query = select(Detection).where(Detection.id == detection_id)
+    query = select(Detection).where(Detection.id == valid_uuid(detection_id))
     result = await db.execute(query)
     detection = result.scalar_one_or_none()
     if not detection:
@@ -131,6 +133,16 @@ async def create_detection(
     current_user = Depends(require_permission("detections:write")),
 ):
     """Crea un nuevo registro de detección y su primer punto de trayectoria."""
+    from app.models.models import Sensor, RestrictedZone
+    from app.services.geospatial_service import geospatial_service
+    if body.sensor_id and await db.get(Sensor, body.sensor_id) is None:
+        raise HTTPException(404, 'Sensor no encontrado.')
+    if body.zone_id:
+        zone = await db.get(RestrictedZone, body.zone_id)
+        if zone is None:
+            raise HTTPException(404, 'Zona no encontrada.')
+        if not zone.is_active or not geospatial_service.evaluate_zone_breach(body.latitude, body.longitude, body.altitude, zone)['is_breached']:
+            raise HTTPException(422, 'La posición no coincide con la geocerca activa indicada.')
     detection = Detection(
         sensor_id=body.sensor_id,
         latitude=body.latitude,
@@ -160,8 +172,6 @@ async def create_detection(
         heading=body.heading,
     )
     db.add(trajectory_pt)
-    await db.commit()
-    await db.refresh(detection)
     
     # RF-012 Geofencing Trigger Automático
     if body.zone_id:
@@ -170,13 +180,12 @@ async def create_detection(
             type=AlertType.RESTRICTED_ZONE,
             severity=AlertSeverity.HIGH if body.threat_level == ThreatLevel.HIGH else AlertSeverity.MEDIUM,
             status=AlertStatus.OPEN,
-            title="Incursión en Zona Restringida",
-            message=f"El dron ha incursionado automáticamente en la zona restringida: {body.zone_id}."
+            title="Coincidencia con geocerca configurada",
+            message=f"La posición recibida coincide con la zona configurada {body.zone_id}; requiere verificación humana."
         )
         db.add(alert)
-        await db.commit()
-        await db.refresh(alert)
-
+    await db.commit()
+    await db.refresh(detection)
     return detection
 
 
@@ -188,7 +197,7 @@ async def update_detection_status(
     current_user = Depends(require_permission("detections:write")),
 ):
     """Cambia el estado de una detección (active, pending, resolved, discarded)."""
-    query = select(Detection).where(Detection.id == detection_id)
+    query = select(Detection).where(Detection.id == valid_uuid(detection_id))
     result = await db.execute(query)
     detection = result.scalar_one_or_none()
     if not detection:
@@ -207,6 +216,13 @@ async def get_trajectory(
     current_user = Depends(require_permission("detections:read")),
 ):
     """Retorna los puntos de trayectoria para reconstrucción de vuelo en 2D/3D."""
-    query = select(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection_id).order_by(TrajectoryPoint.timestamp.asc())
+    from uuid import UUID
+    try:
+        detection_id = str(UUID(detection_id))
+    except ValueError:
+        raise HTTPException(422, 'Identificador inválido.')
+    if await db.get(Detection, detection_id) is None:
+        raise HTTPException(404, 'Detección no encontrada.')
+    query = select(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection_id).order_by(TrajectoryPoint.timestamp.asc(), TrajectoryPoint.sequence.asc(), TrajectoryPoint.id.asc())
     result = await db.execute(query)
     return result.scalars().all()

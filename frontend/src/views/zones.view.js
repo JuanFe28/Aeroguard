@@ -72,14 +72,14 @@ export class ZonesViewModel {
     }
 
     this._map = L.map(containerId, {
+      zoomAnimation: false,
       center: [4.7110, -74.0721],
       zoom: 12,
       zoomControl: false,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(this._map);
 
@@ -133,12 +133,13 @@ export class ZonesViewModel {
       });
 
       poly.bindTooltip(`<strong>${escapeHtml(zone.name)}</strong><br>${escapeHtml(zone.description)}`, { sticky: true });
-      poly.on('click', () => this._selectZone(zone));
+      poly.on('click', () => { if (!this.state.isDrawing) this._selectZone(zone); });
       poly.addTo(this._map);
 
       // Label in center
       if (zone.center) {
         const label = L.marker(zone.center, {
+          title: `Zona ${zone.name}`,
           icon: L.divIcon({
             className: '',
             html: `<div style="background:${color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${escapeHtml(zone.name)}</div>`,
@@ -285,7 +286,7 @@ export class ZonesViewModel {
             <div class="alert-content">
               <div class="alert-title">Polígono de la zona</div>
               <div class="alert-message">
-                ${zone ? `La zona tiene ${zone.polygon?.length || 0} puntos definidos.` : 'Usa el mapa para definir el polígono haciendo clic en el botón "Dibujar Zona" después de crear la zona.'}
+                ${zone ? `La zona tiene ${zone.polygon?.length || 0} puntos definidos.` : 'La zona se crea inactiva. Selecciónala y usa "Dibujar Zona" para delimitar el polígono y activarla.'}
               </div>
             </div>
           </div>
@@ -307,14 +308,17 @@ export class ZonesViewModel {
 
     overlay.querySelector('#zone-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await this._saveZone(zone?.id);
-      overlay.remove();
+      if (await this._saveZone(zone?.id)) overlay.remove();
     });
   }
 
   async _saveZone(id = null) {
     const minAlt = parseFloat(document.getElementById('zone-min-alt')?.value || 0);
     const maxAlt = parseFloat(document.getElementById('zone-max-alt')?.value || 500);
+    if (!Number.isFinite(minAlt) || !Number.isFinite(maxAlt) || minAlt < 0 || minAlt > maxAlt || maxAlt > 15000) {
+      Toast.error('La altitud mínima debe ser menor o igual a la máxima, entre 0 y 15000 m.');
+      return false;
+    }
     const severity = document.getElementById('zone-severity')?.value || 'high';
     const name = document.getElementById('zone-name')?.value;
     const description = document.getElementById('zone-description')?.value;
@@ -332,7 +336,7 @@ export class ZonesViewModel {
       max_altitude: maxAlt,
       polygon,
       coordinates,
-      is_active: true,
+      is_active: existing?.isActive ?? false,
     };
 
     try {
@@ -364,8 +368,10 @@ export class ZonesViewModel {
         this.state.selectedZone = updated;
         this._renderZoneDetail();
       }
+      return true;
     } catch (err) {
       Toast.error(err.message || 'Error al guardar la zona');
+      return false;
     }
   }
 
@@ -442,7 +448,7 @@ export class ZonesViewModel {
       max_altitude: z.maxAltitude,
       polygon: this.state.drawPoints,
       coordinates: coords,
-      is_active: z.isActive,
+      is_active: true,
     };
 
     try {
@@ -549,7 +555,8 @@ export class ZonesViewModel {
            role="button"
            tabindex="0"
            aria-label="Zona: ${escapeHtml(zone.name)}"
-           aria-selected="${this.state.selectedZone?.id === zone.id}">
+           aria-pressed="${this.state.selectedZone?.id === zone.id}"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
         <div class="zone-card-header">
           <div>
             <div class="zone-card-name">${escapeHtml(zone.name)}</div>
@@ -585,7 +592,7 @@ export class ZonesViewModel {
   }
 
   destroy() {
-    if (this._map) { this._map.remove(); this._map = null; }
+    if (this._map) { this._map.stop(); this._map.remove(); this._map = null; }
   }
 }
 
@@ -642,7 +649,7 @@ export class ZonesView {
         <div class="card-header">
           <div class="card-title">📍 Zonas Configuradas</div>
         </div>
-        <div id="zones-list" style="display:flex;flex-direction:column;gap:var(--spacing-sm)" role="list" aria-label="Lista de zonas restringidas">
+        <div id="zones-list" style="display:flex;flex-direction:column;gap:var(--spacing-sm)" role="region" aria-label="Lista de zonas restringidas">
           <!-- Rendered by VM -->
         </div>
       </div>
