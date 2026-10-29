@@ -89,8 +89,13 @@ class UsersViewModel {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     overlay.querySelector('#user-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await this._saveUser(user?.id);
-      overlay.remove();
+      const button = overlay.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        if (await this._saveUser(user?.id)) overlay.remove();
+      } finally {
+        button.disabled = false;
+      }
     });
   }
 
@@ -118,7 +123,8 @@ class UsersViewModel {
       Toast.success(id ? 'Usuario actualizado.' : 'Usuario creado correctamente.');
       await this.load();
       this.renderTable();
-    } catch (err) { Toast.error(err.message); }
+      return true;
+    } catch (err) { Toast.error(err.message); return false; }
   }
 
   async toggleUser(id, isActive) {

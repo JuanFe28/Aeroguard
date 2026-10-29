@@ -159,9 +159,9 @@ export class DashboardView {
             <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-accent);">
               <span>🤖</span> DICTAMEN AGENTE IA (C-UAS)
             </div>
-            <div class="card-subtitle" style="font-size:11px" id="ai-verdict-time">Evaluación cinemática continua</div>
+            <div class="card-subtitle" style="font-size:11px" id="ai-verdict-time">Sin evaluación registrada</div>
           </div>
-          <span class="badge badge-danger" id="ai-verdict-badge" style="font-size:10px;font-weight:700;letter-spacing:0.5px">CRITICAL</span>
+          <span class="badge badge-info" id="ai-verdict-badge" style="font-size:10px;font-weight:700;letter-spacing:0.5px">SIN DATOS</span>
         </div>
         <div style="padding:var(--spacing-sm) var(--spacing-md) var(--spacing-md);display:flex;flex-direction:column;gap:var(--spacing-xs)">
           <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04)">
@@ -178,7 +178,7 @@ export class DashboardView {
             Cargando evaluación táctica del agente...
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-muted);padding-top:4px">
-            <span id="ai-verdict-incident" style="font-family:var(--font-mono);font-size:10px">INC-2026-0891</span>
+            <span id="ai-verdict-incident" style="font-family:var(--font-mono);font-size:10px">Sin incidente</span>
             <button class="btn btn-secondary btn-sm" id="btn-trigger-soar" style="font-size:10px;padding:3px 8px;gap:4px;display:flex;align-items:center;" title="Ejecutar análisis de Agente IA SOAR">
               <span>⚡</span> Disparar SOAR
             </button>

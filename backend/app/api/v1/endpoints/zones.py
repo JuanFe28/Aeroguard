@@ -5,6 +5,7 @@ de zonas de exclusión aérea compatibles con PostGIS (OGC WKT / GeoJSON).
 """
 
 from typing import List, Optional, Any, Dict
+import math
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,7 +23,26 @@ logger = structlog.get_logger("AeroGuard-Zones")
 
 def _normalize_coordinates(raw_coords: Any) -> list:
     """Normaliza coordenadas a formato [[lat, lng], ...]."""
-    return geospatial_service.normalize_coordinates(raw_coords)
+    try:
+        coordinates = geospatial_service.normalize_coordinates(raw_coords)
+    except (ValueError, TypeError, OverflowError):
+        raise HTTPException(status_code=422, detail="Coordenadas geográficas inválidas.")
+    if raw_coords is not None and len(coordinates) != len(raw_coords):
+        raise HTTPException(status_code=422, detail="Cada vértice requiere latitud y longitud.")
+    return coordinates
+
+
+def _validate_zone(min_altitude, max_altitude, coordinates, is_active):
+    if (min_altitude is None or max_altitude is None
+            or not math.isfinite(min_altitude) or not math.isfinite(max_altitude)
+            or not 0 <= min_altitude <= max_altitude <= 15000):
+        raise HTTPException(status_code=422, detail="Rango de altitud inválido (0–15000 m).")
+    for point in coordinates:
+        if not (len(point) == 2 and all(math.isfinite(v) for v in point)
+                and -90 <= point[0] <= 90 and -180 <= point[1] <= 180):
+            raise HTTPException(status_code=422, detail="Coordenadas geográficas inválidas.")
+    if is_active and len({tuple(point) for point in coordinates}) < 3:
+        raise HTTPException(status_code=422, detail="Una zona activa requiere al menos tres vértices distintos.")
 
 
 def _threat_level_to_color(level: Any) -> str:
@@ -213,6 +233,7 @@ async def create_zone(
     # Resolver coordenadas
     raw_coords = body.coordinates if body.coordinates is not None else body.polygon
     coords = _normalize_coordinates(raw_coords)
+    _validate_zone(body.min_altitude, body.max_altitude, coords, body.is_active)
 
     # Color
     color = body.color or _threat_level_to_color(threat)
@@ -279,6 +300,13 @@ async def update_zone(
         update_dict["coordinates"] = _normalize_coordinates(update_dict.pop("polygon"))
     elif "coordinates" in update_dict:
         update_dict["coordinates"] = _normalize_coordinates(update_dict["coordinates"])
+
+    _validate_zone(
+        update_dict.get("min_altitude", zone.min_altitude),
+        update_dict.get("max_altitude", zone.max_altitude),
+        update_dict.get("coordinates", zone.coordinates) or [],
+        update_dict.get("is_active", zone.is_active),
+    )
 
     for field, val in update_dict.items():
         if hasattr(zone, field):

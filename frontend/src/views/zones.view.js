@@ -77,9 +77,8 @@ export class ZonesViewModel {
       zoomControl: false,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(this._map);
 
@@ -285,7 +284,7 @@ export class ZonesViewModel {
             <div class="alert-content">
               <div class="alert-title">Polígono de la zona</div>
               <div class="alert-message">
-                ${zone ? `La zona tiene ${zone.polygon?.length || 0} puntos definidos.` : 'Usa el mapa para definir el polígono haciendo clic en el botón "Dibujar Zona" después de crear la zona.'}
+                ${zone ? `La zona tiene ${zone.polygon?.length || 0} puntos definidos.` : 'La zona se crea inactiva. Selecciónala y usa "Dibujar Zona" para delimitar el polígono y activarla.'}
               </div>
             </div>
           </div>
@@ -307,14 +306,17 @@ export class ZonesViewModel {
 
     overlay.querySelector('#zone-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await this._saveZone(zone?.id);
-      overlay.remove();
+      if (await this._saveZone(zone?.id)) overlay.remove();
     });
   }
 
   async _saveZone(id = null) {
     const minAlt = parseFloat(document.getElementById('zone-min-alt')?.value || 0);
     const maxAlt = parseFloat(document.getElementById('zone-max-alt')?.value || 500);
+    if (!Number.isFinite(minAlt) || !Number.isFinite(maxAlt) || minAlt < 0 || minAlt > maxAlt || maxAlt > 15000) {
+      Toast.error('La altitud mínima debe ser menor o igual a la máxima, entre 0 y 15000 m.');
+      return false;
+    }
     const severity = document.getElementById('zone-severity')?.value || 'high';
     const name = document.getElementById('zone-name')?.value;
     const description = document.getElementById('zone-description')?.value;
@@ -332,7 +334,7 @@ export class ZonesViewModel {
       max_altitude: maxAlt,
       polygon,
       coordinates,
-      is_active: true,
+      is_active: existing?.isActive ?? false,
     };
 
     try {
@@ -364,8 +366,10 @@ export class ZonesViewModel {
         this.state.selectedZone = updated;
         this._renderZoneDetail();
       }
+      return true;
     } catch (err) {
       Toast.error(err.message || 'Error al guardar la zona');
+      return false;
     }
   }
 
@@ -442,7 +446,7 @@ export class ZonesViewModel {
       max_altitude: z.maxAltitude,
       polygon: this.state.drawPoints,
       coordinates: coords,
-      is_active: z.isActive,
+      is_active: true,
     };
 
     try {

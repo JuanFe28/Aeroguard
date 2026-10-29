@@ -227,6 +227,7 @@ async def ingest_telemetry(
 
     # 3. Guardar punto de trayectoria
     point = TrajectoryPoint(
+        timestamp=(packet.timestamp.replace(tzinfo=timezone.utc) if packet.timestamp.tzinfo is None else packet.timestamp.astimezone(timezone.utc)) if packet.timestamp else datetime.now(timezone.utc),
         sequence=(await db.execute(select(func.count()).select_from(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection.id))).scalar_one(),
         detection_id=detection.id,
         latitude=packet.latitude,

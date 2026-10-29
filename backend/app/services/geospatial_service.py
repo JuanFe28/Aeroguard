@@ -30,8 +30,8 @@ class GeospatialService:
         normalized: List[List[float]] = []
         for item in raw_coords:
             if isinstance(item, dict):
-                lat = item.get("lat") or item.get("latitude")
-                lng = item.get("lng") or item.get("longitude")
+                lat = item.get("lat", item.get("latitude"))
+                lng = item.get("lng", item.get("longitude"))
                 if lat is not None and lng is not None:
                     normalized.append([float(lat), float(lng)])
             elif isinstance(item, (list, tuple)) and len(item) >= 2:

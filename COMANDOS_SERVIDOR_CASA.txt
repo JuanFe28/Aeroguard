@@ -1,0 +1,163 @@
+AEROGUARD - RETOMAR DESDE EL PORTATIL AUTORIZADO
+PUBLICACION PENDIENTE: el TXT y los cambios estan guardados localmente. GitHub
+rechazo crear la rama por permisos de la integracion. Antes del paso 2, publicar
+el paquete desde una cuenta autorizada siguiendo LEEME_PUBLICAR_CASA.txt.
+Fecha: 29/10/2026. Repositorio: https://github.com/JuanFe28/Aeroguard
+Rama destino: codex/qa-continuation (aun no publicada; no asumir que esta en main).
+
+ENCENDER EL SERVIDOR ANTES DE EMPEZAR.
+Los bloques externos se pegan en PowerShell del portatil. Introducir el alias SSH
+que ya entra como aeroguard. No copiar claves privadas ni cambiar la cuenta GitHub.
+Si la conexion habitual entra como otro usuario, parar y ajustar el procedimiento.
+
+ALCANCE
+- La instalacion anterior de produccion se conserva: /home/aeroguard/AeroGuard.
+- Configuracion privada existente: /home/aeroguard/AeroGuard/deploy/.env.
+- No reinstalar Docker, regenerar ese .env ni ejecutar down -v.
+- El codigo nuevo se descarga a otra carpeta; no sustituye las imagenes publicadas.
+- No ejecutar bloques siguientes si el anterior falla. No desactivar huellas SSH.
+- No pegar .env, contrasenas, tokens, dumps ni claves en chats o GitHub.
+- Estos comandos no fueron ejecutados en el servidor apagado.
+
+1. DIAGNOSTICO (solo lectura)
+Copiar todo este bloque en PowerShell:
+
+$aeroDestino = Read-Host "Alias SSH habitual de aeroguard"
+@'
+set -eu
+test "$(id -un)" = aeroguard || { echo "Usuario inesperado; detener"; exit 1; }
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
+cd /home/aeroguard/AeroGuard
+git log -1 --format='%h %s'
+docker version --format 'Engine: {{.Server.Version}}'
+docker compose version
+docker ps -a --filter label=com.docker.compose.project=aeroguard-server --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+docker stats --no-stream --format '{{.Name}}: {{.MemUsage}} / CPU {{.CPUPerc}}'
+curl --noproxy '*' --max-time 15 -fsS http://127.0.0.1:8080/health
+echo
+'@ | ssh -T $aeroDestino 'tr -d "\r" | bash -s'
+if ($LASTEXITCODE -ne 0) { throw "Diagnostico incompleto: revisar antes de continuar" }
+
+Si los servicios no arrancaron con el anfitrion, diagnosticarlo antes de continuar.
+No instalar ni reiniciar servicios globales para superar un error.
+
+2. DESCARGAR LA ENTREGA SIN TOCAR EL CHECKOUT ANTERIOR
+En la misma ventana de PowerShell:
+
+@'
+set -eu
+test "$(id -un)" = aeroguard
+cd /home/aeroguard/AeroGuard
+git fetch origin codex/qa-continuation
+target=/home/aeroguard/qa-handoff-20261029
+revision=$(git rev-parse origin/codex/qa-continuation)
+if [ -e "$target" ]; then
+  test "$(git -C "$target" rev-parse HEAD)" = "$revision" || { echo "La carpeta existente tiene otra revision; conservarla y revisar"; exit 1; }
+  test -z "$(git -C "$target" status --porcelain)" || { echo "Hay cambios locales; conservarlos y revisar"; exit 1; }
+else
+  git worktree add --detach "$target" "$revision"
+fi
+git -C "$target" log -1 --format='%h %s'
+'@ | ssh -T $aeroDestino 'tr -d "\r" | bash -s'
+if ($LASTEXITCODE -ne 0) { throw "Descarga incompleta" }
+
+Antes del paso 3, verificar en GitHub que los checks del PR de esta entrega esten
+aprobados. No confundirlos con los checks del commit anterior a884c39.
+
+3. RESPALDAR Y ANADIR MONITOREO A LA INSTALACION EXISTENTE
+Este paso crea respaldo y secretos privados de Grafana. No cambia las claves de
+la aplicacion ni recrea backend, PostgreSQL, RabbitMQ o frontend.
+El respaldo no incluye una nueva restauracion automatica: esa prueba queda en QA.
+
+@'
+set -eu
+test "$(id -un)" = aeroguard
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
+cd /home/aeroguard/qa-handoff-20261029
+envfile=/home/aeroguard/AeroGuard/deploy/.env
+test -f "$envfile"
+python3 - "$envfile" <<'PY'
+import sys
+from scripts.prepare_monitoring import read_values
+assert read_values(__import__('pathlib').Path(sys.argv[1])).get('COMPOSE_PROJECT_NAME') == 'aeroguard-server', 'Proyecto inesperado: detener'
+PY
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+db=$(docker compose --env-file "$envfile" -f deploy/compose.yml ps -q postgres)
+api=$(docker compose --env-file "$envfile" -f deploy/compose.yml ps -q backend)
+test -n "$db" && test -n "$api"
+umask 077
+python3 scripts/database_backup.py --container "$db" --reports-container "$api" --output "/home/aeroguard/AeroGuard/backups/pre-monitor-$stamp.dump"
+python3 scripts/prepare_monitoring.py --env-file "$envfile" --directory deploy
+docker compose --env-file "$envfile" --env-file deploy/.env.monitoring -f deploy/compose.yml -f deploy/compose.monitoring.yml config --quiet
+docker compose --env-file "$envfile" --env-file deploy/.env.monitoring -f deploy/compose.yml -f deploy/compose.monitoring.yml up -d --no-deps prometheus grafana
+for i in $(seq 1 30); do
+  if curl --noproxy '*' --max-time 5 -fsS http://127.0.0.1:19090/-/ready >/dev/null && curl --noproxy '*' --max-time 5 -fsS http://127.0.0.1:13000/api/health >/dev/null; then break; fi
+  sleep 3
+done
+curl --noproxy '*' --max-time 10 -fsS http://127.0.0.1:19090/-/ready
+curl --noproxy '*' --max-time 10 -fsS http://127.0.0.1:13000/api/health
+curl --noproxy '*' --max-time 10 -fsS http://127.0.0.1:19090/api/v1/targets | python3 -c 'import json,sys; d=json.load(sys.stdin); t=d["data"]["activeTargets"]; print(json.dumps([{ "job":x["labels"].get("job"), "health":x["health"] } for x in t])); assert any(x["labels"].get("job")=="aeroguard" and x["health"]=="up" for x in t), "Backend no recolectado"'
+'@ | ssh -T $aeroDestino 'tr -d "\r" | bash -s'
+if ($LASTEXITCODE -ne 0) { throw "Monitor no aceptado: conservar salida y revisar" }
+
+4. ABRIR TUNELES DESDE OTRA VENTANA DE POWERSHELL
+Se mantiene abierto mientras se revisa. No abre puertos publicos.
+
+$aeroDestino = Read-Host "Mismo alias SSH de aeroguard"
+ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:18080:127.0.0.1:8080 -L 127.0.0.1:19090:127.0.0.1:19090 -L 127.0.0.1:13000:127.0.0.1:13000 $aeroDestino
+
+Abrir http://127.0.0.1:18080, http://127.0.0.1:19090/targets y
+http://127.0.0.1:13000. Grafana: usuario admin, clave en el archivo PRIVADO
+/home/aeroguard/qa-handoff-20261029/deploy/.env.monitoring.
+Consultar esa clave solo en la terminal del equipo autorizado, sin pegarla aqui.
+Comprobar dashboard AeroGuard y sus cuatro paneles; guardar captura sin secretos.
+Si un puerto local esta ocupado, cambiar solo el puerto LOCAL del tunel.
+
+5. QA AISLADO DEL CODIGO NUEVO (NO ACTUALIZA PRODUCCION)
+El servidor tiene limites de recursos agregados. Revisar margen antes de compilar
+y levantar otro stack: no detener produccion ni aumentar limites automaticamente.
+Si no hay margen, este paso queda pendiente de planificar en ese equipo.
+
+@'
+set -eu
+test "$(id -un)" = aeroguard
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
+cd /home/aeroguard/qa-handoff-20261029
+export AEROGUARD_QA_TAG=$(git rev-parse --short=12 HEAD)
+if [ ! -e deploy/qa-private/.env ]; then
+  python3 scripts/prepare_deploy.py --directory deploy/qa-private --project aeroguard-qa20261029 --port 18082 --url http://localhost:18082
+fi
+python3 - <<'PY'
+from pathlib import Path
+from scripts.prepare_monitoring import read_values
+v=read_values(Path('deploy/qa-private/.env'))
+assert v.get('COMPOSE_PROJECT_NAME')=='aeroguard-qa20261029' and v.get('HTTP_PORT')=='18082', 'QA debe estar aislado'
+PY
+docker build --target test -f backend/Dockerfile .
+docker compose --env-file deploy/qa-private/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml config --quiet
+docker compose --env-file deploy/qa-private/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml up -d --build --wait --wait-timeout 180
+python3 scripts/check_deploy.py --env-file deploy/qa-private/.env --url http://localhost:18082 --output "backups/qa-$(date -u +%Y%m%dT%H%M%SZ).json"
+'@ | ssh -T $aeroDestino 'tr -d "\r" | bash -s'
+if ($LASTEXITCODE -ne 0) { throw "QA no aprobado: conservar la salida; no tocar produccion" }
+
+Para revisar QA, abrir otro tunel: ssh -N -o ExitOnForwardFailure=yes
+-L 127.0.0.1:18082:127.0.0.1:18082 TU_ALIAS_SSH (una sola linea).
+Entrar con el admin y la clave PRIVADA de deploy/qa-private/.env. La base es nueva,
+sin datos sembrados. No usar contrasenas conocidas de la exposicion universitaria.
+
+6. CIERRE DE TRELLO Y LIMITES
+- MONITOR-01: target aeroguard UP en el servidor y acceso anonimo a metrics bloqueado.
+- MONITOR-02: dashboard Grafana visible y paneles con datos del destino real.
+- MONITOR-03: falta provocar una alerta en QA y comprobarla. No desconectar sensores
+  ni parar el backend de produccion para simularla. Correo/SMS requiere receptor real.
+- DEPLOY-02 previo corresponde a rc.1; el codigo nuevo sigue en QA hasta aceptarlo.
+- Actualizar produccion requiere backup, imagenes nuevas identificadas, ensayo de
+  recuperacion y revision del resultado. No sobrescribir etiquetas rc.1 publicadas.
+- SMTP/n8n, sensores fisicos, validacion independiente de IA y aceptacion docente
+  no quedan terminados por ejecutar estos comandos.
+
+Conservar salidas saneadas, commit, fecha, captura de targets/dashboard y resultado
+de QA. El tablero Trello no se actualiza automaticamente por estos bloques.

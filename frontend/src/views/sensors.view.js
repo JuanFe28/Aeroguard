@@ -55,7 +55,7 @@ class SensorsViewModel {
         else await SensorService.activate(id);
       }
       Toast.success(`Sensor ${isActive ? 'desactivado' : 'activado'}.`);
-      await this.load(); this.renderGrid();
+      await this.load(); this.renderGrid(); this.renderStats();
     } catch (err) { Toast.error(err.message); }
   }
 
@@ -82,21 +82,21 @@ class SensorsViewModel {
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="sensor-lat">Latitud *</label>
-              <input id="sensor-lat" type="number" step="any" class="form-input" required value="${sensor?.latitude || ''}" placeholder="4.7110"/>
+              <input id="sensor-lat" type="number" step="any" min="-90" max="90" class="form-input" required value="${sensor?.latitude ?? ''}" placeholder="4.7110"/>
             </div>
             <div class="form-group">
               <label class="form-label" for="sensor-lng">Longitud *</label>
-              <input id="sensor-lng" type="number" step="any" class="form-input" required value="${sensor?.longitude || ''}" placeholder="-74.0721"/>
+              <input id="sensor-lng" type="number" step="any" min="-180" max="180" class="form-input" required value="${sensor?.longitude ?? ''}" placeholder="-74.0721"/>
             </div>
           </div>
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="sensor-alt">Altitud (m)</label>
-              <input id="sensor-alt" type="number" class="form-input" value="${sensor?.altitude || 0}"/>
+              <input id="sensor-alt" type="number" min="0" max="15000" class="form-input" value="${sensor?.altitude ?? 0}"/>
             </div>
             <div class="form-group">
               <label class="form-label" for="sensor-range">Rango (km)</label>
-              <input id="sensor-range" type="number" step="0.5" class="form-input" value="${sensor?.rangeKm || 5}"/>
+              <input id="sensor-range" type="number" step="any" min="0.001" max="1000" class="form-input" value="${sensor?.rangeKm ?? 5}"/>
             </div>
           </div>
           <div class="modal-footer">
@@ -120,7 +120,7 @@ class SensorsViewModel {
         longitude: parseFloat(document.getElementById('sensor-lng')?.value),
         altitude: parseFloat(document.getElementById('sensor-alt')?.value || 0),
         range_km: parseFloat(document.getElementById('sensor-range')?.value || 5),
-        status: SensorStatus.INACTIVE,
+        ...(sensor ? {} : { status: SensorStatus.INACTIVE }),
       };
       try {
         if (MockService.enabled) {
@@ -132,7 +132,7 @@ class SensorsViewModel {
         }
         Toast.success(sensor ? 'Sensor actualizado.' : 'Sensor agregado.');
         overlay.remove();
-        await this.load(); this.renderGrid();
+        await this.load(); this.renderGrid(); this.renderStats();
       } catch (err) { Toast.error(err.message); }
     });
   }

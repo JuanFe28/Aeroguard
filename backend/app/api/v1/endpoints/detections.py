@@ -207,6 +207,13 @@ async def get_trajectory(
     current_user = Depends(require_permission("detections:read")),
 ):
     """Retorna los puntos de trayectoria para reconstrucción de vuelo en 2D/3D."""
-    query = select(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection_id).order_by(TrajectoryPoint.timestamp.asc())
+    from uuid import UUID
+    try:
+        detection_id = str(UUID(detection_id))
+    except ValueError:
+        raise HTTPException(422, 'Identificador inválido.')
+    if await db.get(Detection, detection_id) is None:
+        raise HTTPException(404, 'Detección no encontrada.')
+    query = select(TrajectoryPoint).where(TrajectoryPoint.detection_id == detection_id).order_by(TrajectoryPoint.timestamp.asc(), TrajectoryPoint.sequence.asc(), TrajectoryPoint.id.asc())
     result = await db.execute(query)
     return result.scalars().all()

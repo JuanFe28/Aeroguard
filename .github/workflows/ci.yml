@@ -7,6 +7,22 @@ on:
 permissions:
   contents: read
 jobs:
+  handoff-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p test_prepare_monitoring.py -v
+      - run: python scripts/prepare_deploy.py --directory tmp/handoff --project aeroguard-ci
+      - run: python scripts/prepare_monitoring.py --env-file tmp/handoff/.env --directory deploy
+      - name: Validar Compose combinado sin mostrar secretos
+        env:
+          AEROGUARD_QA_TAG: ci
+        run: |
+          docker compose --env-file tmp/handoff/.env --env-file deploy/.env.monitoring -f deploy/compose.yml -f deploy/compose.monitoring.yml config --quiet
+          docker compose --env-file tmp/handoff/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml config --quiet
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -22,6 +38,7 @@ jobs:
       - run: python -m pip install -c constraints.txt -r backend/requirements-expo.txt pip-audit==2.9.0
       # La auditoría de dependencias bloquea si hay avisos; no se silencian.
       - run: python scripts/release_checks.py --output tmp/ci-evidence --audit-dependencies
+      - run: node --test tests/frontend_qa.test.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:

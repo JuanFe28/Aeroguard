@@ -6,7 +6,7 @@ Gestión del ciclo de vida de alertas: emisión, asignación, resolución y noti
 from typing import List, Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 import structlog
@@ -147,20 +147,16 @@ async def resolve_alert(
 class AIVerdictSchema(BaseModel):
     incident_id: str
     ai_verdict: str
-    drone_id: Optional[str] = "UAV-HK-402"
-    threat_level: Optional[str] = "CRITICAL"
+    drone_id: Optional[str] = None
+    threat_level: Optional[str] = None
 
 
 _latest_verdict: dict = {
-    "incident_id": "INC-2026-0891",
-    "timestamp": datetime.now(timezone.utc).isoformat(),
-    "ai_verdict": (
-        "UAV-402 mantiene rumbo sur a 145m sobrepasando el techo de 120m en la zona restringida "
-        "de Bucaramanga Centro. Vector constante y cinemática automatizada. "
-        "Acción: Verificar visualmente y notificar al responsable de seguridad."
-    ),
-    "threat_level": "CRITICAL",
-    "drone_id": "UAV-HK-402"
+    "incident_id": None,
+    "timestamp": None,
+    "ai_verdict": "Sin dictámenes registrados.",
+    "threat_level": None,
+    "drone_id": None
 }
 
 
@@ -181,8 +177,8 @@ async def register_ai_verdict(
         "incident_id": body.incident_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "ai_verdict": body.ai_verdict,
-        "threat_level": body.threat_level or "CRITICAL",
-        "drone_id": body.drone_id or "UAV-HK-402"
+        "threat_level": body.threat_level,
+        "drone_id": body.drone_id
     }
 
     try:
@@ -198,26 +194,28 @@ async def register_ai_verdict(
 
 
 class DroneTelemetrySchema(BaseModel):
-    drone_id: str = "UAV-HK-402"
-    latitude: float = 7.1193
-    longitude: float = -73.1227
-    altitude_m: float = 145.0
-    speed_ms: float = 19.4
-    heading_deg: float = 182.0
-    ai_confidence: Optional[float] = 0.94
+    model_config = ConfigDict(allow_inf_nan=False)
+    drone_id: str = Field(min_length=1)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    altitude_m: float = Field(ge=0, le=15000)
+    speed_ms: float = Field(ge=0)
+    heading_deg: float = Field(ge=0, le=360)
+    ai_confidence: Optional[float] = Field(default=None, ge=0, le=1)
 
 
 class ZoneInfoSchema(BaseModel):
-    name: str = "Perímetro Seguridad UTS / Bucaramanga Centro"
-    max_allowed_altitude_m: float = 120.0
+    model_config = ConfigDict(allow_inf_nan=False)
+    name: str = Field(min_length=1)
+    max_allowed_altitude_m: float = Field(ge=0, le=15000)
     restriction_type: Optional[str] = "NO_FLY_ZONE"
 
 
 class TriggerIncidentSchema(BaseModel):
-    event_type: Optional[str] = "GEOFENCE_BREACH_CRITICAL"
+    event_type: Optional[str] = "TELEMETRY_REVIEW"
     incident_id: Optional[str] = None
-    drone: Optional[DroneTelemetrySchema] = None
-    zone: Optional[ZoneInfoSchema] = None
+    drone: DroneTelemetrySchema
+    zone: ZoneInfoSchema
 
 
 @router.post("/trigger-incident", summary="Disparar análisis de incidente táctico hacia n8n / Agente IA")
@@ -234,23 +232,11 @@ async def trigger_tactical_incident(
     from app.services.ai_tactical_agent_service import ai_tactical_service
 
     payload = {
-        "event_type": body.event_type or "GEOFENCE_BREACH_CRITICAL",
+        "event_type": body.event_type or "TELEMETRY_REVIEW",
         "incident_id": body.incident_id or f"INC-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "drone": body.drone.model_dump() if body.drone else {
-            "drone_id": "UAV-HK-402",
-            "latitude": 7.1193,
-            "longitude": -73.1227,
-            "altitude_m": 145.0,
-            "speed_ms": 19.4,
-            "heading_deg": 182.0,
-            "ai_confidence": 0.94
-        },
-        "zone": body.zone.model_dump() if body.zone else {
-            "name": "Perímetro Seguridad UTS / Bucaramanga Centro",
-            "max_allowed_altitude_m": 120.0,
-            "restriction_type": "NO_FLY_ZONE"
-        }
+        "drone": body.drone.model_dump(),
+        "zone": body.zone.model_dump()
     }
 
     result = await ai_tactical_service.analyze_incident(payload)

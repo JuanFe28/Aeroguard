@@ -449,8 +449,8 @@ export class DetectionConfigView {
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label style="display:flex;align-items:center;gap:var(--spacing-sm);cursor:pointer">
-          <input type="checkbox" id="conf-processing-enabled" checked style="accent-color:var(--brand-primary);width:18px;height:18px" aria-label="Habilitar procesamiento de detecciones"/>
-          <span style="color:var(--text-secondary)">Procesamiento de detecciones habilitado</span>
+          <input type="checkbox" id="conf-ai-enabled" checked style="accent-color:var(--brand-primary);width:18px;height:18px" aria-label="Habilitar análisis experimental de IA"/>
+          <span style="color:var(--text-secondary)">Análisis experimental de IA habilitado</span>
         </label>
       </div>
     </div>
@@ -512,7 +512,7 @@ export class DetectionConfigView {
 // ============================================================
 
 export class TrajectoryView {
-  constructor() { this._map = null; }
+  constructor() { this._map = null; this._layers = []; this._request = 0; }
 
   async render(container) {
     document.title = 'AeroGuard — Trayectorias';
@@ -521,6 +521,8 @@ export class TrajectoryView {
     document.getElementById('page-content').innerHTML = this._template();
     this._populateSelect();
     document.getElementById('load-trajectory-btn')?.addEventListener('click', () => this._loadTrajectory());
+    document.getElementById('refresh-trajectories-btn')?.addEventListener('click', () => this._populateSelect());
+    document.getElementById('traj-select')?.addEventListener('change', () => this._clearTrajectory());
     requestAnimationFrame(() => this._initMap());
   }
 
@@ -529,7 +531,7 @@ export class TrajectoryView {
 <div class="fade-in">
   <div class="mb-lg">
     <h2 style="color:var(--text-primary)">Trayectorias de Vuelo</h2>
-    <p style="color:var(--text-muted);font-size:var(--font-size-sm)">Visualiza el recorrido histórico de objetos detectados</p>
+    <p style="color:var(--text-muted);font-size:var(--font-size-sm)">Recorrido histórico 2D y registros de telemetría. La línea une muestras recibidas; no predice el vuelo ni acredita una infracción.</p>
   </div>
   <div class="card mb-lg">
     <div style="display:flex;gap:var(--spacing-md);align-items:flex-end;flex-wrap:wrap">
@@ -540,28 +542,40 @@ export class TrajectoryView {
         </select>
       </div>
       <button id="load-trajectory-btn" class="btn btn-primary" aria-label="Cargar trayectoria">🛤️ Cargar Trayectoria</button>
+      <button id="refresh-trajectories-btn" class="btn btn-secondary">Actualizar detecciones</button>
     </div>
   </div>
+  <p id="traj-status" role="status" aria-live="polite">Cargando detecciones…</p>
   <div class="map-card" style="min-height:500px" role="region" aria-label="Mapa de trayectoria">
     <div id="trajectory-map" style="width:100%;min-height:500px;border-radius:var(--radius-lg)"></div>
   </div>
   <div id="traj-stats" class="hidden">
     <div class="grid-4 mt-lg" id="traj-stats-grid"></div>
   </div>
+  <div id="traj-detail" class="card mt-lg hidden">
+    <h3>Registro de puntos</h3>
+    <p>Fecha/hora local del navegador · coordenadas WGS84 · distancia horizontal aproximada · velocidad media de las muestras.</p>
+    <div class="table-container"><table aria-label="Puntos de trayectoria"><thead><tr><th>Punto</th><th>Fecha y hora</th><th>Latitud</th><th>Longitud</th><th>Altitud (m)</th><th>Velocidad (km/h)</th><th>Rumbo (°)</th></tr></thead><tbody id="traj-points"></tbody></table></div>
+  </div>
 </div>`;
   }
 
   async _populateSelect() {
+    this._clearTrajectory();
     const sel = document.getElementById('traj-select');
     if (!sel) return;
+    sel.innerHTML = '<option value="">-- Selecciona una detección --</option>';
     let detections;
     try { detections = MockService.enabled ? MockService.detections : await DetectionService.list(); }
-    catch (error) { Toast.error(error.message); return; }
+    catch (error) { this._setStatus('No se pudieron consultar las detecciones. Intenta actualizar.'); Toast.error(error.message); return; }
+    detections = Array.isArray(detections) ? detections : (detections.items || []);
     this._detections = detections;
+    document.getElementById('load-trajectory-btn').disabled = !detections.length;
+    this._setStatus(detections.length ? 'Selecciona una detección para consultar sus muestras. Se muestran hasta 50 detecciones recientes.' : 'No hay detecciones registradas. La trayectoria se forma al recibir telemetría del mismo objeto y sensor; no se generan rutas de ejemplo automáticamente.');
     detections.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.id;
-      opt.textContent = `ID: ${d.id} · ${escapeHtml(d.sensor_name)} · ${new Date(d.timestamp).toLocaleString('es-CO', {dateStyle:'short', timeStyle:'short'})}`;
+      opt.textContent = `ID: ${d.id} · ${d.sensor_name || d.sensor_id || 'Sin sensor'} · ${new Date(d.timestamp || d.created_at).toLocaleString('es-CO', {dateStyle:'short', timeStyle:'short'})}`;
       sel.appendChild(opt);
     });
   }
@@ -570,7 +584,7 @@ export class TrajectoryView {
     if (!window.L) return;
     const L = window.L;
     this._map = L.map('trajectory-map', { center: [4.7110, -74.0721], zoom: 13, zoomControl: false });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(this._map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(this._map);
     L.control.zoom({ position: 'bottomright' }).addTo(this._map);
   }
 
@@ -578,37 +592,45 @@ export class TrajectoryView {
     const id = document.getElementById('traj-select')?.value;
     if (!id) { Toast.warn('Selecciona una detección primero.'); return; }
     if (!this._map) return;
+    this._clearTrajectory();
+    const request = this._request;
+    this._setStatus('Consultando puntos de trayectoria…');
 
     const det = this._detections?.find(d => d.id === id);
     if (!det) return;
     const L = window.L;
     let samples;
     try { samples = await DetectionService.getTrajectory(id); }
-    catch (error) { Toast.error(error.message); return; }
+    catch (error) { if (request === this._request) { this._setStatus('No se pudo cargar la trayectoria. No hay una ruta visible válida para esta consulta.'); Toast.error(error.message); } return; }
+    if (request !== this._request) return;
     const points = samples.map(point => [point.latitude, point.longitude]);
-    if (!points.length) { Toast.info('Esta detección no tiene puntos de trayectoria.'); return; }
+    if (!points.length) { this._setStatus('Esta detección no tiene muestras de trayectoria.'); return; }
     const distanceKm = points.slice(1).reduce((total, point, index) => total + L.latLng(points[index]).distanceTo(L.latLng(point)) / 1000, 0);
     const averageSpeed = samples.reduce((total, point) => total + point.speed, 0) / samples.length;
     const maxAltitude = Math.max(...samples.map(point => point.altitude));
 
     // Clear previous
-    this._map.eachLayer(l => { if (l instanceof L.Polyline || l instanceof L.CircleMarker) l.remove(); });
+    const add = layer => { this._layers.push(layer); return layer.addTo(this._map); };
 
     // Draw polyline
-    L.polyline(points, { color: '#00d4ff', weight: 3, opacity: 0.8, dashArray: '8, 4' }).addTo(this._map);
+    if (points.length > 1) add(L.polyline(points, { color: '#00d4ff', weight: 3, opacity: 0.8, dashArray: '8, 4' }));
 
     // Start/end markers
-    L.circleMarker(points[0],  { radius: 10, color: '#00e676', fillColor: '#00e676', fillOpacity: 1 }).bindTooltip('Inicio').addTo(this._map);
-    L.circleMarker(points[points.length-1], { radius: 10, color: '#ff1744', fillColor: '#ff1744', fillOpacity: 1 }).bindTooltip('Último punto').addTo(this._map);
+    add(L.circleMarker(points[0],  { radius: 10, color: '#00e676', fillColor: '#00e676', fillOpacity: 1 }).bindTooltip(points.length === 1 ? 'Única muestra recibida' : 'Inicio'));
+    if (points.length > 1) add(L.circleMarker(points[points.length-1], { radius: 10, color: '#ff1744', fillColor: '#ff1744', fillOpacity: 1 }).bindTooltip('Último punto'));
 
     // Intermediate points
     points.forEach((p, i) => {
       if (i > 0 && i < points.length - 1) {
-        L.circleMarker(p, { radius: 4, color: '#00d4ff', fillColor: '#00d4ff', fillOpacity: 0.6 }).addTo(this._map);
+        add(L.circleMarker(p, { radius: 4, color: '#00d4ff', fillColor: '#00d4ff', fillOpacity: 0.6 }));
       }
     });
 
-    this._map.fitBounds(L.polyline(points).getBounds(), { padding: [40, 40] });
+    if (points.length === 1) this._map.setView(points[0], 15);
+    else this._map.fitBounds(L.polyline(points).getBounds(), { padding: [40, 40], maxZoom: 17 });
+    this._setStatus(points.length === 1 ? 'Solo hay una muestra: aún no permite reconstruir un recorrido.' : `${points.length} muestras recibidas. Inicio en verde; último punto en rojo. No se interpolan muestras faltantes.`);
+    document.getElementById('traj-detail').classList.remove('hidden');
+    document.getElementById('traj-points').innerHTML = samples.map((p, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(new Date(p.timestamp).toLocaleString('es-CO'))}</td><td>${Number(p.latitude).toFixed(6)}</td><td>${Number(p.longitude).toFixed(6)}</td><td>${Number(p.altitude).toFixed(1)}</td><td>${Number(p.speed).toFixed(1)}</td><td>${Number(p.heading).toFixed(1)}</td></tr>`).join('');
 
     // Show stats
     const stats = document.getElementById('traj-stats');
@@ -626,7 +648,22 @@ export class TrajectoryView {
     Toast.success('Trayectoria cargada correctamente.');
   }
 
+  _setStatus(message) {
+    const element = document.getElementById('traj-status');
+    if (element) element.textContent = message;
+  }
+
+  _clearTrajectory() {
+    this._request++;
+    this._layers.forEach(layer => layer.remove());
+    this._layers = [];
+    document.getElementById('traj-stats')?.classList.add('hidden');
+    document.getElementById('traj-detail')?.classList.add('hidden');
+    this._setStatus('Selecciona una detección y carga su trayectoria.');
+  }
+
   destroy() {
+    this._request++;
     if (this._map) { this._map.remove(); this._map = null; }
   }
 }

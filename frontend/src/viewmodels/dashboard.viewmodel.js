@@ -514,7 +514,7 @@ export class DashboardViewModel {
       tacticalAudio.playAlert({ durationMs: 2500, gain: 0.15 });
     }
 
-    Toast.warning(`⚠️ Alerta: ${alert.title}`);
+    Toast.warn(`⚠️ Alerta: ${alert.title}`);
   }
 
   _onVerdictUpdate(data) {
@@ -681,10 +681,16 @@ export class DashboardViewModel {
 
     document.getElementById('btn-test-siren')?.addEventListener('click', () => {
       tacticalAudio.testSiren();
-      Toast.warning('🚨 Ráfaga táctica de prueba (1.5s)');
+      Toast.warn('🚨 Ráfaga táctica de prueba (1.5s)');
     });
 
     document.getElementById('btn-trigger-soar')?.addEventListener('click', async () => {
+      const topDrone = this.state.selectedDetection || this.state.detections.find(d => d.status === 'active');
+      const zone = topDrone && this.state.zones.find(z => z.id === topDrone.zoneId && z.isActive);
+      if (!topDrone || !zone) {
+        Toast.warn('Selecciona una detección asociada a una zona activa para analizarla.');
+        return;
+      }
       const btn = document.getElementById('btn-trigger-soar');
       if (btn) {
         btn.disabled = true;
@@ -692,34 +698,28 @@ export class DashboardViewModel {
       }
       Toast.info('⚡ Despachando incidente a Pipeline SOAR / Agente IA...');
       try {
-        const topDrone = this.state.detections.find(d => d.status === 'active') || {
-          id: 'UAV-HK-402',
-          altitude: 145.0,
-          speed: 70.0,
-          heading: 182,
-        };
         const payload = {
           incident_id: `INC-${Date.now().toString().slice(-4)}`,
-          event_type: 'GEOFENCE_BREACH_CRITICAL',
+          event_type: 'TELEMETRY_REVIEW',
           drone: {
-            drone_id: topDrone.id ? (String(topDrone.id).startsWith('UAV') ? topDrone.id : `UAV-${String(topDrone.id).slice(-3).toUpperCase()}`) : 'UAV-HK-402',
-            altitude_m: topDrone.altitude || 145.0,
-            speed_ms: (topDrone.speed ? topDrone.speed / 3.6 : 19.4),
-            heading_deg: topDrone.heading || 182,
-            ai_confidence: 0.96,
-            latitude: topDrone.latitude || 7.1193,
-            longitude: topDrone.longitude || -73.1227
+            drone_id: topDrone.id,
+            altitude_m: topDrone.altitude,
+            speed_ms: topDrone.speed / 3.6,
+            heading_deg: topDrone.heading,
+            ai_confidence: topDrone.aiConfidence,
+            latitude: topDrone.latitude,
+            longitude: topDrone.longitude
           },
           zone: {
-            name: 'Perímetro Seguridad UTS / Bucaramanga Centro',
-            max_allowed_altitude_m: 120.0,
+            name: zone.name,
+            max_allowed_altitude_m: zone.maxAltitude,
             restriction_type: 'NO_FLY_ZONE'
           }
         };
         const res = await AlertService.triggerIncident(payload);
         if (res?.data) {
           this._onVerdictUpdate(res.data);
-          const sourceLabel = res.data.execution_source === 'n8n_soar_pipeline' ? 'n8n SOAR' : 'Agente IA Embebido';
+          const sourceLabel = res.data.execution_source === 'n8n_soar_pipeline' ? 'n8n SOAR' : 'Reglas locales experimentales';
           Toast.success(`🤖 Dictamen táctico generado por ${sourceLabel}`);
         }
       } catch (err) {
@@ -746,14 +746,15 @@ export class DashboardViewModel {
     const elInc = document.getElementById('ai-verdict-incident');
 
     if (elText && verdict.ai_verdict) elText.textContent = verdict.ai_verdict;
-    if (elTarget && verdict.drone_id) elTarget.textContent = `${verdict.drone_id} (tipo no verificado)`;
-    if (elInc && verdict.incident_id) elInc.textContent = verdict.incident_id;
+    if (elTarget) elTarget.textContent = verdict.drone_id ? `${verdict.drone_id} (tipo no verificado)` : 'Sin objeto verificado';
+    if (elInc) elInc.textContent = verdict.incident_id || 'Sin incidente';
 
-    if (elBadge && verdict.threat_level) {
-      elBadge.textContent = verdict.threat_level.toUpperCase();
-      elBadge.className = verdict.threat_level.toLowerCase() === 'critical' 
+    if (elBadge) {
+      const level = verdict.threat_level || '';
+      elBadge.textContent = level ? level.toUpperCase() : 'SIN DATOS';
+      elBadge.className = level.toLowerCase() === 'critical'
         ? 'badge badge-danger' 
-        : verdict.threat_level.toLowerCase() === 'high' 
+        : level.toLowerCase() === 'high'
           ? 'badge badge-warning' 
           : 'badge badge-info';
     }
@@ -761,6 +762,8 @@ export class DashboardViewModel {
     if (elTime && verdict.timestamp) {
       const d = new Date(verdict.timestamp);
       elTime.textContent = `Actualizado ${d.toLocaleTimeString('es-CO')}`;
+    } else if (elTime) {
+      elTime.textContent = 'Sin evaluación registrada';
     }
     if (elConf) {
       elConf.textContent = 'Sin precisión validada';

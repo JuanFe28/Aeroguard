@@ -272,7 +272,7 @@ export class RestrictedZoneModel {
     this.description = data.description  || '';
     this.polygon     = data.polygon      || data.coordinates || [];  // Array de {lat, lng} o [lat, lng]
     this.minAltitude = data.min_altitude || data.minAltitude || 0;
-    this.maxAltitude = data.max_altitude || data.maxAltitude || 500;
+    this.maxAltitude = data.max_altitude ?? data.maxAltitude ?? 500;
     this.severity    = data.threat_level || data.severity     || AlertSeverity.HIGH;
     this.isActive    = data.is_active    ?? data.isActive ?? true;
     this.color       = data.color        || '#ff1744';
