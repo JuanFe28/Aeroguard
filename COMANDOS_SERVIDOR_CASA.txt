@@ -3,6 +3,10 @@ ENTREGA PUBLICADA en la rama codex/qa-continuation. Abrir este archivo desde esa
 rama y comprobar los checks de su PR antes de ejecutar los pasos del servidor.
 Fecha: 29/10/2026. Repositorio: https://github.com/JuanFe28/Aeroguard
 Rama de la entrega: codex/qa-continuation (no asumir que esta en main).
+PR: https://github.com/JuanFe28/Aeroguard/pull/2
+Resultados esperados y evidencias por tarjeta: docs/qa-2026-10-29/ACEPTACION_SERVIDOR.md
+Manual actualizado: docs/correcciones-2026-10-21/OPERACION.md
+Preparacion de nueva candidata: docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md
 
 ENCENDER EL SERVIDOR ANTES DE EMPEZAR.
 Los bloques externos se pegan en PowerShell del portatil. Introducir el alias SSH
@@ -86,6 +90,17 @@ stamp=$(date -u +%Y%m%dT%H%M%SZ)
 db=$(docker compose --env-file "$envfile" -f deploy/compose.yml ps -q postgres)
 api=$(docker compose --env-file "$envfile" -f deploy/compose.yml ps -q backend)
 test -n "$db" && test -n "$api"
+docker exec -i "$api" python - <<'PY'
+from urllib.request import urlopen
+from urllib.error import HTTPError
+try:
+    urlopen('http://127.0.0.1:8000/metrics', timeout=10)
+except HTTPError as error:
+    assert error.code in (401, 403), f'Estado inesperado: {error.code}'
+    print(f'Metricas anonimas bloqueadas: HTTP {error.code}')
+else:
+    raise SystemExit('Metricas accesibles sin autenticacion: detener')
+PY
 umask 077
 python3 scripts/database_backup.py --container "$db" --reports-container "$api" --output "/home/aeroguard/AeroGuard/backups/pre-monitor-$stamp.dump"
 python3 scripts/prepare_monitoring.py --env-file "$envfile" --directory deploy
@@ -152,6 +167,9 @@ sin datos sembrados. No usar contrasenas conocidas de la exposicion universitari
 - MONITOR-02: dashboard Grafana visible y paneles con datos del destino real.
 - MONITOR-03: falta provocar una alerta en QA y comprobarla. No desconectar sensores
   ni parar el backend de produccion para simularla. Correo/SMS requiere receptor real.
+  El stack del paso 5 no incluye Monitor: para esa prueba se requiere un Prometheus
+  separado apuntando al backend de QA, con puertos/secretos propios. No usar el
+  target de produccion como evidencia de una alerta sintetica creada solo en QA.
 - DEPLOY-02 previo corresponde a rc.1; el codigo nuevo sigue en QA hasta aceptarlo.
 - Actualizar produccion requiere backup, imagenes nuevas identificadas, ensayo de
   recuperacion y revision del resultado. No sobrescribir etiquetas rc.1 publicadas.

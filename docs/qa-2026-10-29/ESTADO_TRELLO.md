@@ -32,8 +32,8 @@ MONITOR puede cerrarse con una anotación de «validación local» si ese es el 
 
 ## Lo que falta después del despliegue básico
 
-1. **Cerrar la revisión del código:** el [PR #1](https://github.com/JuanFe28/Aeroguard/pull/1) sigue abierto y en borrador, sin fusionar. Las correcciones actuales están en el árbol local `codex/qa-continuation`, aún sin publicar ni ejecutar sus checks remotos.
-2. **Terminar QA pendiente:** permisos por rol, estados de usuarios y recorrido detecciones/alertas/reportes/auditoría. La revisión completa de escritorio no está aceptada.
+1. **Cerrar la revisión del código:** el [PR #1](https://github.com/JuanFe28/Aeroguard/pull/1) sigue abierto y en borrador, sin fusionar. Las correcciones están publicadas en `codex/qa-continuation`, [PR #2](https://github.com/JuanFe28/Aeroguard/pull/2). Los checks del checkpoint `9453997` aprobaron; verificar los del HEAD final antes de ejecutar.
+2. **Terminar QA del destino:** permisos por rol, estados de usuarios y recorrido detecciones/alertas/reportes/auditoría ya tienen pruebas automatizadas locales con usuarios persistidos y login real. Resultado acumulado: 175 aprobadas, 7 omitidas por falta de Compose, 7 subpruebas aprobadas y 10 frontend aprobadas. Falta PostgreSQL y aceptación visual del destino; usar [ACEPTACION_SERVIDOR.md](ACEPTACION_SERVIDOR.md).
 3. **Preparar la siguiente candidata:** verificar Docker/Linux y PostgreSQL, publicar imágenes nuevas con otra etiqueta y actualizar el servidor desde un equipo con identidad SSH autorizada. El servidor documentado conserva imágenes de `33f1cfd`, no los arreglos nuevos de configuración, SOAR, usuarios, mapas, trayectorias y scheduler.
 4. **Instalar y verificar monitoreo en el destino privado:** recolección Prometheus, paneles Grafana y fallos controlados de backend/sensor. Acordar y comprobar el receptor externo si se requiere notificación.
 5. **Completar operación según aceptación:** SMTP y recuperación de contraseña con entrega real; n8n externo si forma parte del alcance. Sensores físicos, precisión de visión, referencia de altitud y rendimiento del destino requieren validaciones propias.
@@ -42,7 +42,7 @@ El anclaje externo de auditoría, respaldo periódico, ensayo de reinicio del an
 
 ## Texto breve para la tarjeta de Deploy
 
-> Candidata v1.2.0-rc.1 instalada y verificada en servidor privado el 28/10/2026: PostgreSQL/PostGIS, RabbitMQ, backend y frontend saludables; acceso mediante túnel SSH, persistencia y restauración ensayadas. El cierre corresponde al stack básico de esa candidata. Las correcciones del 29/10 siguen locales y requieren nueva candidata, validación y actualización del destino. Monitoreo del servidor y QA completo se registran como pendientes separados.
+> Candidata v1.2.0-rc.1 instalada y verificada en servidor privado el 28/10/2026: PostgreSQL/PostGIS, RabbitMQ, backend y frontend saludables; acceso mediante túnel SSH, persistencia y restauración ensayadas. El cierre corresponde al stack básico de esa candidata. Las correcciones del 29/10 están publicadas en el PR #2 y requieren nueva candidata, validación y actualización del destino. Monitoreo del servidor y QA del destino se registran como pendientes separados.
 
 ## Texto breve para las tarjetas de Monitor
 

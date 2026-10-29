@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — QA del 29-10-2026
+
+- Corregidos configuración, edición de sensores/usuarios, Perfil y mapas; trayectorias históricas con tabla y estados explícitos.
+- Eliminados incidentes iniciales y telemetría de respaldo ficticios de SOAR.
+- Reportes programados y avance del cron confirmados juntos para permitir recuperación tras errores.
+- Añadidas validaciones de UUID, referencias, límites numéricos/paginación y notas de resolución; detección manual y alerta asociada persistidas juntas tras validar la geocerca.
+- Ampliadas las regresiones de roles, sesiones y recorrido integrado de telemetría a auditoría; preparados comandos de servidor y Compose privados de Monitor/QA.
+- Cambios aún sin release nueva ni actualización del servidor. Ver `docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md` para aceptación y límites.
+
 Este registro describe el código y la preparación local. No prueba que haya versiones publicadas. La política SemVer propuesta está en `docs/auditoria-2026-10-21/02_RELEASE.md`.
 
 ## [1.2.0-rc.1] — 2026-10-26

@@ -1,14 +1,14 @@
-from app.core.validation import UUIDText, valid_uuid
 """
 AeroGuard — Restricted Zones Endpoint (RF-017 a RF-019, RF-012)
 Definición, delimitación geográfica poligonal, administración y verificación geoespacial
 de zonas de exclusión aérea compatibles con PostGIS (OGC WKT / GeoJSON).
 """
+from app.core.validation import UUIDText, valid_uuid
 
 from typing import List, Optional, Any, Dict
 import math
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import structlog
@@ -117,6 +117,13 @@ class ZoneUpdateSchema(BaseModel):
     coordinates: Optional[list] = None
     polygon: Optional[list] = None
     is_active: Optional[bool] = None
+
+    @field_validator('name', 'max_altitude', 'min_altitude', 'is_active', 'threat_level')
+    @classmethod
+    def reject_explicit_null(cls, value):
+        if value is None:
+            raise ValueError('Omite el campo para conservarlo; no se admite null.')
+        return value
 
 
 class ZoneBreachCheckRequest(BaseModel):

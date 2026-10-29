@@ -1,8 +1,8 @@
-from app.core.validation import valid_uuid
 """
 AeroGuard — User Service
 Lógica de negocio para autenticación y administración de usuarios (RF-001 a RF-004).
 """
+from app.core.validation import valid_uuid
 
 from typing import Optional, List
 from datetime import datetime, timezone

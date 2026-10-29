@@ -1,5 +1,19 @@
 # Continuación de QA — 29 de octubre de 2026
 
+## Estado final de la entrega preparada
+
+La rama `codex/qa-continuation` está publicada en GitHub y se revisa en el [PR #2](https://github.com/JuanFe28/Aeroguard/pull/2), dirigido a `deploy/academic-vm`. El PR #1 y producción conservan su revisión independiente. Los apartados siguientes registran sesiones anteriores; este estado tiene prioridad sobre sus referencias a cambios locales o pendientes ya resueltos.
+
+Verificación final local: **175 pruebas aprobadas, 7 omitidas por falta de Docker Compose y 7 subpruebas aprobadas; 10 pruebas frontend aprobadas**. Sintaxis de 61 archivos Python y 16 JavaScript correcta; Bandit de `backend/app` sin hallazgos medios/altos. Se ejecutaron con Python 3.12, SQLite temporal y usuarios de prueba. Las tres pruebas de carga conservan su evidencia anterior y no forman parte de ese conteo funcional.
+
+Se añadió aceptación integrada de telemetría → detección → trayectoria → alerta asignada/resuelta → CSV original con hash → auditoría, con usuarios persistidos, login real y controles de permisos. También se validan UUID, referencias existentes, límites numéricos y paginación; los campos obligatorios de sensores/zonas no admiten `null` explícito. La detección manual comprueba la geocerca antes de crear una alerta y confirma detección, punto y alerta juntos. El techo de cero metros conserva su significado.
+
+La recuperación del scheduler y las trece regresiones de roles/estados ya están implementadas y verificadas localmente. La aceptación visual completa, PostgreSQL, construcción de imágenes nuevas y ejecución en el destino siguen pendientes. Los checks `checks`, `handoff-layout` y `rehearsal` aprobaron para el checkpoint `9453997`; consultar el HEAD final del PR antes de ejecutar. `rehearsal` ensaya las imágenes publicadas de rc.1; la construcción manual de contenedores está omitida en las ejecuciones de PR.
+
+Para continuar: [comandos del portátil](../../COMANDOS_SERVIDOR_CASA.txt), [aceptación y evidencias del servidor](ACEPTACION_SERVIDOR.md), [siguiente candidata](SIGUIENTE_CANDIDATA.md), [manual de operación actualizado](../correcciones-2026-10-21/OPERACION.md) y [estado de Trello](ESTADO_TRELLO.md). El servidor apagado no recibió cambios y el tablero no se modificó.
+
+## Historial de sesiones anteriores
+
 Último lote: [recuperación del scheduler](SCHEDULER_RECUPERACION.md), con ocho regresiones nuevas. Verificación acumulada: 126 pruebas funcionales aprobadas, 7 omitidas por falta de Compose; frontend sin cambios en ese lote.
 
 Actualización posterior: revisión y mejoras del módulo de trayectorias y matriz de entidades reguladoras en [TRAYECTORIAS_Y_AUTORIDADES.md](TRAYECTORIAS_Y_AUTORIDADES.md). Última verificación: 118 pruebas funcionales y 10 frontend aprobadas; 7 pruebas de Compose omitidas. Las cifras inferiores corresponden a las sesiones anteriores.

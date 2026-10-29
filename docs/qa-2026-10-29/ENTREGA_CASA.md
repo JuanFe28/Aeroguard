@@ -12,11 +12,11 @@ Los comandos están en [COMANDOS_SERVIDOR_CASA.txt](../../COMANDOS_SERVIDOR_CASA
 - Compose independiente para compilar el código nuevo en una instalación de QA con nombre, puerto y volúmenes diferentes de producción.
 - Comandos de PowerShell con eliminación de retornos CR al enviarlos a bash, diagnóstico sin secretos, descarga en worktree separado, respaldo y verificaciones del target Prometheus y salud Grafana.
 
-Resultado local: **141 pruebas aprobadas, 7 omitidas por falta de Docker Compose y 7 subpruebas aprobadas; 10 pruebas frontend aprobadas**. Bandit del preparador sin hallazgos medios/altos. El workflow de PR incorpora validación del Compose combinado en un runner con Docker; consultar su resultado remoto antes de ejecutar la entrega.
+Resultado final local: **175 pruebas aprobadas, 7 omitidas por falta de Docker Compose y 7 subpruebas aprobadas; 10 pruebas frontend aprobadas**. Bandit de `backend/app` sin hallazgos medios/altos. Incluye el recorrido integrado de detecciones, trayectorias, alertas, reportes y auditoría, y validaciones de UUID/referencias, paginación y campos nulos. El workflow del PR incorpora validación del Compose combinado en un runner con Docker; consultar el resultado del HEAD final antes de ejecutar la entrega.
 
 ## Pendiente de ejecutar o aceptar
 
-1. Checks remotos de esta entrega y validación de Compose en Linux.
+1. Verificar los checks del HEAD final. Los del checkpoint `9453997`, incluida la validación de Compose en Linux, aprobaron. El ensayo usa imágenes anteriores; no acredita construcción del código nuevo.
 2. Encender el servidor, verificar arranque y margen de recursos desde el portátil autorizado.
 3. Ejecutar los bloques del TXT por etapas. No mezclar `.env` de producción y QA.
 4. Verificar dashboard y alertas en el destino. Una comprobación HTTP no sustituye la prueba controlada de una alerta ni la entrega a un receptor externo.
@@ -24,4 +24,4 @@ Resultado local: **141 pruebas aprobadas, 7 omitidas por falta de Docker Compose
 
 El objetivo es dejar la ejecución sobre el servidor como el siguiente trabajo práctico. **No se declara terminado todo el producto**: sensores físicos, validación independiente de visión, referencia de altitud, SMTP/n8n, revisión normativa consolidada y aceptación docente conservan sus condiciones externas. La siguiente versión publicada y la integración del PR también requieren revisión; no se sobrescribió la candidata rc.1.
 
-Trello: usar [ESTADO_TRELLO.md](ESTADO_TRELLO.md). Los archivos y pruebas locales no cierran por sí solos MONITOR en el destino ni actualizan el tablero.
+Trello: usar [ESTADO_TRELLO.md](ESTADO_TRELLO.md) y conservar las evidencias de [ACEPTACION_SERVIDOR.md](ACEPTACION_SERVIDOR.md). Los archivos y pruebas locales no cierran por sí solos MONITOR en el destino ni actualizan el tablero. La preparación de la siguiente versión está en [SIGUIENTE_CANDIDATA.md](SIGUIENTE_CANDIDATA.md).

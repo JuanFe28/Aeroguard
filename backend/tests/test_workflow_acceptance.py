@@ -118,3 +118,9 @@ def test_alert_assignment_requires_an_existing_authorized_user(isolated_client):
 def test_list_pagination_is_bounded(isolated_client, path):
     assert isolated_client.get(path + '?skip=-1', headers=AUTH).status_code == 422
     assert isolated_client.get(path + '?limit=1000000', headers=AUTH).status_code == 422
+
+
+@pytest.mark.parametrize('resource,field', [('sensors', 'name'), ('sensors', 'latitude'), ('sensors', 'status'), ('sensors', 'config'), ('zones', 'name'), ('zones', 'is_active'), ('zones', 'max_altitude'), ('zones', 'threat_level')])
+def test_explicit_null_cannot_corrupt_required_fields(isolated_client, resource, field):
+    response = isolated_client.put(f'/api/v1/{resource}/{uuid4()}', headers=AUTH, json={field: None})
+    assert response.status_code == 422

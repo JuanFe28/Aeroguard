@@ -1,5 +1,21 @@
 ACTUALIZACION LOCAL DEL 29/10/2026 - LEER ANTES DEL HISTORIAL
 
+CIERRE DE ENTREGA: codigo y documentacion publicados en codex/qa-continuation,
+PR #2 hacia deploy/academic-vm. El servidor apagado no se modifico. No fusionar
+automaticamente PR #1 ni main. Ver HEAD final y Actions en GitHub.
+Verificacion final local: 175 aprobadas, 7 Compose omitidas, 7 subpruebas y
+10 frontend aprobadas; 61 Python y 16 JavaScript sin errores de sintaxis.
+Bandit backend/app sin hallazgos medios/altos. Se probaron roles con login real,
+telemetria/deteccion/trayectoria/alerta/reporte/auditoria en SQLite aislado,
+UUID/referencias, limites, paginacion y rechazo de null en campos obligatorios.
+Manual de operacion actualizado. ACEPTACION_SERVIDOR.md y SIGUIENTE_CANDIDATA.md
+en docs/qa-2026-10-29 detallan lo pendiente: Linux/imagenes nuevas/PostgreSQL,
+monitoreo y aceptacion del destino. El test-stage Docker tambien usa SQLite;
+no confundirlo con prueba funcional en PostgreSQL. TXT contiene los comandos.
+Los checks de 9453997 aprobaron (containers manual omitido); comprobar HEAD final.
+Trello tiene matriz/evidencias preparadas; el tablero vivo no se leyo ni modifico.
+Todas las cifras y estados inferiores son historial de checkpoints anteriores.
+
 PUBLICACION DESBLOQUEADA: usuario autorizo anadir camachoab21-cmd como cuenta
 separada de Git Credential Manager. SamuelAlvarezT permanece. Rama
 codex/qa-continuation subida a JuanFe28/Aeroguard, primer commit ef96a1a.

@@ -1,13 +1,13 @@
-from app.core.validation import valid_uuid
 """
 AeroGuard — Sensors Endpoint (RF-020 a RF-023)
 Gestión, configuración y monitoreo del estado de sensores físicos o simulados.
 """
+from app.core.validation import valid_uuid
 
 from typing import List, Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func
 from uuid import UUID
@@ -42,6 +42,13 @@ class SensorUpdateSchema(BaseModel):
     altitude: Optional[float] = Field(default=None, ge=0, le=15000)
     range_km: Optional[float] = Field(default=None, gt=0, le=1000)
     config: Optional[dict] = None
+
+    @field_validator('name', 'type', 'status', 'latitude', 'longitude', 'altitude', 'range_km', 'config')
+    @classmethod
+    def reject_explicit_null(cls, value):
+        if value is None:
+            raise ValueError('Omite el campo para conservarlo; no se admite null.')
+        return value
 
 
 @router.get("", summary="Listar todos los sensores (RF-020)")
