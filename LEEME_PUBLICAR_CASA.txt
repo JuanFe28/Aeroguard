@@ -1,9 +1,13 @@
-AEROGUARD - PUBLICAR LA ENTREGA DESDE EL PORTATIL AUTORIZADO
+AEROGUARD - ENTREGA PUBLICADA Y COPIA MANUAL DE RESPALDO
 
-La integracion de GitHub de este chat rechazo crear la rama (HTTP 403).
+ACTUALIZACION: la entrega ya se subio con camachoab21-cmd a codex/qa-continuation.
+No hace falta subirla otra vez. Abrir COMANDOS_SERVIDOR_CASA.txt en esa rama.
+Las instrucciones inferiores se conservan solo como respaldo manual; no ejecutarlas
+sobre la rama publicada ni usar --force. La cuenta SamuelAlvarezT se conservo.
+
+HISTORIAL: la integracion de GitHub de este chat rechazo crear la rama (HTTP 403).
 El ZIP contiene los cambios y evidencias, SIN .git, .env, claves ni bases privadas.
-No hay subida confirmada: abrir GitHub por si solo no permite recuperar estos
-archivos hasta que la entrega se publique. Llevar el ZIP al portatil autorizado.
+La subida posterior se realizo con Git tras autorizar una cuenta separada.
 
 Opcion manual, sin cambiar credenciales ni configuracion global:
 1. Elegir una carpeta NUEVA para evitar sobrescribir trabajo existente.

@@ -1,5 +1,12 @@
 ACTUALIZACION LOCAL DEL 29/10/2026 - LEER ANTES DEL HISTORIAL
 
+PUBLICACION DESBLOQUEADA: usuario autorizo anadir camachoab21-cmd como cuenta
+separada de Git Credential Manager. SamuelAlvarezT permanece. Rama
+codex/qa-continuation subida a JuanFe28/Aeroguard, primer commit ef96a1a.
+TXT accesible desde GitHub en esa rama; comprobar el HEAD y sus checks del PR.
+No subir manualmente el ZIP sobre esa rama ni usar force. Servidor sin cambios.
+Los avisos de bloqueo inferiores son historial, no el estado actual.
+
 PUBLICACION BLOQUEADA: GitHub rechazo crear codex/qa-continuation con 403.
 La revision automatica rechazo consultar cuentas guardadas. No se modificaron
 credenciales. TXT y cambios solo locales; ENTREGA_CASA_20261029.zip es el respaldo

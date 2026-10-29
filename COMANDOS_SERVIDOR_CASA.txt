@@ -1,9 +1,8 @@
 AEROGUARD - RETOMAR DESDE EL PORTATIL AUTORIZADO
-PUBLICACION PENDIENTE: el TXT y los cambios estan guardados localmente. GitHub
-rechazo crear la rama por permisos de la integracion. Antes del paso 2, publicar
-el paquete desde una cuenta autorizada siguiendo LEEME_PUBLICAR_CASA.txt.
+ENTREGA PUBLICADA en la rama codex/qa-continuation. Abrir este archivo desde esa
+rama y comprobar los checks de su PR antes de ejecutar los pasos del servidor.
 Fecha: 29/10/2026. Repositorio: https://github.com/JuanFe28/Aeroguard
-Rama destino: codex/qa-continuation (aun no publicada; no asumir que esta en main).
+Rama de la entrega: codex/qa-continuation (no asumir que esta en main).
 
 ENCENDER EL SERVIDOR ANTES DE EMPEZAR.
 Los bloques externos se pegan en PowerShell del portatil. Introducir el alias SSH

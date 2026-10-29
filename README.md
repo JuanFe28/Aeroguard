@@ -1,6 +1,6 @@
 # AeroGuard
 
-Entrega de QA del 29/10: los comandos para retomar desde el portátil autorizado están en [COMANDOS_SERVIDOR_CASA.txt](COMANDOS_SERVIDOR_CASA.txt), rama local `codex/qa-continuation`, pendiente de publicación. Incluye diagnóstico, respaldo, monitoreo del despliegue privado y ensayo aislado del código nuevo. No sustituye automáticamente la instalación anterior.
+Entrega de QA del 29/10: los comandos para retomar desde el portátil autorizado están en [COMANDOS_SERVIDOR_CASA.txt](COMANDOS_SERVIDOR_CASA.txt), publicados en la rama `codex/qa-continuation`. Incluye diagnóstico, respaldo, monitoreo del despliegue privado y ensayo aislado del código nuevo. No sustituye automáticamente la instalación anterior. Comprobar los checks del PR antes de ejecutar la entrega.
 
 Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Candidata académica **1.2.0-rc.1**, identificada y publicada mediante el flujo de Release en GitHub Actions y GHCR. La política de versiones está en [VERSIONING.md](VERSIONING.md).
 

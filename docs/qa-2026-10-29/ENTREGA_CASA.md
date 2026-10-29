@@ -1,6 +1,6 @@
 # Entrega para retomar en casa
 
-**Publicación bloqueada:** la integración de GitHub respondió 403 al crear la rama. La consulta de cuentas guardadas fue rechazada por la revisión automática; no se accedió a las credenciales. Se preparó `ENTREGA_CASA_20261029.zip` para traslado manual, con instrucciones en `LEEME_PUBLICAR_CASA.txt`. Ni el TXT ni las correcciones están confirmados en GitHub. Los checks nuevos de CI todavía no se ejecutaron.
+**Entrega publicada:** tras la autorización explícita del usuario se añadió `camachoab21-cmd` como cuenta separada y se subió `codex/qa-continuation` mediante Git. `SamuelAlvarezT` se conserva. La restricción de escritura de la integración no se modificó. Los checks del PR deben consultarse antes de ejecutar la entrega; el ZIP queda como respaldo opcional, no como requisito de publicación manual.
 
 Los comandos están en [COMANDOS_SERVIDOR_CASA.txt](../../COMANDOS_SERVIDOR_CASA.txt), en la rama `codex/qa-continuation`. El servidor estaba apagado; no se ejecutaron esos bloques.
 
