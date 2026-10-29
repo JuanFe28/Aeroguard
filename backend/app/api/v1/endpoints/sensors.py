@@ -1,3 +1,4 @@
+from app.core.validation import valid_uuid
 """
 AeroGuard — Sensors Endpoint (RF-020 a RF-023)
 Gestión, configuración y monitoreo del estado de sensores físicos o simulados.
@@ -85,7 +86,7 @@ async def get_sensor(
     current_user = Depends(require_permission("sensors:read")),
 ):
     """Obtiene el detalle de un sensor por ID."""
-    query = select(Sensor).where(Sensor.id == sensor_id)
+    query = select(Sensor).where(Sensor.id == valid_uuid(sensor_id))
     result = await db.execute(query)
     sensor = result.scalar_one_or_none()
     if not sensor:
@@ -101,7 +102,7 @@ async def update_sensor(
     current_user = Depends(require_permission("sensors:write")),
 ):
     """Actualiza configuración y parámetros del sensor."""
-    query = select(Sensor).where(Sensor.id == sensor_id)
+    query = select(Sensor).where(Sensor.id == valid_uuid(sensor_id))
     result = await db.execute(query)
     sensor = result.scalar_one_or_none()
     if not sensor:
@@ -122,7 +123,7 @@ async def delete_sensor(
     current_user = Depends(require_permission("sensors:write")),
 ):
     """Elimina un sensor de la red."""
-    query = select(Sensor).where(Sensor.id == sensor_id)
+    query = select(Sensor).where(Sensor.id == valid_uuid(sensor_id))
     result = await db.execute(query)
     sensor = result.scalar_one_or_none()
     if not sensor:

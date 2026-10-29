@@ -1,3 +1,4 @@
+from app.core.validation import UUIDText, valid_uuid
 """
 AeroGuard — Restricted Zones Endpoint (RF-017 a RF-019, RF-012)
 Definición, delimitación geográfica poligonal, administración y verificación geoespacial
@@ -122,7 +123,7 @@ class ZoneBreachCheckRequest(BaseModel):
     latitude: float = Field(..., ge=-90.0, le=90.0, description="Latitud WGS84")
     longitude: float = Field(..., ge=-180.0, le=180.0, description="Longitud WGS84")
     altitude: float = Field(0.0, ge=0.0, le=15000.0, description="Altitud en metros sobre el nivel del suelo")
-    zone_id: Optional[str] = Field(None, description="ID opcional para evaluar una zona puntual")
+    zone_id: Optional[UUIDText] = Field(None, description="ID opcional para evaluar una zona puntual")
 
 
 @router.get("", summary="Listar zonas restringidas (RF-017)")
@@ -262,7 +263,7 @@ async def get_zone(
     current_user = Depends(require_permission("zones:read")),
 ):
     """Obtiene el detalle de una zona por ID incluyendo WKT y GeoJSON."""
-    query = select(RestrictedZone).where(RestrictedZone.id == zone_id)
+    query = select(RestrictedZone).where(RestrictedZone.id == valid_uuid(zone_id))
     result = await db.execute(query)
     zone = result.scalar_one_or_none()
     if not zone:
@@ -279,7 +280,7 @@ async def update_zone(
     current_user = Depends(require_permission("zones:write")),
 ):
     """Actualiza los parámetros o polígono de una zona."""
-    query = select(RestrictedZone).where(RestrictedZone.id == zone_id)
+    query = select(RestrictedZone).where(RestrictedZone.id == valid_uuid(zone_id))
     result = await db.execute(query)
     zone = result.scalar_one_or_none()
     if not zone:
@@ -325,7 +326,7 @@ async def delete_zone(
     current_user = Depends(require_permission("zones:delete")),
 ):
     """Elimina una zona restringida."""
-    query = select(RestrictedZone).where(RestrictedZone.id == zone_id)
+    query = select(RestrictedZone).where(RestrictedZone.id == valid_uuid(zone_id))
     result = await db.execute(query)
     zone = result.scalar_one_or_none()
     if not zone:

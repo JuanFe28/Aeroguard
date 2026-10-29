@@ -1,3 +1,4 @@
+from app.core.validation import valid_uuid
 """Reportes de BD, archivos recuperables por ID y programación UTC."""
 import csv
 from datetime import datetime, timezone
@@ -153,7 +154,7 @@ async def create_schedule(body: ScheduleSchema, db: AsyncSession = Depends(get_d
 
 @router.put('/schedules/{schedule_id}')
 async def update_schedule(schedule_id: str, body: ScheduleSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
-    item = await db.get(ReportSchedule, schedule_id)
+    item = await db.get(ReportSchedule, valid_uuid(schedule_id))
     if item is None:
         raise HTTPException(404, 'Programación no encontrada.')
     for name, value in body.model_dump().items():
@@ -164,7 +165,7 @@ async def update_schedule(schedule_id: str, body: ScheduleSchema, db: AsyncSessi
 
 @router.delete('/schedules/{schedule_id}', status_code=204)
 async def delete_schedule(schedule_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
-    item = await db.get(ReportSchedule, schedule_id)
+    item = await db.get(ReportSchedule, valid_uuid(schedule_id))
     if item is None:
         raise HTTPException(404, 'Programación no encontrada.')
     await db.delete(item)

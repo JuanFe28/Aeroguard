@@ -15,29 +15,30 @@ from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
 from app.models.models import Alert, AlertStatus, AlertSeverity, AlertType
 from app.services.audit_service import log_audit
+from app.core.validation import UUIDText, valid_uuid
 
 router = APIRouter()
 logger = structlog.get_logger("AeroGuard-Alerts")
 
 
 class AlertCreateSchema(BaseModel):
-    detection_id: Optional[str] = None
+    detection_id: Optional[UUIDText] = None
     type: AlertType = AlertType.RESTRICTED_ZONE
     severity: AlertSeverity = AlertSeverity.HIGH
-    title: str
-    message: str
+    title: str = Field(min_length=1, max_length=255)
+    message: str = Field(min_length=1, max_length=10000)
 
 
 class AlertResolveSchema(BaseModel):
-    notes: str
+    notes: str = Field(min_length=1, max_length=10000, pattern=r'\S')
 
 
 @router.get("", summary="Listar alertas (RF-013)")
 async def list_alerts(
     status: Optional[AlertStatus] = None,
     severity: Optional[AlertSeverity] = None,
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("alerts:read")),
 ):
@@ -59,6 +60,9 @@ async def create_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Crea una nueva alerta de seguridad."""
+    from app.models.models import Detection
+    if body.detection_id and await db.get(Detection, body.detection_id) is None:
+        raise HTTPException(404, 'Detección no encontrada.')
     alert = Alert(
         detection_id=body.detection_id,
         type=body.type,
@@ -81,13 +85,21 @@ async def assign_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Asigna la alerta al operador especificado o al usuario actual si no se provee ID."""
-    query = select(Alert).where(Alert.id == alert_id)
+    query = select(Alert).where(Alert.id == valid_uuid(alert_id))
     result = await db.execute(query)
     alert = result.scalar_one_or_none()
     if not alert:
         raise HTTPException(status_code=404, detail="Alerta no encontrada.")
 
     assigned_target = user_id or str(getattr(current_user, "id", ""))
+    from app.models.models import User
+    from app.core.security import has_permission
+    assigned_target = valid_uuid(assigned_target)
+    target = await db.get(User, assigned_target)
+    if target is None:
+        raise HTTPException(404, 'Usuario asignado no encontrado.')
+    if not target.is_active or not has_permission(target.role, 'alerts:write'):
+        raise HTTPException(422, 'El destinatario debe estar activo y autorizado para gestionar alertas.')
     setattr(alert, "assigned_to_id", assigned_target)
     setattr(alert, "status", AlertStatus.ASSIGNED)
 
@@ -114,7 +126,7 @@ async def resolve_alert(
     current_user = Depends(require_permission("alerts:write")),
 ):
     """Marca la alerta como resuelta e incluye notas de resolución obligatorias."""
-    query = select(Alert).where(Alert.id == alert_id)
+    query = select(Alert).where(Alert.id == valid_uuid(alert_id))
     result = await db.execute(query)
     alert = result.scalar_one_or_none()
     if not alert:

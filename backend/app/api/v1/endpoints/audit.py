@@ -21,8 +21,8 @@ async def list_audit_logs(
     username: Optional[str] = None,
     action: Optional[str] = None,
     resource: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("audit:read")),
 ):

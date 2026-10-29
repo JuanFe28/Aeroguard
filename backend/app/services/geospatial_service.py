@@ -274,7 +274,8 @@ class GeospatialService:
         in_polygon = cls.is_point_in_polygon(lat, lng, coords)
         
         min_alt = float(getattr(zone, "min_altitude", 0.0) or 0.0)
-        max_alt = float(getattr(zone, "max_altitude", 500.0) or 500.0)
+        configured_max = getattr(zone, "max_altitude", None)
+        max_alt = 500.0 if configured_max is None else float(configured_max)
         in_altitude = (min_alt <= alt <= max_alt)
 
         is_breached = in_polygon and in_altitude
