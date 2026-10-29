@@ -49,7 +49,7 @@ export class DashboardView {
         <span style="opacity:0.4">|</span>
         🛰️ VIGILANCIA C-UAS ACTIVA
         <span style="opacity:0.4">|</span>
-        UMBRAL DE EJEMPLO: <b style="color:var(--danger)">120m AGL</b>
+        UMBRAL DE EJEMPLO: <b style="color:var(--danger)">120 m</b>
       </span>
     </div>
     <div style="display:flex;align-items:center;gap:var(--spacing-sm);">
@@ -191,7 +191,7 @@ export class DashboardView {
         <div class="card-header" style="padding-bottom:var(--spacing-xs)">
           <div>
             <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px">
-              <span>📐</span> Perfil de Altitud 2D (AGL)
+              <span>📐</span> Altitud de las muestras (m)
             </div>
             <div class="card-subtitle" style="font-size:11px">Monitoreo de techo de vuelo civil</div>
           </div>
@@ -204,7 +204,7 @@ export class DashboardView {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:10px;color:var(--text-muted)">
             <span style="display:flex;align-items:center;gap:4px">
               <span style="display:inline-block;width:12px;height:2px;border-top:2px dashed var(--danger)"></span>
-              Límite Civil UAEAC: 120m
+              Referencia visual: 120 m · confirmar referencia vertical del sensor
             </span>
             <span id="altimetry-status-text" style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary)">Escaneo en curso</span>
           </div>

@@ -353,7 +353,7 @@ export const Layout = {
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
       const ok = await import('./app.js').then(m => m.confirm('¿Cerrar sesión?', 'Cerrar Sesión'));
       if (!ok) return;
-      AuthService.clearSession();
+      await AuthService.logout();
       window.location.hash = '#/login';
     });
 

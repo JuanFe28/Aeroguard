@@ -4,6 +4,8 @@
 
 Los comandos están en [COMANDOS_SERVIDOR_CASA.txt](../../COMANDOS_SERVIDOR_CASA.txt), en la rama `codex/qa-continuation`. El servidor estaba apagado; no se ejecutaron esos bloques.
 
+El paso 5 termina ejecutando automáticamente una batería de **51 casos de navegador** sobre la instalación QA: once pantallas a tres tamaños, campos/acciones, roles, descargas, WebSocket, errores JavaScript y accesibilidad. Ensayo local aprobado con SQLite; la ejecución del destino y la revisión humana del diseño quedan pendientes. Se genera un informe HTML, inventarios y galería privados. Ver [PRUEBA_COMPLETA_APP.md](PRUEBA_COMPLETA_APP.md); el TXT incluye descarga del informe al portátil.
+
 ## Cerrado localmente en este lote
 
 - Trece pruebas nuevas de aceptación de roles con usuarios persistidos y login real: matriz de lecturas, desactivación/reactivación, revocación tras cambio de rol y protección de la propia cuenta administradora. Se ejecuta la autenticación en modo producción sobre SQLite de prueba, no con usuarios inventados por tokens demo.

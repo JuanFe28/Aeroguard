@@ -32,6 +32,8 @@ MONITOR puede cerrarse con una anotación de «validación local» si ese es el 
 
 ## Lo que falta después del despliegue básico
 
+Preparación adicional: 51 casos de navegador ensayados localmente, con contraste/accesibilidad y capturas de once pantallas en tres tamaños. El paso 5 del TXT lanza esa misma batería sobre QA del destino. Adjuntar el resultado del servidor y la aceptación visual por pantalla a TEST/Deploy; no cerrar aceptación del servidor solo por este ensayo SQLite. [Matriz de cobertura](PRUEBA_COMPLETA_APP.md).
+
 1. **Cerrar la revisión del código:** el [PR #1](https://github.com/JuanFe28/Aeroguard/pull/1) sigue abierto y en borrador, sin fusionar. Las correcciones están publicadas en `codex/qa-continuation`, [PR #2](https://github.com/JuanFe28/Aeroguard/pull/2). Los checks del checkpoint `9453997` aprobaron; verificar los del HEAD final antes de ejecutar.
 2. **Terminar QA del destino:** permisos por rol, estados de usuarios y recorrido detecciones/alertas/reportes/auditoría ya tienen pruebas automatizadas locales con usuarios persistidos y login real. Resultado acumulado: 175 aprobadas, 7 omitidas por falta de Compose, 7 subpruebas aprobadas y 10 frontend aprobadas. Falta PostgreSQL y aceptación visual del destino; usar [ACEPTACION_SERVIDOR.md](ACEPTACION_SERVIDOR.md).
 3. **Preparar la siguiente candidata:** verificar Docker/Linux y PostgreSQL, publicar imágenes nuevas con otra etiqueta y actualizar el servidor desde un equipo con identidad SSH autorizada. El servidor documentado conserva imágenes de `33f1cfd`, no los arreglos nuevos de configuración, SOAR, usuarios, mapas, trayectorias y scheduler.

@@ -1,5 +1,20 @@
 ACTUALIZACION LOCAL DEL 29/10/2026 - LEER ANTES DEL HISTORIAL
 
+ULTIMA PETICION: dejar lista prueba de la app campo/boton/texto/color/diseno
+para ejecutarse al aplicar el servidor. Se agregan Playwright + axe fijados y
+51 casos ensayados localmente con exito; 175 backend y 10 frontend conservan
+aprobacion. scripts/run_server_app_qa.py se llama al final del paso 5 del TXT.
+Solo proyecto aeroguard-qa20261029; comprueba version -qa. antes de escribir.
+Informe/capturas/inventarios PRIVADOS en backups/qa-app-FECHA, descarga scp
+incluida en TXT. Matriz: docs/qa-2026-10-29/PRUEBA_COMPLETA_APP.md.
+Visual humano y PostgreSQL del destino siguen pendientes. No afirmar cobertura
+de cada combinacion posible ni aprobar diseno por crear capturas sin referencia.
+CI agrega app-browser en Linux/SQLite y valida Compose browser-qa.
+Se corrigen enlaces de detecciones/alertas a trayectoria, sensores fijos en IA,
+mensaje de alerta, contraste/ARIA, recortes moviles y cierre de mapas animados.
+El dashboard usa OSM y referencia visual de 120m sin afirmar infraccion ni AGL.
+Conservar cuentas GitHub y produccion existentes. Subir lote a la misma rama.
+
 CIERRE DE ENTREGA: codigo y documentacion publicados en codex/qa-continuation,
 PR #2 hacia deploy/academic-vm. El servidor apagado no se modifico. No fusionar
 automaticamente PR #1 ni main. Ver HEAD final y Actions en GitHub.

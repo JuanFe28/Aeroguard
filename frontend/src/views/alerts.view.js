@@ -125,7 +125,7 @@ export class AlertsViewModel {
     }
 
     container.innerHTML = this.state.filtered.map(a => `
-      <div class="card" style="border-left:4px solid var(--severity-${a.severity})" role="article" aria-label="Alerta: ${escapeHtml(a.title)}">
+      <div class="card" data-alert-id="${escapeHtml(a.id)}" style="border-left:4px solid var(--severity-${a.severity})" role="article" aria-label="Alerta: ${escapeHtml(a.title)}">
         <div class="card-header" style="margin-bottom:var(--spacing-sm)">
           <div style="display:flex;align-items:center;gap:var(--spacing-sm)">
             <span style="font-size:20px">${a.severityIcon}</span>
@@ -159,7 +159,7 @@ export class AlertsViewModel {
             </button>
           ` : ''}
           ${a.detectionId ? `
-            <a href="#/detections/${a.detectionId}" class="btn btn-secondary btn-sm" aria-label="Ver detección relacionada">
+            <a href="#/trajectory?detection=${encodeURIComponent(a.detectionId)}" class="btn btn-secondary btn-sm" aria-label="Ver detección relacionada">
               🎯 Ver detección
             </a>
           ` : ''}
@@ -282,7 +282,7 @@ export class AlertsView {
   </div>
 
   <!-- Alert List -->
-  <div id="alerts-list" style="display:flex;flex-direction:column;gap:var(--spacing-md)" role="list" aria-live="polite" aria-label="Lista de alertas">
+  <div id="alerts-list" style="display:flex;flex-direction:column;gap:var(--spacing-md)" role="region" aria-live="polite" aria-label="Lista de alertas">
     <!-- Rendered by VM -->
   </div>
 </div>

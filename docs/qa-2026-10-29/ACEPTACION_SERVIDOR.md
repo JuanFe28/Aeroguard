@@ -2,6 +2,8 @@
 
 Fecha: 29/10/2026. Ejecutar desde el portátil con identidad SSH ya autorizada. Comandos: [TXT de casa](../../COMANDOS_SERVIDOR_CASA.txt). No se ejecutó esta lista en el servidor apagado.
 
+El paso 5 del TXT ya llama automáticamente a `run_server_app_qa.py` después del arranque y la comprobación del stack QA. Ejecuta 51 casos de navegador, guarda informe HTML/capturas/inventarios y genera galería visual pendiente de revisión humana. [Cobertura detallada](PRUEBA_COMPLETA_APP.md). No se ejecuta contra producción.
+
 | Paso | Resultado esperado | Evidencia a conservar | Tarjeta / criterio |
 |---|---|---|---|
 | Identificar revisión | Commit del worktree igual a la entrega descargada; checks de ese HEAD aprobados | SHA, enlace del PR, enlaces de Actions, fecha | DEPLOY-01; nunca usar checks de un commit anterior |

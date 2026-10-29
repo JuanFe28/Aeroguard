@@ -15,14 +15,35 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m unittest discover -s tests -p test_prepare_monitoring.py -v
+      - run: python -m unittest discover -s tests -p test_app_qa_report.py -v
       - run: python scripts/prepare_deploy.py --directory tmp/handoff --project aeroguard-ci
       - run: python scripts/prepare_monitoring.py --env-file tmp/handoff/.env --directory deploy
       - name: Validar Compose combinado sin mostrar secretos
         env:
           AEROGUARD_QA_TAG: ci
+          AEROGUARD_QA_EVIDENCE: /tmp/aeroguard-browser-evidence
         run: |
           docker compose --env-file tmp/handoff/.env --env-file deploy/.env.monitoring -f deploy/compose.yml -f deploy/compose.monitoring.yml config --quiet
           docker compose --env-file tmp/handoff/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml config --quiet
+          docker compose --env-file tmp/handoff/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml -f deploy/compose.browser-qa.yml --profile qa-ui config --quiet
+  app-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: python -m pip install -c constraints.txt -r backend/requirements-expo.txt
+      - run: npm ci --ignore-scripts --no-fund --no-audit
+      - run: npx playwright install --with-deps chromium
+      - name: Ensayar navegador en base SQLite temporal
+        run: python scripts/run_local_app_qa.py
+      # Informes detallados quedan privados en el runner: pueden contener credenciales
+      # sintéticas en errores. El servidor guardará la evidencia en backups/ (ignorado).
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 15

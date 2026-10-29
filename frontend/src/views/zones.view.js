@@ -72,6 +72,7 @@ export class ZonesViewModel {
     }
 
     this._map = L.map(containerId, {
+      zoomAnimation: false,
       center: [4.7110, -74.0721],
       zoom: 12,
       zoomControl: false,
@@ -132,12 +133,13 @@ export class ZonesViewModel {
       });
 
       poly.bindTooltip(`<strong>${escapeHtml(zone.name)}</strong><br>${escapeHtml(zone.description)}`, { sticky: true });
-      poly.on('click', () => this._selectZone(zone));
+      poly.on('click', () => { if (!this.state.isDrawing) this._selectZone(zone); });
       poly.addTo(this._map);
 
       // Label in center
       if (zone.center) {
         const label = L.marker(zone.center, {
+          title: `Zona ${zone.name}`,
           icon: L.divIcon({
             className: '',
             html: `<div style="background:${color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${escapeHtml(zone.name)}</div>`,
@@ -553,7 +555,8 @@ export class ZonesViewModel {
            role="button"
            tabindex="0"
            aria-label="Zona: ${escapeHtml(zone.name)}"
-           aria-selected="${this.state.selectedZone?.id === zone.id}">
+           aria-pressed="${this.state.selectedZone?.id === zone.id}"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
         <div class="zone-card-header">
           <div>
             <div class="zone-card-name">${escapeHtml(zone.name)}</div>
@@ -589,7 +592,7 @@ export class ZonesViewModel {
   }
 
   destroy() {
-    if (this._map) { this._map.remove(); this._map = null; }
+    if (this._map) { this._map.stop(); this._map.remove(); this._map = null; }
   }
 }
 
@@ -646,7 +649,7 @@ export class ZonesView {
         <div class="card-header">
           <div class="card-title">📍 Zonas Configuradas</div>
         </div>
-        <div id="zones-list" style="display:flex;flex-direction:column;gap:var(--spacing-sm)" role="list" aria-label="Lista de zonas restringidas">
+        <div id="zones-list" style="display:flex;flex-direction:column;gap:var(--spacing-sm)" role="region" aria-label="Lista de zonas restringidas">
           <!-- Rendered by VM -->
         </div>
       </div>

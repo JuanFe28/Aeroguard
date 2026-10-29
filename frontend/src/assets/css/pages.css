@@ -291,7 +291,7 @@
 
 .dashboard-main-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
   gap: var(--spacing-lg);
 }
 
@@ -370,6 +370,7 @@
 }
 
 .sidebar-widgets {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
@@ -539,8 +540,15 @@
 /* === Responsive adjustments === */
 @media (max-width: 1200px) {
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
-  .dashboard-main-grid { grid-template-columns: 1fr; }
-  .zones-split { grid-template-columns: 1fr; }
+  .dashboard-main-grid { grid-template-columns: minmax(0, 1fr); }
+  .zones-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-main-grid > *, .zones-split > * { min-width: 0; }
+  .detector-name, .alert-item-title, .zone-card-name { overflow-wrap: anywhere; }
+  .map-legend { max-width: 165px; padding: 8px; }
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,52 @@
+{
+  "date_utc": "2026-10-29T20:27:48.874Z",
+  "implementation_base_commit": "39890ed521d7edff8568120006c36123f464c863",
+  "working_tree_changes": true,
+  "platform": "Windows",
+  "python": "3.12.14",
+  "node": "24.22.1",
+  "playwright": "1.64.1",
+  "stats": {
+    "startTime": "2026-10-29T20:27:48.874Z",
+    "duration": 90675.097,
+    "expected": 51,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "artifacts": {
+    "screenshots": 38,
+    "inventories": 38,
+    "accessibility_scans": 11,
+    "javascript_error_checks": 51
+  },
+  "scope": "Servidor efímero SQLite con usuarios persistidos, login real y datos sintéticos. No acredita PostgreSQL ni Docker del destino.",
+  "visual_acceptance": "PENDIENTE_REVISION_HUMANA",
+  "private_artifacts_published": false,
+  "source_sha256": {
+    "frontend/src/app.js": "effb08dbf21c99dca115182e2b400ce1cb10109722c1a74efdf74df30bb00d9e",
+    "frontend/src/assets/css/global.css": "0186586ab9b0c1108f831a6b03c9bbd782c43ccb09a0c164c9faed6a63cbf4a2",
+    "frontend/src/assets/css/pages.css": "eab49af49f7a5dab8f71bc8c99553ca96c097419e4c4330c39b994544246f4a7",
+    "frontend/src/assets/css/variables.css": "372338b1c976722604da696bb87ee1312da8822b1cc5657b0158814de733ec10",
+    "frontend/src/main.js": "630ab131d4abd0cf1d7fc042e0e4c5120d636e4a0900af6db028b4096a7a70f2",
+    "frontend/src/models/models.js": "3e76c13119fc429872bc5d92a506ff5efdddc8e24e083788ad1a3f0ac70a4a73",
+    "frontend/src/services/api.service.js": "cbe87ab909ad3611463fee3f14ba1776c5096fdac13b1032c03c834813b57d68",
+    "frontend/src/services/audio.service.js": "2e5a73dbb99727fe58b9f29eeabdfed5fd7d669451e3d3b2266c98255505cfc0",
+    "frontend/src/utils/html.js": "d2cf6da76ff0a3a82735909187089f59e6f5a293059b59ca9d1af21d92eef1b5",
+    "frontend/src/viewmodels/dashboard.viewmodel.js": "f13668ff2e3e5c772676e2a2c15fe4ec0835869ce929ed691ec38866ca273dc4",
+    "frontend/src/viewmodels/login.viewmodel.js": "de0b4b46b25571147167315cf905e364c88b04b9067546db47002980cbe80174",
+    "frontend/src/views/alerts.view.js": "f5f51b12d2726869d9ea1c35a354b3699460c57ca4a003a973d2c43d598ab40c",
+    "frontend/src/views/dashboard.view.js": "09147a8b77a9467ca6dfea3a7cbf86d2f3ac065be115036706e62bc06afba1da",
+    "frontend/src/views/detections.view.js": "cc7f20c4316f8bd83718c3a5e5a810986b55e929472c1ee8e1ea59a34f7d9f23",
+    "frontend/src/views/login.view.js": "a487f19dca0251007c8f0d8b3a21f194e7741e21c3466c3df744f1c1398cfe25",
+    "frontend/src/views/misc.views.js": "2222e866e40494a3de6196ee669ad429a77f135fb1fb241cba501e48ee70be3a",
+    "frontend/src/views/sensors.view.js": "60afbd3cc2b03afc3a89bdcd5b4ed28a2abb446ca2b9e99aeb7912451d374ee3",
+    "frontend/src/views/users.view.js": "9e598c0d95931ed18244a92c6d0441d7048f6fc38b077b80a5c804239df3fdfc",
+    "frontend/src/views/zones.view.js": "38c53ff46b184cbe7a4de18210686d80c8f78a41892938ee71a00916d44a97d1",
+    "package-lock.json": "7d823e8836d0f37aa894c5b539266dcc0d722a9fe0d9fd7668dd687a80b68ee3",
+    "playwright.config.js": "e85bb81d79a2f56466a90940ec7982b8971c855bd8b9802a6e7273dbcf7d8517",
+    "scripts/qa_local_server.py": "88498b55dc104557a5d9dfa99ec1593a5e324982dcabb94dfa1afd0b3ea68ee2",
+    "scripts/run_local_app_qa.py": "6e08f3e527e23e4181ee1c3771a5098b5ffea26a4ced86341f793905f5283f45",
+    "tests/e2e/app.spec.js": "2251f31e24898868e37f5845576182e446a1ebbe643441ba08916a5e25233d14"
+  }
+}

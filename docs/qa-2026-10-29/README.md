@@ -2,6 +2,10 @@
 
 ## Estado final de la entrega preparada
 
+Ampliación de aceptación de interfaz: se prepararon **51 casos Playwright** y se ensayaron correctamente sobre una instancia SQLite efímera con login real. Incluyen once módulos en escritorio/tableta/móvil, formularios y acciones, permisos, descargas, WebSocket, contraste/etiquetas con axe, excepciones JavaScript y recortes interiores. El paso 5 del TXT ahora los ejecuta automáticamente sobre el stack QA del servidor y genera informe/galería privados. [Matriz y límites de cobertura](PRUEBA_COMPLETA_APP.md). La aceptación visual humana y PostgreSQL del destino siguen pendientes.
+
+El ensayo detectó y permitió corregir enlaces a rutas inexistentes, mensajes de alertas no representados, sensores de ejemplo fijos en IA, contraste insuficiente, roles ARIA, recortes móviles y animaciones de mapas durante la navegación. Dashboard usa ahora el mismo mapa OSM que las otras vistas; la altimetría identifica los 120 m como referencia visual de ejemplo, sin presentarlos como una infracción o como AGL confirmado. La salida de sesión llama a la revocación del backend.
+
 La rama `codex/qa-continuation` está publicada en GitHub y se revisa en el [PR #2](https://github.com/JuanFe28/Aeroguard/pull/2), dirigido a `deploy/academic-vm`. El PR #1 y producción conservan su revisión independiente. Los apartados siguientes registran sesiones anteriores; este estado tiene prioridad sobre sus referencias a cambios locales o pendientes ya resueltos.
 
 Verificación final local: **175 pruebas aprobadas, 7 omitidas por falta de Docker Compose y 7 subpruebas aprobadas; 10 pruebas frontend aprobadas**. Sintaxis de 61 archivos Python y 16 JavaScript correcta; Bandit de `backend/app` sin hallazgos medios/altos. Se ejecutaron con Python 3.12, SQLite temporal y usuarios de prueba. Las tres pruebas de carga conservan su evidencia anterior y no forman parte de ese conteo funcional.

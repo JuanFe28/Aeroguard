@@ -514,12 +514,12 @@ export class DetectionConfigView {
 export class TrajectoryView {
   constructor() { this._map = null; this._layers = []; this._request = 0; }
 
-  async render(container) {
+  async render(container, query = {}) {
     document.title = 'AeroGuard — Trayectorias';
     container.innerHTML = Layout.renderShell('#/trajectory', 'Consulta de Trayectorias');
     Layout.bindShellEvents();
     document.getElementById('page-content').innerHTML = this._template();
-    this._populateSelect();
+    this._populateSelect(query.detection);
     document.getElementById('load-trajectory-btn')?.addEventListener('click', () => this._loadTrajectory());
     document.getElementById('refresh-trajectories-btn')?.addEventListener('click', () => this._populateSelect());
     document.getElementById('traj-select')?.addEventListener('change', () => this._clearTrajectory());
@@ -560,7 +560,7 @@ export class TrajectoryView {
 </div>`;
   }
 
-  async _populateSelect() {
+  async _populateSelect(selectedId = null) {
     this._clearTrajectory();
     const sel = document.getElementById('traj-select');
     if (!sel) return;
@@ -578,12 +578,13 @@ export class TrajectoryView {
       opt.textContent = `ID: ${d.id} · ${d.sensor_name || d.sensor_id || 'Sin sensor'} · ${new Date(d.timestamp || d.created_at).toLocaleString('es-CO', {dateStyle:'short', timeStyle:'short'})}`;
       sel.appendChild(opt);
     });
+    if (selectedId && detections.some(d => d.id === selectedId)) sel.value = selectedId;
   }
 
   _initMap() {
     if (!window.L) return;
     const L = window.L;
-    this._map = L.map('trajectory-map', { center: [4.7110, -74.0721], zoom: 13, zoomControl: false });
+    this._map = L.map('trajectory-map', { center: [4.7110, -74.0721], zoom: 13, zoomControl: false, zoomAnimation: false });
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(this._map);
     L.control.zoom({ position: 'bottomright' }).addTo(this._map);
   }
@@ -664,6 +665,6 @@ export class TrajectoryView {
 
   destroy() {
     this._request++;
-    if (this._map) { this._map.remove(); this._map = null; }
+    if (this._map) { this._map.stop(); this._map.remove(); this._map = null; }
   }
 }

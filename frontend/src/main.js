@@ -40,5 +40,4 @@ router
 // Start the SPA
 router.start();
 
-console.log('%c🛡️ AeroGuard v1.0 — Sistema de Monitoreo Drone', 'color:#00d4ff;font-size:14px;font-weight:bold');
-console.log('%cModo demo activo. Configurar API_URL para conectar al backend.', 'color:#8899bb;font-size:12px');
+console.log('AeroGuard — monitoreo experimental. Consultar /health para identificar la versión del backend.');

@@ -242,7 +242,7 @@ export class SensorsView {
     <div class="stat-card"><div class="stat-card-icon" style="background:rgba(255,23,68,0.1)">⚠️</div><div class="stat-card-value" style="color:var(--danger)" id="stat-sensors-error">—</div><div class="stat-card-label">Con Error</div></div>
     <div class="stat-card"><div class="stat-card-icon" style="background:rgba(0,212,255,0.1)">🔢</div><div class="stat-card-value" id="stat-sensors-total">—</div><div class="stat-card-label">Total</div></div>
   </div>
-  <div class="grid-auto" id="sensors-grid" role="list" aria-label="Lista de sensores" aria-live="polite">
+  <div class="grid-auto" id="sensors-grid" role="region" aria-label="Lista de sensores" aria-live="polite">
     <!-- Rendered by VM -->
   </div>
 </div>`;

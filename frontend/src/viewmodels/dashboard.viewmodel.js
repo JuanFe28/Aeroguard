@@ -197,72 +197,17 @@ export class DashboardViewModel {
     }
 
     this._map = L.map(containerId, {
+      zoomAnimation: false,
       center: defaultCenter,
       zoom: defaultZoom,
       zoomControl: false,
     });
 
-    // 1. CartoDB Dark Matter
-    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
+    // Mismo proveedor público y atribución que Zonas y Trayectorias.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-    });
-
-    // 2. Google Maps (Normal)
-    const googleRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-    });
-
-    // 3. Google Maps (Satélite + Calles)
-    const googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-    });
-
-    // 3. OpenStreetMap Standard
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    });
-
-    // Add default Google layer with fallback to OSM
-    let fallbackTriggered = false;
-    googleRoadLayer.on('tileerror', () => {
-      if (!fallbackTriggered) {
-        fallbackTriggered = true;
-        console.warn('Google Maps falló. Cambiando a OpenStreetMap (Fallback).');
-        if (this._map.hasLayer(googleRoadLayer)) {
-          this._map.removeLayer(googleRoadLayer);
-          osmLayer.addTo(this._map);
-          Toast.warn('Google Maps no disponible. Usando mapa de respaldo.');
-        }
-      }
-    });
-
-    googleSatLayer.on('tileerror', () => {
-      if (!fallbackTriggered) {
-        fallbackTriggered = true;
-        console.warn('Google Maps (Satélite) falló. Cambiando a OpenStreetMap (Fallback).');
-        if (this._map.hasLayer(googleSatLayer)) {
-          this._map.removeLayer(googleSatLayer);
-          osmLayer.addTo(this._map);
-          Toast.warn('Google Maps no disponible. Usando mapa de respaldo.');
-        }
-      }
-    });
-
-    googleRoadLayer.addTo(this._map);
-
-    // Layer switcher control (Top Right)
-    const baseLayers = {
-      '🌙 Modo Oscuro': darkLayer,
-      '🛰️ Satélite (Google)': googleSatLayer,
-      '🗺️ Calles (Google)': googleRoadLayer,
-      '🗺️ OpenStreetMap': osmLayer,
-    };
-    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(this._map);
+    }).addTo(this._map);
 
     // Zoom control (Bottom Right)
     L.control.zoom({ position: 'bottomright' }).addTo(this._map);
@@ -358,7 +303,7 @@ export class DashboardViewModel {
       if (!detection.latitude || !detection.longitude) return;
       const marker = L.marker(
         [detection.latitude, detection.longitude],
-        { icon: this._makeDetectionIcon(detection) }
+        { icon: this._makeDetectionIcon(detection), title: `Detección ${detection.id}` }
       );
 
       marker.bindPopup(`
@@ -414,7 +359,7 @@ export class DashboardViewModel {
       // Marker
       const marker = L.marker(
         [sensor.latitude, sensor.longitude],
-        { icon: this._makeSensorIcon(sensor) }
+        { icon: this._makeSensorIcon(sensor), title: `Sensor ${sensor.name}` }
       ).bindTooltip(`📡 ${escapeHtml(sensor.name)} (${escapeHtml(sensor.typeLabel)} - ${sensor.rangeKm}km)`, { direction: 'top' }).addTo(this._map);
 
       this._sensorCircles.push(circle, marker);
@@ -615,7 +560,7 @@ export class DashboardViewModel {
       const statusText = s.status === 'active' ? 'En línea' : s.status === 'error' ? 'Error' : 'Inactivo';
       const textColor  = s.status === 'active' ? 'var(--success)' : s.status === 'error' ? 'var(--danger)' : 'var(--text-muted)';
       return `
-        <div class="detector-item">
+        <div class="detector-item" role="listitem">
           <span style="font-size:20px">${s.typeIcon}</span>
           <div class="detector-info">
             <div class="detector-name">${escapeHtml(s.name)}</div>
@@ -837,7 +782,7 @@ export class DashboardViewModel {
     ctx.fillStyle = '#ff1744';
     ctx.font = 'bold 9px "Inter", sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('LÍMITE CIVIL 120m', width - padR - 4, y120 - 6);
+    ctx.fillText('REFERENCIA VISUAL 120m', width - padR - 4, y120 - 6);
 
     // Active drones
     const activeDrones = (this.state.detections || [])
@@ -947,11 +892,11 @@ export class DashboardViewModel {
 
     if (statusText) {
       if (hasViolation) {
-        statusText.textContent = '⚠️ ALERTA: INFRACCIÓN DE TECHO (>120m)';
+        statusText.textContent = 'Muestra sobre la referencia visual de 120 m';
         statusText.style.color = 'var(--danger)';
         statusText.style.fontWeight = 'bold';
       } else {
-        statusText.textContent = 'Tráfico nominal (<120m)';
+        statusText.textContent = 'Muestras bajo la referencia visual de 120 m';
         statusText.style.color = 'var(--success)';
         statusText.style.fontWeight = 'normal';
       }
@@ -965,7 +910,7 @@ export class DashboardViewModel {
       window.removeEventListener('resize', this._resizeHandler);
     }
     if (this._map) {
-      try { this._map.remove(); } catch (e) {}
+      try { this._map.stop(); this._map.remove(); } catch (e) {}
       this._map = null;
     }
   }

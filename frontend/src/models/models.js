@@ -213,7 +213,7 @@ export class AlertModel {
     this.severity     = data.severity     || AlertSeverity.MEDIUM;
     this.status       = data.status       || AlertStatus.OPEN;
     this.title        = data.title        || '';
-    this.description  = data.description  || '';
+    this.description  = data.description ?? data.message ?? '';
     this.detectionId  = data.detection_id || data.detectionId || null;
     this.zoneId       = data.zone_id      || data.zoneId      || null;
     this.zoneName     = data.zone_name    || data.zoneName    || null;

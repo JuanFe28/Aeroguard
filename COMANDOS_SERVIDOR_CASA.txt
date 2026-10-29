@@ -154,6 +154,7 @@ docker build --target test -f backend/Dockerfile .
 docker compose --env-file deploy/qa-private/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml config --quiet
 docker compose --env-file deploy/qa-private/.env -f deploy/compose.yml -f deploy/compose.source-qa.yml up -d --build --wait --wait-timeout 180
 python3 scripts/check_deploy.py --env-file deploy/qa-private/.env --url http://localhost:18082 --output "backups/qa-$(date -u +%Y%m%dT%H%M%SZ).json"
+python3 scripts/run_server_app_qa.py --env-file deploy/qa-private/.env
 '@ | ssh -T $aeroDestino 'tr -d "\r" | bash -s'
 if ($LASTEXITCODE -ne 0) { throw "QA no aprobado: conservar la salida; no tocar produccion" }
 
@@ -161,6 +162,31 @@ Para revisar QA, abrir otro tunel: ssh -N -o ExitOnForwardFailure=yes
 -L 127.0.0.1:18082:127.0.0.1:18082 TU_ALIAS_SSH (una sola linea).
 Entrar con el admin y la clave PRIVADA de deploy/qa-private/.env. La base es nueva,
 sin datos sembrados. No usar contrasenas conocidas de la exposicion universitaria.
+
+PRUEBA AUTOMATICA: al finalizar el paso 5 se construye el navegador de QA y se
+ejecuta la bateria de la aplicacion. Requiere Internet para imagenes/CDN y margen
+adicional de hasta 1 GiB para el navegador. Si no hay capacidad, conservar el
+resultado y ejecutar la bateria desde un equipo de pruebas; no parar produccion.
+La bateria crea cuentas, sensores, zonas, telemetria y reportes SINTETICOS solo
+en aeroguard-qa20261029. Otra ejecucion usa identificadores nuevos y conserva
+la evidencia previa. Nunca ejecutarla contra la instalacion rc.1 de produccion.
+
+EVIDENCIA: backups/qa-app-FECHA/ dentro del worktree. results.json contiene el
+resultado automatico, html/index.html el informe con capturas/inventarios y
+REVISION_VISUAL.html la galeria. Todo es PRIVADO; no subir la carpeta a GitHub.
+La revision humana de texto, color y diseno sigue pendiente aunque pasen los tests.
+Matriz campo/boton/estado: docs/qa-2026-10-29/PRUEBA_COMPLETA_APP.md.
+
+DESCARGAR EL INFORME DESDE POWERSHELL (al terminar el paso 5):
+$aeroCarpeta = Read-Host "Nombre qa-app-FECHA mostrado por la prueba"
+if ($aeroCarpeta -notmatch '^qa-app-[0-9TZ]+$') { throw "Nombre de evidencia invalido" }
+scp -r "${aeroDestino}:/home/aeroguard/qa-handoff-20261029/backups/$aeroCarpeta" .
+if ($LASTEXITCODE -ne 0) { throw "No se pudo descargar el informe" }
+Start-Process (Join-Path $PWD "$aeroCarpeta/html/index.html")
+
+Para repetir SOLO la bateria, entrar por SSH al worktree y ejecutar:
+python3 scripts/run_server_app_qa.py --env-file deploy/qa-private/.env
+Conservar el mismo usuario aeroguard y entorno Docker rootless del paso 5.
 
 6. CIERRE DE TRELLO Y LIMITES
 - MONITOR-01: target aeroguard UP en el servidor y acceso anonimo a metrics bloqueado.
