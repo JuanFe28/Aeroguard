@@ -83,7 +83,7 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "raw_path = 'data/aeroguard_raw_telemetry.csv'\n",
+                    "raw_path = 'data_mining/data/aeroguard_raw_telemetry.csv' if os.path.exists('data_mining/data/aeroguard_raw_telemetry.csv') else 'data/aeroguard_raw_telemetry.csv'\n",
                     "df_raw = pd.read_csv(raw_path, low_memory=False)\n",
                     "print(f'Dimensiones del dataset bruto: {df_raw.shape[0]:,} filas x {df_raw.shape[1]} columnas')\n",
                     "df_raw.head(5)"
