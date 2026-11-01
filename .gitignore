@@ -120,3 +120,8 @@ postman/collections/New Collection/
 # --- Trazas locales de fallos previos (se publica antes_resumen.json) ---
 docs/evidencias/TEST-03/*_antes.txt
 docs/evidencias/TEST-03/*_antes.xml
+ 
+# --- Data Mining Artifacts ---
+data_mining/data/*.csv
+data_mining/models/*.pkl
+*.pkl
