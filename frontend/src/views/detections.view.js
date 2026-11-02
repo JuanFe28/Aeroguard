@@ -4,7 +4,7 @@ import { escapeHtml } from '../utils/html.js';
  * Lista y detalle de detecciones (RF-009, RF-010, RF-011, RF-021)
  */
 
-import { DetectionService, WebSocketService, MockService, AIService } from '../services/api.service.js';
+import { DetectionService, SensorService, WebSocketService, MockService, AIService } from '../services/api.service.js';
 import { DetectionModel } from '../models/models.js';
 import { Layout, Toast } from '../app.js';
 
@@ -138,7 +138,7 @@ export class DetectionsViewModel {
     }
 
     tbody.innerHTML = this.state.filtered.map(d => `
-      <tr style="cursor:pointer" onclick="window.location.hash='#/detections/${d.id}'" role="row" aria-label="Detección ${d.id}">
+      <tr style="cursor:pointer" onclick="window.location.hash='#/trajectory?detection=${encodeURIComponent(d.id)}'" role="row" aria-label="Detección ${d.id}">
         <td class="text-primary" style="font-family:var(--font-mono);font-size:12px">${d.id}</td>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
@@ -163,7 +163,7 @@ export class DetectionsViewModel {
             <span class="confidence-val">${d.confidencePercent}</span>
           </div>
           <div style="font-size:11px;margin-top:2px;color:${d.isDrone ? 'var(--danger)' : 'var(--success)'}">
-            ${d.isDrone ? '⚠️ Posible dron' : '✅ No dron'}
+            ${!d.aiAnalyzed ? 'Sin análisis de IA' : d.isDrone ? '⚠️ Posible dron' : '✅ No dron'}
           </div>
         </td>
         <td><span class="badge ${d.statusBadgeClass}">${d.status}</span></td>
@@ -233,10 +233,7 @@ export class DetectionsViewModel {
             <div>
               <label class="form-label" for="ai-sensor-select">Sensor Óptico / Cámara</label>
               <select id="ai-sensor-select" class="form-select">
-                <option value="CAM-BGA-NORTE-01">CAM-BGA-NORTE-01 (Bucaramanga Norte)</option>
-                <option value="OPT-PALONEGRO-02">OPT-PALONEGRO-02 (Aeropuerto Palonegro)</option>
-                <option value="CAM-DORADO-01">CAM-DORADO-01 (Aeropuerto El Dorado)</option>
-                <option value="CAM-SANTANDER-03">CAM-SANTANDER-03 (Complejo Santander)</option>
+                <option value="">Sin asociar: análisis aislado de imagen</option>
               </select>
             </div>
             <div>
@@ -289,6 +286,14 @@ export class DetectionsViewModel {
     const sampleBtn = overlay.querySelector('#ai-sample-btn');
     const runBtn = overlay.querySelector('#ai-run-infer-btn');
     const resultsPanel = overlay.querySelector('#ai-results-panel');
+    const sensorSelect = overlay.querySelector('#ai-sensor-select');
+    (MockService.enabled ? Promise.resolve(MockService.sensors) : SensorService.list()).then(items => {
+      for (const sensor of (Array.isArray(items) ? items : items.items || [])) {
+        const option = document.createElement('option');
+        option.value = sensor.id; option.textContent = sensor.name;
+        sensorSelect.appendChild(option);
+      }
+    }).catch(() => { sensorSelect.title = 'No se pudieron consultar sensores; el análisis sigue sin asociación.'; });
 
     let currentFile = null;
 

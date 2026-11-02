@@ -294,7 +294,47 @@ export const Layout = {
     return sections;
   },
 
+  showUserProfile() {
+    const user = AuthService.getUser();
+    if (!user) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay visible';
+    overlay.innerHTML = `
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+        <div class="modal-header">
+          <h3 class="modal-title" id="profile-title">Perfil de usuario</h3>
+          <button class="modal-close" aria-label="Cerrar perfil">✕</button>
+        </div>
+        <dl>
+          <dt>Nombre</dt><dd>${escapeHtml([user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '')}</dd>
+          <dt>Usuario</dt><dd>${escapeHtml(user.username || '')}</dd>
+          <dt>Correo</dt><dd>${escapeHtml(user.email || 'Sin correo registrado')}</dd>
+          <dt>Rol</dt><dd>${escapeHtml(user.role || '')}</dd>
+        </dl>
+      </section>`;
+    const close = () => {
+      overlay.remove();
+      document.getElementById('user-profile-btn')?.focus();
+    };
+    overlay.querySelector('button').addEventListener('click', close);
+    overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
+    overlay.addEventListener('keydown', event => {
+      if (event.key === 'Escape') close();
+      if (event.key === 'Tab') { event.preventDefault(); overlay.querySelector('button').focus(); }
+    });
+    document.body.appendChild(overlay);
+    overlay.querySelector('button').focus();
+  },
+
   bindShellEvents() {
+    const profile = document.getElementById('user-profile-btn');
+    profile?.addEventListener('click', () => this.showUserProfile());
+    profile?.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.showUserProfile();
+      }
+    });
     // Sidebar toggle
     const toggleBtn = document.getElementById('sidebar-toggle-btn');
     if (toggleBtn) {
@@ -313,7 +353,7 @@ export const Layout = {
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
       const ok = await import('./app.js').then(m => m.confirm('¿Cerrar sesión?', 'Cerrar Sesión'));
       if (!ok) return;
-      AuthService.clearSession();
+      await AuthService.logout();
       window.location.hash = '#/login';
     });
 

@@ -1,0 +1,16 @@
+# Solo QA aislado: no combinar con el .env de producción.
+services:
+  backend:
+    image: aeroguard-qa/backend:${AEROGUARD_QA_TAG:?Define el commit corto de QA}
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+      target: runtime
+    environment:
+      APP_VERSION: 1.2.0-qa.${AEROGUARD_QA_TAG}
+  frontend:
+    image: aeroguard-qa/frontend:${AEROGUARD_QA_TAG:?Define el commit corto de QA}
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: runtime

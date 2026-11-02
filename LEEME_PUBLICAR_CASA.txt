@@ -1,0 +1,52 @@
+AEROGUARD - ENTREGA PUBLICADA Y COPIA MANUAL DE RESPALDO
+
+ACTUALIZACION: la entrega ya se subio con camachoab21-cmd a codex/qa-continuation.
+No hace falta subirla otra vez. Abrir COMANDOS_SERVIDOR_CASA.txt en esa rama.
+Las instrucciones inferiores se conservan solo como respaldo manual; no ejecutarlas
+sobre la rama publicada ni usar --force. La cuenta SamuelAlvarezT se conservo.
+
+HISTORIAL: la integracion de GitHub de este chat rechazo crear la rama (HTTP 403).
+El ZIP contiene los cambios y evidencias, SIN .git, .env, claves ni bases privadas.
+La subida posterior se realizo con Git tras autorizar una cuenta separada.
+
+Opcion manual, sin cambiar credenciales ni configuracion global:
+1. Elegir una carpeta NUEVA para evitar sobrescribir trabajo existente.
+2. Clonar desde la rama deploy/academic-vm, base de esta entrega.
+3. Crear una rama nueva, extraer el ZIP sobre ese clon y revisar el diff.
+4. Publicar usando tu acceso de escritura ya autorizado en el portatil.
+
+Ejemplo en PowerShell (la ruta del ZIP se elige en tu equipo):
+
+$zipEntrega = Read-Host "Ruta completa de ENTREGA_CASA_20261029.zip"
+git clone --branch deploy/academic-vm https://github.com/JuanFe28/Aeroguard.git AeroGuard-entrega-casa
+if ($LASTEXITCODE -ne 0) { throw "Clonado incompleto" }
+Set-Location AeroGuard-entrega-casa
+git switch -c codex/qa-continuation
+if ($LASTEXITCODE -ne 0) { throw "Revisar la rama antes de continuar" }
+Expand-Archive -LiteralPath $zipEntrega -DestinationPath . -Force
+git status --short
+git diff --check
+git diff --stat
+
+Revisar los archivos. El ZIP fue preparado sobre a884c39. Si deploy/academic-vm
+avanzo desde ese commit, comparar y resolver los cambios antes de publicar;
+no sobrescribir nuevas modificaciones de JuanFe.
+
+Si la revision es correcta y la sesion del portatil tiene permiso:
+
+git add .
+git commit -m "fix: complete academic QA and prepare server handoff"
+git push -u origin codex/qa-continuation
+
+Si Git pide una cuenta, usar camachoab21-cmd con el metodo habitual. No borrar
+cuentas guardadas, cambiar configuracion global ni introducir contrasenas en chats.
+Si la rama ya existe en GitHub, detenerse y revisar: no usar --force.
+
+Despues, abrir un PR hacia deploy/academic-vm y esperar los checks del nuevo commit.
+No fusionar automaticamente el PR #1 hacia main. En GitHub, abrir el archivo
+COMANDOS_SERVIDOR_CASA.txt de la rama publicada y seguir sus bloques por etapas.
+
+Validacion local de esta entrega: 141 pruebas aprobadas, 7 Compose omitidas,
+10 frontend aprobadas. Pruebas de Compose/Linux y del servidor siguen pendientes.
+Las 13 pruebas nuevas de roles usan login real y usuarios sinteticos persistidos.
+No se ejecutaron operaciones en el servidor apagado ni se modifico Trello.

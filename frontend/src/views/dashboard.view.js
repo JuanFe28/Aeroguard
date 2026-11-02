@@ -49,7 +49,7 @@ export class DashboardView {
         <span style="opacity:0.4">|</span>
         🛰️ VIGILANCIA C-UAS ACTIVA
         <span style="opacity:0.4">|</span>
-        UMBRAL DE EJEMPLO: <b style="color:var(--danger)">120m AGL</b>
+        UMBRAL DE EJEMPLO: <b style="color:var(--danger)">120 m</b>
       </span>
     </div>
     <div style="display:flex;align-items:center;gap:var(--spacing-sm);">
@@ -159,9 +159,9 @@ export class DashboardView {
             <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-accent);">
               <span>🤖</span> DICTAMEN AGENTE IA (C-UAS)
             </div>
-            <div class="card-subtitle" style="font-size:11px" id="ai-verdict-time">Evaluación cinemática continua</div>
+            <div class="card-subtitle" style="font-size:11px" id="ai-verdict-time">Sin evaluación registrada</div>
           </div>
-          <span class="badge badge-danger" id="ai-verdict-badge" style="font-size:10px;font-weight:700;letter-spacing:0.5px">CRITICAL</span>
+          <span class="badge badge-info" id="ai-verdict-badge" style="font-size:10px;font-weight:700;letter-spacing:0.5px">SIN DATOS</span>
         </div>
         <div style="padding:var(--spacing-sm) var(--spacing-md) var(--spacing-md);display:flex;flex-direction:column;gap:var(--spacing-xs)">
           <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04)">
@@ -178,7 +178,7 @@ export class DashboardView {
             Cargando evaluación táctica del agente...
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-muted);padding-top:4px">
-            <span id="ai-verdict-incident" style="font-family:var(--font-mono);font-size:10px">INC-2026-0891</span>
+            <span id="ai-verdict-incident" style="font-family:var(--font-mono);font-size:10px">Sin incidente</span>
             <button class="btn btn-secondary btn-sm" id="btn-trigger-soar" style="font-size:10px;padding:3px 8px;gap:4px;display:flex;align-items:center;" title="Ejecutar análisis de Agente IA SOAR">
               <span>⚡</span> Disparar SOAR
             </button>
@@ -191,7 +191,7 @@ export class DashboardView {
         <div class="card-header" style="padding-bottom:var(--spacing-xs)">
           <div>
             <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px">
-              <span>📐</span> Perfil de Altitud 2D (AGL)
+              <span>📐</span> Altitud de las muestras (m)
             </div>
             <div class="card-subtitle" style="font-size:11px">Monitoreo de techo de vuelo civil</div>
           </div>
@@ -204,7 +204,7 @@ export class DashboardView {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:10px;color:var(--text-muted)">
             <span style="display:flex;align-items:center;gap:4px">
               <span style="display:inline-block;width:12px;height:2px;border-top:2px dashed var(--danger)"></span>
-              Límite Civil UAEAC: 120m
+              Referencia visual: 120 m · confirmar referencia vertical del sensor
             </span>
             <span id="altimetry-status-text" style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary)">Escaneo en curso</span>
           </div>
