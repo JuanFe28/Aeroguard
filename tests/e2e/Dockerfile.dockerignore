@@ -1,0 +1,10 @@
+*
+!package.json
+!package-lock.json
+!playwright.config.js
+!tests/
+tests/*
+!tests/e2e/
+tests/e2e/*
+!tests/e2e/app.spec.js
+!tests/e2e/Dockerfile

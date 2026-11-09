@@ -1,0 +1,50 @@
+name: Ensayo de Deploy privado
+on:
+  pull_request:
+    paths:
+      - 'deploy/**'
+      - 'scripts/*deploy*.py'
+      - 'tests/test_prepare_deploy.py'
+      - '.github/workflows/deploy-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Probar controles de configuración privada
+        run: python -m unittest discover -s tests -p test_prepare_deploy.py -v
+      - name: Preparar credenciales efímeras del runner
+        run: |
+          python scripts/prepare_deploy.py --directory tmp/deploy-ci --project aeroguard-deploy-ci
+          python - <<'PY'
+          from pathlib import Path
+          for line in Path('tmp/deploy-ci/.env').read_text().splitlines():
+              key, value = line.split('=', 1)
+              if value and any(word in key for word in ('PASSWORD', 'SECRET', 'TOKEN')):
+                  print('::add-mask::' + value)
+          PY
+      - name: Validar aislamiento y arrancar imágenes publicadas
+        run: |
+          python -c 'import subprocess; version=subprocess.check_output(["docker","version","--format","{{.Server.Version}}"],text=True).strip(); raise SystemExit(0 if int(version.split(".")[0]) >= 28 else "Este ensayo requiere Docker Engine 28 o posterior")'
+          python scripts/check_deploy_layout.py --env-file tmp/deploy-ci/.env
+          docker compose --env-file tmp/deploy-ci/.env -f deploy/compose.yml up -d --pull always --wait --wait-timeout 180
+      - name: Verificar instalación de prueba
+        run: python scripts/check_deploy.py --env-file tmp/deploy-ci/.env --check-bootstrap-login --output tmp/deploy-ci-check.json
+      - name: Detener únicamente el ensayo
+        if: always()
+        run: |
+          if [ -f tmp/deploy-ci/.env ]; then
+            docker compose --env-file tmp/deploy-ci/.env -f deploy/compose.yml stop
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deploy-private-check
+          path: tmp/deploy-ci-check.json

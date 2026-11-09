@@ -1,5 +1,7 @@
 # AeroGuard
 
+Entrega de QA del 29/10: los comandos para retomar desde el portátil autorizado están en [COMANDOS_SERVIDOR_CASA.txt](COMANDOS_SERVIDOR_CASA.txt), publicados en la rama `codex/qa-continuation`. Incluye diagnóstico, respaldo, monitoreo del despliegue privado y ensayo aislado del código nuevo. No sustituye automáticamente la instalación anterior. Comprobar los checks del PR antes de ejecutar la entrega.
+
 Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Candidata académica **1.2.0-rc.1**, identificada y publicada mediante el flujo de Release en GitHub Actions y GHCR. La política de versiones está en [VERSIONING.md](VERSIONING.md).
 
 La API y el frontend usan datos persistidos por defecto. La exposición local puede sembrar ejemplos de forma explícita. La visión usa heurísticas OpenCV/Pillow o un adaptador YOLO opcional: **no existe un modelo de drones validado con un conjunto de prueba independiente**. No se han probado sensores físicos, identificación de fabricante ni funciones de neutralización.
@@ -16,6 +18,10 @@ La API y el frontend usan datos persistidos por defecto. La exposición local pu
 - Cuatro imágenes construidas; pruebas de Linux, navegador, PostgreSQL/PostGIS, RabbitMQ y restauración verificadas.
 
 Las evidencias y el estado de Trello están en [correcciones del 21-10-2026](docs/correcciones-2026-10-21/README.md). Los [informes iniciales de auditoría](docs/auditoria-2026-10-21/README.md) son históricos: sus pendientes pueden haber quedado resueltos en esta revisión.
+
+## Preparación de Deploy privado
+
+La candidata publicada utiliza [el paquete de despliegue privado](deploy/README.md), con imágenes fijadas por digest, credenciales generadas localmente y un único puerto en `127.0.0.1`, accesible mediante túnel SSH. El 28 de octubre se verificó una instalación nueva en el servidor real con Docker rootless, límites efectivos, autenticación, persistencia y restauración de respaldo. [Evidencia saneada del servidor](deploy/evidence/2026-10-28-server.json). DEPLOY-02 cuenta con estas comprobaciones para el stack básico; las integraciones externas y la validación operativa de sensores e IA siguen pendientes.
 
 ## Exposición local en Windows
 

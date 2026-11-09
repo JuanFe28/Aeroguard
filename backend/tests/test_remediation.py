@@ -72,9 +72,12 @@ def test_bcrypt_never_truncates_utf8():
 
 def test_production_rejects_demo_and_default_secret():
     with pytest.raises(ValidationError):
-        Settings(APP_ENV='production', DEBUG=False, SEED_DEMO_DATA=False, ALLOW_DEMO_TOKENS=False)
+        Settings(_env_file=None, APP_ENV='production', DEBUG=False,
+                 SECRET_KEY=Settings.model_fields['SECRET_KEY'].default,
+                 SEED_DEMO_DATA=False, ALLOW_DEMO_TOKENS=False, ALLOW_SQLITE_FALLBACK=False)
     with pytest.raises(ValidationError):
-        Settings(APP_ENV='production', DEBUG=False, SECRET_KEY='x'*48, SEED_DEMO_DATA=True, ALLOW_DEMO_TOKENS=False)
+        Settings(_env_file=None, APP_ENV='production', DEBUG=False, SECRET_KEY='x'*48,
+                 SEED_DEMO_DATA=True, ALLOW_DEMO_TOKENS=False, ALLOW_SQLITE_FALLBACK=False)
 
 
 def test_auth_rate_limit_is_enforced(isolated_client, monkeypatch):

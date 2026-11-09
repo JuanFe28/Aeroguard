@@ -1,0 +1,16 @@
+{
+  "version": "1.2.0-rc.1",
+  "commit": "33f1cfd5aa9f7ef3d059c2dbc054f293ae4e7db1",
+  "platform": "linux/amd64",
+  "images": {
+    "backend": "ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.1@sha256:e0162c6efeba03c18331507da89d59092e185ed71a4abe718922c8544fcf233e",
+    "frontend": "ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.1@sha256:e9f63aa07bee5e5f3df1ffc680c0fb66163217bb617516eff6654191ac707727",
+    "ai-service": "ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.1@sha256:77103c34eafde7f4931837940af6fd00f6290ff159bc221e2bd782752322d24a",
+    "simulator": "ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.1@sha256:1ef125089ea8d8dd57ba887459ad7c332198d1c8d43f0546ed017daf0df6360a"
+  },
+  "infrastructure": {
+    "postgres": "postgis/postgis:16-3.5@sha256:94146ac37bc61e2322f88016056c5920729cb8c64c8542ed590af8fc2abdac07",
+    "rabbitmq": "rabbitmq:4.3.6-management-alpine@sha256:3505b6096cdbc083bcc363e74366f575ecd0c1a55be4dadcbc60fa08e34647e1"
+  },
+  "evidence": "https://github.com/JuanFe28/Aeroguard/actions/runs/40342511908"
+}
