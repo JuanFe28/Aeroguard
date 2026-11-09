@@ -10,8 +10,13 @@ client = TestClient(app)
 AUTH = {"Authorization": "Bearer " + create_access_token({"sub": "admin", "role": "admin"})}
 
 
-def test_get_ai_verdict_success():
+def test_get_ai_verdict_success(monkeypatch):
     """Valida obtención del dictamen táctico de IA actual."""
+    from app.api.v1.endpoints import alerts
+    monkeypatch.setattr(alerts, '_latest_verdict', {
+        'incident_id': None, 'timestamp': None, 'ai_verdict': 'Sin dictámenes registrados.',
+        'threat_level': None, 'drone_id': None,
+    })
     response = client.get("/api/v1/alerts/ai-verdict", headers=AUTH)
     assert response.status_code == 200
     data = response.json()
@@ -19,7 +24,10 @@ def test_get_ai_verdict_success():
     assert "ai_verdict" in data
     assert "threat_level" in data
     assert "drone_id" in data
-    assert "120m" in data["ai_verdict"] or "UAV" in data["drone_id"]
+    assert data['incident_id'] is None
+    assert data['threat_level'] is None
+    assert data['drone_id'] is None
+    assert data['timestamp'] is None
 
 
 def test_post_ai_verdict_broadcast():

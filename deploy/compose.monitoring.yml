@@ -1,0 +1,41 @@
+# Combinar con deploy/compose.yml; usa sus redes privadas y sus servicios.
+services:
+  prometheus:
+    image: prom/prometheus@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+    # En Docker rootless UID 0 es el usuario del motor, no root del anfitrión.
+    # Permite leer el token 0600 sin hacerlo legible a otros usuarios del host.
+    user: "0:0"
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=16m"]
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
+    ports: ["127.0.0.1:19090:9090"]
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/rules.yml:/etc/prometheus/rules.yml:ro
+      - prometheus_data:/prometheus
+    secrets: [metrics_token]
+    networks: [default, entry]
+  grafana:
+    image: grafana/grafana@sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
+    ports: ["127.0.0.1:13000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Ejecuta prepare_monitoring.py}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ../monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/aeroguard.yml:ro
+      - ../monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/aeroguard.yml:ro
+      - ../monitoring/grafana/dashboard.json:/var/lib/grafana/dashboards/aeroguard.json:ro
+      - grafana_data:/var/lib/grafana
+    networks: [default, entry]
+secrets:
+  metrics_token:
+    file: ./secrets/metrics.token
+volumes:
+  prometheus_data:
+  grafana_data:

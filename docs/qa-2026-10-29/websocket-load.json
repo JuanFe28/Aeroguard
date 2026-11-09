@@ -1,0 +1,50 @@
+{
+  "transport": "TCP/WebSocket en 127.0.0.1, puerto efímero",
+  "scope": "Router y ConnectionManager reales, autenticación con SQLite temporal; servidor de exposición separado",
+  "criteria": {
+    "max_p95_rtt_ms": 100,
+    "errors": 0,
+    "lost_messages": 0
+  },
+  "scenarios": [
+    {
+      "clients": 10,
+      "ping_pong_pairs": 500,
+      "broadcast_deliveries": 100,
+      "p50_rtt_ms": 1.853,
+      "p95_rtt_ms": 4.104,
+      "max_rtt_ms": 5.422,
+      "duration_s": 0.178,
+      "errors": 0,
+      "lost_messages": 0,
+      "remaining_connections": 0,
+      "passed": true
+    },
+    {
+      "clients": 50,
+      "ping_pong_pairs": 2500,
+      "broadcast_deliveries": 500,
+      "p50_rtt_ms": 9.762,
+      "p95_rtt_ms": 16.199,
+      "max_rtt_ms": 17.712,
+      "duration_s": 0.734,
+      "errors": 0,
+      "lost_messages": 0,
+      "remaining_connections": 0,
+      "passed": true
+    },
+    {
+      "clients": 100,
+      "ping_pong_pairs": 5000,
+      "broadcast_deliveries": 1000,
+      "p50_rtt_ms": 17.93,
+      "p95_rtt_ms": 33.223,
+      "max_rtt_ms": 35.76,
+      "duration_s": 1.365,
+      "errors": 0,
+      "lost_messages": 0,
+      "remaining_connections": 0,
+      "passed": true
+    }
+  ]
+}

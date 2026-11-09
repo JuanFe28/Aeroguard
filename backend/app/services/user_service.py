@@ -2,6 +2,7 @@
 AeroGuard — User Service
 Lógica de negocio para autenticación y administración de usuarios (RF-001 a RF-004).
 """
+from app.core.validation import valid_uuid
 
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -27,7 +28,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
 
 async def get_user_by_id(db: AsyncSession, user_id: str) -> Optional[User]:
     """Busca un usuario por su ID (UUID)."""
-    query = select(User).where(User.id == user_id)
+    query = select(User).where(User.id == valid_uuid(user_id))
     result = await db.execute(query)
     return result.scalar_one_or_none()
 
@@ -53,7 +54,7 @@ async def update_last_login(db: AsyncSession, user_id: str) -> None:
     """Actualiza la fecha y hora del último inicio de sesión del usuario."""
     stmt = (
         update(User)
-        .where(User.id == user_id)
+        .where(User.id == valid_uuid(user_id))
         .values(last_login=datetime.now(timezone.utc))
     )
     await db.execute(stmt)
@@ -65,7 +66,7 @@ async def update_password(db: AsyncSession, user_id: str, new_password: str, com
     hashed = hash_password(new_password)
     stmt = (
         update(User)
-        .where(User.id == user_id)
+        .where(User.id == valid_uuid(user_id))
         .values(
             password_hash=hashed,
             updated_at=datetime.now(timezone.utc),

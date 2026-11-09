@@ -1,4 +1,5 @@
 """Reportes de BD, archivos recuperables por ID y programación UTC."""
+from app.core.validation import valid_uuid
 import csv
 from datetime import datetime, timezone
 import hashlib
@@ -112,8 +113,11 @@ async def persist_report(db, body, current_user):
                         status='completed', file_url=f'/api/v1/reports/{report_id}/download', file_size=len(content),
                         completed_at=datetime.now(timezone.utc))
         db.add(report)
-        await db.commit()
+        await db.flush()
         await db.refresh(report)
+        # Incluye el avance del cron si el llamador es el scheduler.
+        # No ejecutar consultas que puedan fallar después del commit y borrar el archivo.
+        await db.commit()
         return report
     except Exception:
         await db.rollback()
@@ -150,7 +154,7 @@ async def create_schedule(body: ScheduleSchema, db: AsyncSession = Depends(get_d
 
 @router.put('/schedules/{schedule_id}')
 async def update_schedule(schedule_id: str, body: ScheduleSchema, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
-    item = await db.get(ReportSchedule, schedule_id)
+    item = await db.get(ReportSchedule, valid_uuid(schedule_id))
     if item is None:
         raise HTTPException(404, 'Programación no encontrada.')
     for name, value in body.model_dump().items():
@@ -161,7 +165,7 @@ async def update_schedule(schedule_id: str, body: ScheduleSchema, db: AsyncSessi
 
 @router.delete('/schedules/{schedule_id}', status_code=204)
 async def delete_schedule(schedule_id: str, db: AsyncSession = Depends(get_db), current_user=Depends(require_permission('reports:write'))):
-    item = await db.get(ReportSchedule, schedule_id)
+    item = await db.get(ReportSchedule, valid_uuid(schedule_id))
     if item is None:
         raise HTTPException(404, 'Programación no encontrada.')
     await db.delete(item)

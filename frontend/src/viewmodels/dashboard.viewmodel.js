@@ -197,72 +197,17 @@ export class DashboardViewModel {
     }
 
     this._map = L.map(containerId, {
+      zoomAnimation: false,
       center: defaultCenter,
       zoom: defaultZoom,
       zoomControl: false,
     });
 
-    // 1. CartoDB Dark Matter
-    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
+    // Mismo proveedor público y atribución que Zonas y Trayectorias.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-    });
-
-    // 2. Google Maps (Normal)
-    const googleRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-    });
-
-    // 3. Google Maps (Satélite + Calles)
-    const googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-    });
-
-    // 3. OpenStreetMap Standard
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    });
-
-    // Add default Google layer with fallback to OSM
-    let fallbackTriggered = false;
-    googleRoadLayer.on('tileerror', () => {
-      if (!fallbackTriggered) {
-        fallbackTriggered = true;
-        console.warn('Google Maps falló. Cambiando a OpenStreetMap (Fallback).');
-        if (this._map.hasLayer(googleRoadLayer)) {
-          this._map.removeLayer(googleRoadLayer);
-          osmLayer.addTo(this._map);
-          Toast.warn('Google Maps no disponible. Usando mapa de respaldo.');
-        }
-      }
-    });
-
-    googleSatLayer.on('tileerror', () => {
-      if (!fallbackTriggered) {
-        fallbackTriggered = true;
-        console.warn('Google Maps (Satélite) falló. Cambiando a OpenStreetMap (Fallback).');
-        if (this._map.hasLayer(googleSatLayer)) {
-          this._map.removeLayer(googleSatLayer);
-          osmLayer.addTo(this._map);
-          Toast.warn('Google Maps no disponible. Usando mapa de respaldo.');
-        }
-      }
-    });
-
-    googleRoadLayer.addTo(this._map);
-
-    // Layer switcher control (Top Right)
-    const baseLayers = {
-      '🌙 Modo Oscuro': darkLayer,
-      '🛰️ Satélite (Google)': googleSatLayer,
-      '🗺️ Calles (Google)': googleRoadLayer,
-      '🗺️ OpenStreetMap': osmLayer,
-    };
-    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(this._map);
+    }).addTo(this._map);
 
     // Zoom control (Bottom Right)
     L.control.zoom({ position: 'bottomright' }).addTo(this._map);
@@ -358,7 +303,7 @@ export class DashboardViewModel {
       if (!detection.latitude || !detection.longitude) return;
       const marker = L.marker(
         [detection.latitude, detection.longitude],
-        { icon: this._makeDetectionIcon(detection) }
+        { icon: this._makeDetectionIcon(detection), title: `Detección ${detection.id}` }
       );
 
       marker.bindPopup(`
@@ -414,7 +359,7 @@ export class DashboardViewModel {
       // Marker
       const marker = L.marker(
         [sensor.latitude, sensor.longitude],
-        { icon: this._makeSensorIcon(sensor) }
+        { icon: this._makeSensorIcon(sensor), title: `Sensor ${sensor.name}` }
       ).bindTooltip(`📡 ${escapeHtml(sensor.name)} (${escapeHtml(sensor.typeLabel)} - ${sensor.rangeKm}km)`, { direction: 'top' }).addTo(this._map);
 
       this._sensorCircles.push(circle, marker);
@@ -514,7 +459,7 @@ export class DashboardViewModel {
       tacticalAudio.playAlert({ durationMs: 2500, gain: 0.15 });
     }
 
-    Toast.warning(`⚠️ Alerta: ${alert.title}`);
+    Toast.warn(`⚠️ Alerta: ${alert.title}`);
   }
 
   _onVerdictUpdate(data) {
@@ -615,7 +560,7 @@ export class DashboardViewModel {
       const statusText = s.status === 'active' ? 'En línea' : s.status === 'error' ? 'Error' : 'Inactivo';
       const textColor  = s.status === 'active' ? 'var(--success)' : s.status === 'error' ? 'var(--danger)' : 'var(--text-muted)';
       return `
-        <div class="detector-item">
+        <div class="detector-item" role="listitem">
           <span style="font-size:20px">${s.typeIcon}</span>
           <div class="detector-info">
             <div class="detector-name">${escapeHtml(s.name)}</div>
@@ -681,10 +626,16 @@ export class DashboardViewModel {
 
     document.getElementById('btn-test-siren')?.addEventListener('click', () => {
       tacticalAudio.testSiren();
-      Toast.warning('🚨 Ráfaga táctica de prueba (1.5s)');
+      Toast.warn('🚨 Ráfaga táctica de prueba (1.5s)');
     });
 
     document.getElementById('btn-trigger-soar')?.addEventListener('click', async () => {
+      const topDrone = this.state.selectedDetection || this.state.detections.find(d => d.status === 'active');
+      const zone = topDrone && this.state.zones.find(z => z.id === topDrone.zoneId && z.isActive);
+      if (!topDrone || !zone) {
+        Toast.warn('Selecciona una detección asociada a una zona activa para analizarla.');
+        return;
+      }
       const btn = document.getElementById('btn-trigger-soar');
       if (btn) {
         btn.disabled = true;
@@ -692,34 +643,28 @@ export class DashboardViewModel {
       }
       Toast.info('⚡ Despachando incidente a Pipeline SOAR / Agente IA...');
       try {
-        const topDrone = this.state.detections.find(d => d.status === 'active') || {
-          id: 'UAV-HK-402',
-          altitude: 145.0,
-          speed: 70.0,
-          heading: 182,
-        };
         const payload = {
           incident_id: `INC-${Date.now().toString().slice(-4)}`,
-          event_type: 'GEOFENCE_BREACH_CRITICAL',
+          event_type: 'TELEMETRY_REVIEW',
           drone: {
-            drone_id: topDrone.id ? (String(topDrone.id).startsWith('UAV') ? topDrone.id : `UAV-${String(topDrone.id).slice(-3).toUpperCase()}`) : 'UAV-HK-402',
-            altitude_m: topDrone.altitude || 145.0,
-            speed_ms: (topDrone.speed ? topDrone.speed / 3.6 : 19.4),
-            heading_deg: topDrone.heading || 182,
-            ai_confidence: 0.96,
-            latitude: topDrone.latitude || 7.1193,
-            longitude: topDrone.longitude || -73.1227
+            drone_id: topDrone.id,
+            altitude_m: topDrone.altitude,
+            speed_ms: topDrone.speed / 3.6,
+            heading_deg: topDrone.heading,
+            ai_confidence: topDrone.aiConfidence,
+            latitude: topDrone.latitude,
+            longitude: topDrone.longitude
           },
           zone: {
-            name: 'Perímetro Seguridad UTS / Bucaramanga Centro',
-            max_allowed_altitude_m: 120.0,
+            name: zone.name,
+            max_allowed_altitude_m: zone.maxAltitude,
             restriction_type: 'NO_FLY_ZONE'
           }
         };
         const res = await AlertService.triggerIncident(payload);
         if (res?.data) {
           this._onVerdictUpdate(res.data);
-          const sourceLabel = res.data.execution_source === 'n8n_soar_pipeline' ? 'n8n SOAR' : 'Agente IA Embebido';
+          const sourceLabel = res.data.execution_source === 'n8n_soar_pipeline' ? 'n8n SOAR' : 'Reglas locales experimentales';
           Toast.success(`🤖 Dictamen táctico generado por ${sourceLabel}`);
         }
       } catch (err) {
@@ -746,14 +691,15 @@ export class DashboardViewModel {
     const elInc = document.getElementById('ai-verdict-incident');
 
     if (elText && verdict.ai_verdict) elText.textContent = verdict.ai_verdict;
-    if (elTarget && verdict.drone_id) elTarget.textContent = `${verdict.drone_id} (tipo no verificado)`;
-    if (elInc && verdict.incident_id) elInc.textContent = verdict.incident_id;
+    if (elTarget) elTarget.textContent = verdict.drone_id ? `${verdict.drone_id} (tipo no verificado)` : 'Sin objeto verificado';
+    if (elInc) elInc.textContent = verdict.incident_id || 'Sin incidente';
 
-    if (elBadge && verdict.threat_level) {
-      elBadge.textContent = verdict.threat_level.toUpperCase();
-      elBadge.className = verdict.threat_level.toLowerCase() === 'critical' 
+    if (elBadge) {
+      const level = verdict.threat_level || '';
+      elBadge.textContent = level ? level.toUpperCase() : 'SIN DATOS';
+      elBadge.className = level.toLowerCase() === 'critical'
         ? 'badge badge-danger' 
-        : verdict.threat_level.toLowerCase() === 'high' 
+        : level.toLowerCase() === 'high'
           ? 'badge badge-warning' 
           : 'badge badge-info';
     }
@@ -761,6 +707,8 @@ export class DashboardViewModel {
     if (elTime && verdict.timestamp) {
       const d = new Date(verdict.timestamp);
       elTime.textContent = `Actualizado ${d.toLocaleTimeString('es-CO')}`;
+    } else if (elTime) {
+      elTime.textContent = 'Sin evaluación registrada';
     }
     if (elConf) {
       elConf.textContent = 'Sin precisión validada';
@@ -834,7 +782,7 @@ export class DashboardViewModel {
     ctx.fillStyle = '#ff1744';
     ctx.font = 'bold 9px "Inter", sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('LÍMITE CIVIL 120m', width - padR - 4, y120 - 6);
+    ctx.fillText('REFERENCIA VISUAL 120m', width - padR - 4, y120 - 6);
 
     // Active drones
     const activeDrones = (this.state.detections || [])
@@ -944,11 +892,11 @@ export class DashboardViewModel {
 
     if (statusText) {
       if (hasViolation) {
-        statusText.textContent = '⚠️ ALERTA: INFRACCIÓN DE TECHO (>120m)';
+        statusText.textContent = 'Muestra sobre la referencia visual de 120 m';
         statusText.style.color = 'var(--danger)';
         statusText.style.fontWeight = 'bold';
       } else {
-        statusText.textContent = 'Tráfico nominal (<120m)';
+        statusText.textContent = 'Muestras bajo la referencia visual de 120 m';
         statusText.style.color = 'var(--success)';
         statusText.style.fontWeight = 'normal';
       }
@@ -962,7 +910,7 @@ export class DashboardViewModel {
       window.removeEventListener('resize', this._resizeHandler);
     }
     if (this._map) {
-      try { this._map.remove(); } catch (e) {}
+      try { this._map.stop(); this._map.remove(); } catch (e) {}
       this._map = null;
     }
   }

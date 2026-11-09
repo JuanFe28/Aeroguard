@@ -1,3 +1,105 @@
+ACTUALIZACION LOCAL DEL 29/10/2026 - LEER ANTES DEL HISTORIAL
+
+ULTIMA PETICION: dejar lista prueba de la app campo/boton/texto/color/diseno
+para ejecutarse al aplicar el servidor. Se agregan Playwright + axe fijados y
+51 casos ensayados localmente con exito; 175 backend y 10 frontend conservan
+aprobacion. scripts/run_server_app_qa.py se llama al final del paso 5 del TXT.
+Solo proyecto aeroguard-qa20261029; comprueba version -qa. antes de escribir.
+Informe/capturas/inventarios PRIVADOS en backups/qa-app-FECHA, descarga scp
+incluida en TXT. Matriz: docs/qa-2026-10-29/PRUEBA_COMPLETA_APP.md.
+Visual humano y PostgreSQL del destino siguen pendientes. No afirmar cobertura
+de cada combinacion posible ni aprobar diseno por crear capturas sin referencia.
+CI agrega app-browser en Linux/SQLite y valida Compose browser-qa.
+Se corrigen enlaces de detecciones/alertas a trayectoria, sensores fijos en IA,
+mensaje de alerta, contraste/ARIA, recortes moviles y cierre de mapas animados.
+El dashboard usa OSM y referencia visual de 120m sin afirmar infraccion ni AGL.
+Conservar cuentas GitHub y produccion existentes. Subir lote a la misma rama.
+
+CIERRE DE ENTREGA: codigo y documentacion publicados en codex/qa-continuation,
+PR #2 hacia deploy/academic-vm. El servidor apagado no se modifico. No fusionar
+automaticamente PR #1 ni main. Ver HEAD final y Actions en GitHub.
+Verificacion final local: 175 aprobadas, 7 Compose omitidas, 7 subpruebas y
+10 frontend aprobadas; 61 Python y 16 JavaScript sin errores de sintaxis.
+Bandit backend/app sin hallazgos medios/altos. Se probaron roles con login real,
+telemetria/deteccion/trayectoria/alerta/reporte/auditoria en SQLite aislado,
+UUID/referencias, limites, paginacion y rechazo de null en campos obligatorios.
+Manual de operacion actualizado. ACEPTACION_SERVIDOR.md y SIGUIENTE_CANDIDATA.md
+en docs/qa-2026-10-29 detallan lo pendiente: Linux/imagenes nuevas/PostgreSQL,
+monitoreo y aceptacion del destino. El test-stage Docker tambien usa SQLite;
+no confundirlo con prueba funcional en PostgreSQL. TXT contiene los comandos.
+Los checks de 9453997 aprobaron (containers manual omitido); comprobar HEAD final.
+Trello tiene matriz/evidencias preparadas; el tablero vivo no se leyo ni modifico.
+Todas las cifras y estados inferiores son historial de checkpoints anteriores.
+
+PUBLICACION DESBLOQUEADA: usuario autorizo anadir camachoab21-cmd como cuenta
+separada de Git Credential Manager. SamuelAlvarezT permanece. Rama
+codex/qa-continuation subida a JuanFe28/Aeroguard, primer commit ef96a1a.
+TXT accesible desde GitHub en esa rama; comprobar el HEAD y sus checks del PR.
+No subir manualmente el ZIP sobre esa rama ni usar force. Servidor sin cambios.
+Los avisos de bloqueo inferiores son historial, no el estado actual.
+
+PUBLICACION BLOQUEADA: GitHub rechazo crear codex/qa-continuation con 403.
+La revision automatica rechazo consultar cuentas guardadas. No se modificaron
+credenciales. TXT y cambios solo locales; ENTREGA_CASA_20261029.zip es el respaldo
+transportable. LEEME_PUBLICAR_CASA.txt explica subida manual desde el portatil.
+No afirmar que el archivo ya esta disponible en GitHub ni que corrio el nuevo CI.
+
+ENTREGA PARA CASA: COMANDOS_SERVIDOR_CASA.txt en la raiz. El servidor esta apagado;
+no se intento configurarlo ni comprobarlo desde este equipo. Bloques para PowerShell
+y SSH del portatil autorizado: diagnostico, copia separada, respaldo, Monitor y QA.
+Se agrego Compose Monitor compatible con Deploy y preparacion idempotente de secretos.
+13 pruebas nuevas de roles/estados con login real aprobaron. Validacion local:
+141 aprobadas, 7 Compose omitidas, 10 frontend aprobadas. Falta validacion del destino.
+El TXT distingue QA del codigo nuevo y produccion rc.1: no publicar cambios en
+produccion sin aceptar pruebas y respaldo. Sensores/SMTP/n8n/aceptacion docente no
+se declaran completos. Ver docs/qa-2026-10-29/ENTREGA_CASA.md.
+
+TRAZABILIDAD TRELLO: docs/qa-2026-10-29/ESTADO_TRELLO.md contiene matriz por tarjeta,
+evidencias y textos para registrar. No se leyo ni modifico el tablero vivo.
+Release, Deploy basico y procedimientos/manuales tienen evidencia de la candidata.
+Monitor tiene evidencia local, no instalacion comprobada en el servidor privado.
+PR #1 sigue en borrador sin fusionar; correcciones del 29/10 siguen locales y no desplegadas.
+Usar esta distincion para actualizar Trello antes de continuar mejoras independientes.
+
+ULTIMO LOTE: recuperacion de reportes programados corregida sin migraciones.
+El reporte y el avance del cron se confirman juntos; fallo/cancelacion deja la ocurrencia pendiente.
+Ocho regresiones nuevas: reintento, competencia, permisos, continuidad del lote y fallos de commit/refresh.
+126 pruebas funcionales aprobadas, 7 Compose omitidas. Informe: docs/qa-2026-10-29/SCHEDULER_RECUPERACION.md.
+Pendiente: PostgreSQL, caida real del proceso, archivos huerfanos y resultado incierto de commit.
+La instancia local ya iniciada no se reinicio: las pruebas cargaron el nuevo codigo en aislamiento.
+Siguiente frente: permisos por rol/estados de usuarios y recorrido detecciones-alertas-reportes-auditoria.
+
+REVISION TRAYECTORIAS: se mejoraron estados vacios/error, tabla de puntos, mapa OSM y consulta de muestra unica.
+API valida UUID/existencia y conserva la fecha enviada en telemetria, normalizada a UTC.
+118 pruebas funcionales y 10 frontend aprobadas; 7 Compose omitidas. Prueba visual con tres puntos SINTETICOS locales.
+Informe tecnico y matriz regulatoria Colombia: docs/qa-2026-10-29/TRAYECTORIAS_Y_AUTORIDADES.md.
+Persisten limites: 50 detecciones recientes sin paginacion, sin replay/3D, contrato de altitud/unidades,
+idempotencia/relojes y validacion de sensores. No convertir geocercas de ejemplo en infracciones legales.
+No se confirmo la edicion consolidada vigente de RAC 100 por restricciones de acceso al portal oficial.
+
+SEGUNDA SESION DEL 29/10: verificacion real en navegador local completada para configuracion,
+sensor activo editado, borrador/dibujo/activacion de zona y error/correccion de correo de usuario.
+Se corrigieron el mapa de zonas (CARTO exigia clave; ahora OSM con atribucion) y Perfil sin handler.
+7 pruebas frontend aprobadas. Capturas e informe en docs/qa-2026-10-29/README.md.
+Instancia de exposicion local disponible en 127.0.0.1:3000 y API en 127.0.0.1:8000.
+BD sintetica tmp/expo/aeroguard.db; no es el servidor privado. No copiar estos datos al servidor.
+Pendientes inmediatos: estados/permisos de usuarios, detecciones/alertas/trayectorias/reportes/auditoria,
+recuperacion de contrasena, PostgreSQL y recuperacion del scheduler.
+
+Se retomo origin/deploy/academic-vm en la rama local codex/qa-continuation, base a884c39.
+Informe y pendientes actualizados: docs/qa-2026-10-29/README.md.
+Se corrigieron configuracion, estado y contadores de sensores, conservacion del formulario de usuarios,
+datos ficticios iniciales/SOAR, Toast.warn, validacion de altitudes y vertices de zonas y version del login.
+Hay 116 pruebas aprobadas, 7 omitidas por falta de Docker Compose; 6 pruebas frontend y 3 de carga aprobadas.
+100 clientes: P95 33,223 ms en este equipo; no resuelve la medicion del portatil anterior ni acredita el servidor.
+Los checks remotos del HEAD anterior a884c39 aprobaron. Las correcciones nuevas son locales y no estan desplegadas.
+No se modificaron cuenta, credenciales, servidor, volumenes, imagenes publicadas ni el PR #1.
+No repetir la instalacion del servidor ni fusionar el PR automaticamente.
+Falta QA completo de navegador, PostgreSQL, mapa/Perfil/recuperacion, scheduler y referencias UUID.
+Conservar los cambios locales al retomar y leer el informe nuevo antes de seguir el estado historico inferior.
+
+--- HISTORIAL CONSERVADO ---
+
 PRIORIDAD AL RETOMAR EN LA UNIVERSIDAD - PAUSA DEL 28/10/2026
 
 El usuario pidió detener la revisión y guardar el punto de continuación. Esta sección tiene prioridad sobre el historial inferior. NO considerar terminada la prueba de toda la aplicación.

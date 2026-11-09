@@ -4,7 +4,7 @@ Gestión y administración de usuarios y roles (RBAC).
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select, func
 from app.models.models import User
@@ -51,8 +51,8 @@ class UserResponseSchema(BaseModel):
 
 @router.get("", response_model=List[UserResponseSchema], summary="Listar usuarios (RBAC: users:read)")
 async def list_users(
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_permission("users:read")),
 ):
