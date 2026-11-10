@@ -4,6 +4,11 @@
 
 Identificación alineada en API, `.env.example`, Python, frontend, ai-service y package. Integrado en `main` el 09-11-2026. Faltan la construcción y publicación de imágenes, la etiqueta Git y la actualización del servidor; `deploy/` sigue apuntando a los digests de rc.1.
 
+### Mapa y documentación — 10-11-2026
+
+- Corregida la política de contenido de Nginx, que bloqueaba las teselas de OpenStreetMap y dejaba los mapas sin fondo en el despliegue con Docker; añadida una regresión que compara la CSP con los servidores de teselas usados por las vistas.
+- Nuevo mapa de documentación en `docs/README.md` y documentos de proyecto (resumen ejecutivo, propuesta, TRL, presupuesto y equipo, modelo de negocio, guía de postulación) y técnicos (arquitectura, manual de usuario).
+
 ### Aceptación completa de interfaz
 
 - Batería de 51 casos de navegador con Playwright/axe: once módulos a tres tamaños, formularios, botones, roles, descargas, WebSocket, contraste, excepciones y recortes interiores; informe y galería privados para aceptación visual humana.

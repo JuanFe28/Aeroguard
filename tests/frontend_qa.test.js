@@ -185,3 +185,16 @@ test('a late trajectory response cannot overwrite a new selection', async () => 
   await pending;
   assert.match(element('traj-status').textContent, /Selecciona/);
 });
+
+test('nginx CSP allows every map tile host used by the views', () => {
+  const read = file => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+  const csp = /Content-Security-Policy "([^"]+)"/.exec(read('nginx.conf'))[1];
+  const imgSrc = /img-src ([^;]+)/.exec(csp)[1].split(/\s+/);
+  const files = ['frontend/src/viewmodels/dashboard.viewmodel.js', 'frontend/src/views/misc.views.js', 'frontend/src/views/zones.view.js'];
+  const hosts = new Set();
+  for (const file of files) {
+    for (const match of read(file).matchAll(/tileLayer\('(https:\/\/[^/']+)/g)) hosts.add(match[1]);
+  }
+  assert.ok(hosts.size > 0, 'no tile hosts found');
+  for (const host of hosts) assert.ok(imgSrc.includes(host), `CSP img-src must list ${host} explicitly`);
+});

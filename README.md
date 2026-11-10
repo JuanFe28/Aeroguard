@@ -6,6 +6,14 @@ Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGI
 
 La API y el frontend usan datos persistidos por defecto. La exposición local puede sembrar ejemplos de forma explícita. La visión usa heurísticas OpenCV/Pillow o un adaptador YOLO opcional: **no existe un modelo de drones validado con un conjunto de prueba independiente**. No se han probado sensores físicos, identificación de fabricante ni funciones de neutralización.
 
+## Documentación
+
+Toda la documentación está ordenada por propósito en el [mapa de documentación](docs/README.md). Accesos rápidos:
+
+- [Resumen ejecutivo](docs/proyecto/01_RESUMEN_EJECUTIVO.md): qué es AeroGuard, propósito, estado y límites.
+- [Propuesta del proyecto](docs/proyecto/02_PROPUESTA_PROYECTO.md) y [guía de postulación](docs/proyecto/06_GUIA_DE_POSTULACION.md): para convocatorias, fondos y becas.
+- [Arquitectura técnica](docs/tecnica/ARQUITECTURA.md) y [manual de usuario](docs/tecnica/MANUAL_DE_USUARIO.md).
+
 ## Estado comprobado
 
 - Autenticación JWT con revocación persistente, recuperación de un solo uso, límites de intentos y permisos por rol.
