@@ -27,7 +27,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != "/health":
             self.send_json(404, {"detail": "Ruta no encontrada"})
             return
-        self.send_json(200, {"status": "healthy", "service": "aeroguard-ai-service", "version": "1.2.0-rc.1", "endpoint": "POST /analyze", "model_validated": False})
+        self.send_json(200, {"status": "healthy", "service": "aeroguard-ai-service", "version": "1.2.0-rc.2", "endpoint": "POST /analyze", "model_validated": False})
 
     def do_POST(self):
         if self.path != "/analyze":

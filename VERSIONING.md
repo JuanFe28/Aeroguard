@@ -2,7 +2,7 @@
 
 Usamos SemVer con el formato MAYOR.MENOR.PARCHE. Un cambio incompatible incrementa MAYOR. Una función compatible incrementa MENOR. Una corrección compatible incrementa PARCHE.
 
-La candidata académica actual es **1.2.0-rc.1** y su etiqueta Git es **v1.2.0-rc.1**. `rc` indica una candidata que se entrega para revisión. No significa que el prototipo ya esté validado para uso operativo. Python representa esta misma candidata como `1.2.0rc1` en `pyproject.toml`.
+La última candidata publicada es **1.2.0-rc.1** y su etiqueta Git es **v1.2.0-rc.1**. El código de `main` se identifica como **1.2.0-rc.2**, en preparación y todavía sin etiqueta ni imágenes publicadas. `rc` indica una candidata que se entrega para revisión. No significa que el prototipo ya esté validado para uso operativo. Python representa la candidata en preparación como `1.2.0rc2` en `pyproject.toml`.
 
 Cada publicación identifica el commit exacto y los digests SHA256 de sus cuatro imágenes. Una etiqueta publicada no se reutiliza para otro código. Si hace falta corregir la candidata se crea `1.2.0-rc.2`. La versión estable `1.2.0` se reserva para una aceptación posterior.
 
