@@ -1,0 +1,28 @@
+{
+  "modo": "Test on test data",
+  "entrenamiento": 108750,
+  "prueba_lote2": 104400,
+  "resultados": {
+    "Arbol de decision": {
+      "CA": 0.948,
+      "F1": 0.948,
+      "Precision": 0.948,
+      "Recall": 0.948,
+      "AUC": 0.9521
+    },
+    "Random Forest": {
+      "CA": 0.9541,
+      "F1": 0.954,
+      "Precision": 0.9546,
+      "Recall": 0.9541,
+      "AUC": 0.9789
+    },
+    "Regresion logistica": {
+      "CA": 0.5829,
+      "F1": 0.5606,
+      "Precision": 0.5907,
+      "Recall": 0.5829,
+      "AUC": 0.6551
+    }
+  }
+}

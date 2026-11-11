@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Versión aprobada, por ejemplo 1.2.0-rc.1'
+        description: 'Versión aprobada, por ejemplo 1.2.0-rc.2'
         required: true
-        default: '1.2.0-rc.1'
+        default: '1.2.0-rc.2'
         type: string
 permissions:
   contents: read

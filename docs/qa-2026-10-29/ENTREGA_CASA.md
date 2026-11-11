@@ -2,7 +2,7 @@
 
 **Entrega publicada:** tras la autorización explícita del usuario se añadió `camachoab21-cmd` como cuenta separada y se subió `codex/qa-continuation` mediante Git. `SamuelAlvarezT` se conserva. La restricción de escritura de la integración no se modificó. Los checks del PR deben consultarse antes de ejecutar la entrega; el ZIP queda como respaldo opcional, no como requisito de publicación manual.
 
-Los comandos están en [COMANDOS_SERVIDOR_CASA.txt](../../COMANDOS_SERVIDOR_CASA.txt), en la rama `codex/qa-continuation`. El servidor estaba apagado; no se ejecutaron esos bloques.
+Los comandos están en [COMANDOS_SERVIDOR_CASA.txt](../../deploy/COMANDOS_SERVIDOR_CASA.txt), en la rama `codex/qa-continuation`. El servidor estaba apagado; no se ejecutaron esos bloques.
 
 El paso 5 termina ejecutando automáticamente una batería de **51 casos de navegador** sobre la instalación QA: once pantallas a tres tamaños, campos/acciones, roles, descargas, WebSocket, errores JavaScript y accesibilidad. Ensayo local aprobado con SQLite; la ejecución del destino y la revisión humana del diseño quedan pendientes. Se genera un informe HTML, inventarios y galería privados. Ver [PRUEBA_COMPLETA_APP.md](PRUEBA_COMPLETA_APP.md); el TXT incluye descarga del informe al portátil.
 

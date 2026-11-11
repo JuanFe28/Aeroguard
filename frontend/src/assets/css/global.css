@@ -814,6 +814,149 @@ p { color: var(--text-secondary); font-size: var(--font-size-md); }
 
 .modal-close:hover { color: var(--danger); border-color: rgba(255,23,68,0.4); }
 
+/* === Perfil de usuario === */
+.profile-modal {
+  position: relative;
+  max-width: 520px;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.profile-close {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 1;
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(0, 212, 255, 0.16) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(0, 102, 255, 0.10) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--brand-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  box-shadow: var(--brand-glow);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.profile-identity { min-width: 0; padding-right: var(--spacing-xl); }
+
+.profile-name {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.profile-handle {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-accent);
+}
+
+.profile-badges { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-sm); }
+
+#profile-view, .profile-password { padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl); }
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-lg);
+}
+
+.profile-field {
+  background: var(--glass-bg);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+  min-width: 0;
+}
+
+.profile-field dt {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.profile-field dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.profile-section { margin-bottom: var(--spacing-lg); }
+
+.profile-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.profile-chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+
+.profile-chips li {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: var(--info-bg);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-card);
+}
+
+.profile-password .form-group { margin-bottom: var(--spacing-md); }
+.profile-hint { display: block; margin-top: 6px; font-size: var(--font-size-xs); color: var(--text-muted); }
+.profile-error { min-height: 18px; margin: 0 0 var(--spacing-sm); font-size: var(--font-size-sm); color: #ff718e; }
+.profile-error:empty { min-height: 0; margin: 0; }
+
+[hidden] { display: none !important; }
+
+@media (max-width: 520px) {
+  .profile-hero { flex-direction: column; text-align: center; padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md); }
+  .profile-identity { padding-right: 0; }
+  .profile-badges { justify-content: center; }
+  .profile-grid { grid-template-columns: 1fr; }
+  #profile-view, .profile-password { padding: var(--spacing-md); }
+  .profile-actions { flex-direction: column-reverse; }
+  .profile-actions .btn { width: 100%; }
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;

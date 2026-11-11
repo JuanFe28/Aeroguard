@@ -8,6 +8,7 @@ Ejecuta:
 - Fase 6: Despliegue y Reglas de Conocimiento (Exportacion .pkl e Insights Operacionales)
 """
 
+import json
 import os
 import sys
 import numpy as np
@@ -15,6 +16,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from limpieza import clean_telemetry  # noqa: E402
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -32,11 +36,37 @@ plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
 plt.rcParams['axes.edgecolor'] = '#cccccc'
 plt.rcParams['axes.linewidth'] = 0.8
 
+
+def compute_knowledge_rules(df):
+    """Calcula las reglas de conocimiento sobre el dataset limpio y devuelve porcentajes reales."""
+    hc = df["threat_level"].isin(["HIGH", "CRITICAL"])
+    crit = df["threat_level"] == "CRITICAL"
+
+    c1 = (df["distance_to_zone_m"] < 150) & (df["speed_ms"] > 20) & df["flight_pattern"].isin(["Directo", "Evasivo"])
+    c2 = (df["altitude_m"] > 120) & df["drone_class"].isin(["diy_custom", "fixed_wing"])
+    birds = df["drone_class"] == "bird_false_pos"
+    c4 = df["rf_signal_dbm"] > -50
+
+    def pct(mask):
+        return round(float(mask.mean()) * 100, 1) if len(mask) else 0.0
+
+    return {
+        "nota": "Calculado sobre el dataset sintetico limpio; threat_level proviene del puntaje del generador.",
+        "registros_limpios": int(len(df)),
+        "r1": {"n": int(c1.sum()), "pct_critical": pct(crit[c1]), "pct_critical_base": pct(crit)},
+        "r2": {"n": int(c2.sum()), "pct_hc_cond": pct(hc[c2]), "pct_hc_resto": pct(hc[~c2]),
+               "diff_pp": round(pct(hc[c2]) - pct(hc[~c2]), 1)},
+        "r3": {"n": int(birds.sum()), "pct_low": pct(df.loc[birds, "threat_level"] == "LOW")},
+        "r4": {"n": int(c4.sum()), "pct_hc_cond": pct(hc[c4]), "pct_hc_resto": pct(hc[~c4])},
+    }
+
+
 def run_crisp_dm_pipeline():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(base_dir, "data")
     models_dir = os.path.join(base_dir, "models")
-    figures_dir = os.path.join(base_dir, "reports", "figures")
+    reports_dir = os.path.join(base_dir, "reports")
+    figures_dir = os.path.join(reports_dir, "figures")
 
     os.makedirs(data_dir, exist_ok=True)
     os.makedirs(models_dir, exist_ok=True)
@@ -167,64 +197,17 @@ def run_crisp_dm_pipeline():
     # =========================================================================
     print("\n>>> [CRISP-DM FASE 3] Preparacion y Preprocesamiento de los Datos...")
 
-    # 1. Eliminacion de duplicados exactos
-    df_clean = df_raw.drop_duplicates().copy()
-    dupes_removed = total_raw - len(df_clean)
-    print(f" -> Filas tras deduplicacion: {len(df_clean):,} (eliminadas: {dupes_removed:,})")
-
-    # 2. Reemplazo de tokens corruptos por NaN
-    for token in corrupt_tokens:
-        df_clean.replace(token, np.nan, inplace=True)
-
-    # 3. Conversion de columnas numericas con coercion segura
-    for col in numeric_candidate_cols:
-        df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
-
-    # 4. Correccion de rangos fisicos imposibles
-    # ai_confidence debe estar en [0, 1]
-    invalid_conf = (df_clean["ai_confidence"] < 0.0) | (df_clean["ai_confidence"] > 1.0)
-    df_clean.loc[invalid_conf, "ai_confidence"] = np.nan
-
-    # battery_est_pct debe estar en [0, 100]
-    invalid_bat = (df_clean["battery_est_pct"] < 0.0) | (df_clean["battery_est_pct"] > 100.0)
-    df_clean.loc[invalid_bat, "battery_est_pct"] = np.nan
-
-    # heading_deg debe estar en [0, 360]
-    invalid_head = (df_clean["heading_deg"] < 0.0) | (df_clean["heading_deg"] > 360.0)
-    df_clean.loc[invalid_head, "heading_deg"] = np.nan
-
-    # 5. Tratamiento de Outliers Extremos mediante filtrado racional
-    # Drones comerciales operan tipicamente a altitud <= 1000m y velocidad <= 80 m/s
-    # Eliminamos las anomalias extremas inyectadas (alt > 3000m o < 0m, spd > 200 m/s, dist > 50,000m, wind > 180 km/h)
-    mask_valid_physics = (
-        (df_clean["altitude_m"].isna() | ((df_clean["altitude_m"] >= 0.0) & (df_clean["altitude_m"] <= 1500.0))) &
-        (df_clean["speed_ms"].isna() | ((df_clean["speed_ms"] >= 0.0) & (df_clean["speed_ms"] <= 100.0))) &
-        (df_clean["distance_to_zone_m"].isna() | ((df_clean["distance_to_zone_m"] >= 0.0) & (df_clean["distance_to_zone_m"] <= 25000.0))) &
-        (df_clean["wind_speed_kmh"].isna() | ((df_clean["wind_speed_kmh"] >= 0.0) & (df_clean["wind_speed_kmh"] <= 120.0)))
-    )
-
-    df_clean = df_clean[mask_valid_physics].copy()
+    # Limpieza compartida con 03_export_orange.py (ver limpieza.py)
+    df_clean, clean_summary = clean_telemetry(df_raw)
+    print(f" -> Filas tras deduplicacion: {total_raw - clean_summary['duplicados_eliminados']:,} "
+          f"(eliminadas: {clean_summary['duplicados_eliminados']:,})")
     print(f" -> Filas tras filtrado de anomalias fisicas extremas: {len(df_clean):,}")
 
     # Verificacion estricta del requisito: Dataset limpio >= 105,000 registros
     if len(df_clean) < 105000:
-        print(f"[ADVERTENCIA] El dataset tiene {len(df_clean)} filas (< 105,000). Ajustando filtros...")
+        print(f"[ADVERTENCIA] El dataset tiene {len(df_clean)} filas (< 105,000).")
     else:
         print(f" -> [OK] Cumple requisito de tamano limpio: {len(df_clean):,} >= 105,000 registros")
-
-    # 6. Imputacion de valores nulos
-    # Numericas: Mediana
-    for col in numeric_candidate_cols:
-        if df_clean[col].isna().sum() > 0:
-            median_val = df_clean[col].median()
-            df_clean[col] = df_clean[col].fillna(median_val)
-
-    # Categoricas: Moda
-    categorical_cols = ["weather_condition", "drone_class", "flight_pattern", "city_zone", "sensor_id"]
-    for col in categorical_cols:
-        if df_clean[col].isna().sum() > 0:
-            mode_val = df_clean[col].mode()[0]
-            df_clean[col] = df_clean[col].fillna(mode_val)
 
     # Guardar dataset limpio en CSV
     df_clean.to_csv(clean_csv, index=False)
@@ -450,22 +433,32 @@ def run_crisp_dm_pipeline():
     model_size_mb = os.path.getsize(model_path) / (1024 * 1024)
     print(f" -> Modelo y transformadores serializados en: {model_path} ({model_size_mb:.2f} MB)")
 
-    # Reglas de conocimiento descubiertas
+    # Reglas de conocimiento: se CALCULAN sobre el dataset limpio (no son valores fijos).
+    # Nota: threat_level lo asigna el generador sintetico con un puntaje por reglas,
+    # por eso estas reglas describen el generador, no comportamiento real de drones.
+    rules = compute_knowledge_rules(df_clean)
+    rules_path = os.path.join(reports_dir, "reglas_conocimiento.json")
+    with open(rules_path, "w", encoding="utf-8") as fh:
+        json.dump(rules, fh, ensure_ascii=False, indent=2)
+
+    r1, r2, r3, r4 = rules["r1"], rules["r2"], rules["r3"], rules["r4"]
     print("\n" + "=" * 75)
-    print(" REGLAS DE CONOCIMIENTO TACTICO DESCUBIERTAS (BUSINESS INSIGHTS)")
+    print(" REGLAS DE CONOCIMIENTO CALCULADAS SOBRE EL DATASET LIMPIO (SINTETICO)")
     print("=" * 75)
-    print(" 1. PROXIMIDAD PERIMETRAL Y VELOCIDAD (Primer Factor de Riesgo):")
+    print(" 1. PROXIMIDAD PERIMETRAL Y VELOCIDAD:")
     print("    - Si 'distance_to_zone_m' < 150m y 'speed_ms' > 20 m/s con patron 'Directo' o 'Evasivo',")
-    print("      el 98.4% de los eventos corresponden a nivel CRITICAL.")
-    print("\n 2. TECHO OPERATIVO REGLAMENTARIO (Cota 120m AGL):")
-    print("    - La altitud superior a 120m combinada con drones no comerciales ('diy_custom', 'fixed_wing')")
-    print("      incrementa la probabilidad de clasificacion HIGH/CRITICAL en un +42%.")
-    print("\n 3. DISCRIMINACION DE FALSOS POSITIVOS (Aves vs Drones):")
-    print("    - La clase 'bird_false_pos' se identifica univocamente como LOW, permitiendo al C-UAS")
-    print("      descartar alarmas sonoras e interceptaciones innecesarias, reduciendo fatiga del operador.")
-    print("\n 4. ANALISIS DE SENAL RF:")
-    print("    - Potencias de senal RF superiores a -50 dBm correlacionan fuertemente con la presencia")
-    print("      del operador o estacion de control cercana al perimetro de seguridad.")
+    print(f"      el {r1['pct_critical']:.1f}% de los {r1['n']:,} eventos son CRITICAL "
+          f"(base general: {r1['pct_critical_base']:.1f}%).")
+    print("\n 2. TECHO DE 120 m AGL Y DRONES NO COMERCIALES:")
+    print("    - Con altitud > 120 m y tipo 'diy_custom' o 'fixed_wing', HIGH/CRITICAL es "
+          f"{r2['pct_hc_cond']:.1f}% frente a {r2['pct_hc_resto']:.1f}% en el resto "
+          f"({r2['diff_pp']:+.1f} puntos porcentuales, n={r2['n']:,}).")
+    print("\n 3. AVES (FALSOS POSITIVOS):")
+    print(f"    - De {r3['n']:,} registros 'bird_false_pos', el {r3['pct_low']:.1f}% es LOW.")
+    print("\n 4. SENAL RF:")
+    print(f"    - Con RF > -50 dBm, HIGH/CRITICAL es {r4['pct_hc_cond']:.1f}% frente a "
+          f"{r4['pct_hc_resto']:.1f}% con RF <= -50 dBm (n={r4['n']:,}).")
+    print(f"\n -> Reglas guardadas en: {rules_path}")
     print("=" * 75)
     print(" [SUCCESS] Pipeline CRISP-DM completado exitosamente con todas las fases!")
 

@@ -14,7 +14,7 @@ Se añadió aceptación integrada de telemetría → detección → trayectoria 
 
 La recuperación del scheduler y las trece regresiones de roles/estados ya están implementadas y verificadas localmente. La aceptación visual completa, PostgreSQL, construcción de imágenes nuevas y ejecución en el destino siguen pendientes. Los checks `checks`, `handoff-layout` y `rehearsal` aprobaron para el checkpoint `9453997`; consultar el HEAD final del PR antes de ejecutar. `rehearsal` ensaya las imágenes publicadas de rc.1; la construcción manual de contenedores está omitida en las ejecuciones de PR.
 
-Para continuar: [comandos del portátil](../../COMANDOS_SERVIDOR_CASA.txt), [aceptación y evidencias del servidor](ACEPTACION_SERVIDOR.md), [siguiente candidata](SIGUIENTE_CANDIDATA.md), [manual de operación actualizado](../correcciones-2026-10-21/OPERACION.md) y [estado de Trello](ESTADO_TRELLO.md). El servidor apagado no recibió cambios y el tablero no se modificó.
+Para continuar: [comandos del portátil](../../deploy/COMANDOS_SERVIDOR_CASA.txt), [aceptación y evidencias del servidor](ACEPTACION_SERVIDOR.md), [siguiente candidata](SIGUIENTE_CANDIDATA.md), [manual de operación actualizado](../correcciones-2026-10-21/OPERACION.md) y [estado de Trello](ESTADO_TRELLO.md). El servidor apagado no recibió cambios y el tablero no se modificó.
 
 ## Historial de sesiones anteriores
 

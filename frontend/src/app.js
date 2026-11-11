@@ -294,36 +294,168 @@ export const Layout = {
     return sections;
   },
 
+  _profilePermissions(role) {
+    const byRole = {
+      admin: ['Usuarios y roles', 'Detecciones y alertas', 'Zonas restringidas', 'Sensores', 'Reportes', 'Auditoría', 'Configuración'],
+      operator: ['Detecciones y alertas', 'Consulta de zonas', 'Consulta de sensores', 'Historial'],
+      analyst: ['Consulta de detecciones', 'Consulta de alertas', 'Consulta de zonas', 'Reportes', 'Auditoría', 'Historial'],
+    };
+    return byRole[role] || [];
+  },
+
+  _formatProfileDate(value) {
+    if (!value) return 'Sin registro';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Sin registro';
+    return date.toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+  },
+
+  _profileInitials(user) {
+    const parts = [user.first_name, user.last_name].filter(Boolean);
+    const letters = parts.length ? parts.map(part => part[0]).join('') : (user.username || 'U').slice(0, 2);
+    return letters.slice(0, 2).toUpperCase();
+  },
+
+  _profileTemplate(user) {
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'Usuario';
+    const isActive = user.is_active !== false;
+    const roleLabel = this._getRoleLabel(user.role);
+    return `
+      <section class="modal profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+        <button class="modal-close profile-close" id="profile-close" aria-label="Cerrar perfil">✕</button>
+        <header class="profile-hero">
+          <div class="profile-avatar" aria-hidden="true">${escapeHtml(this._profileInitials(user))}</div>
+          <div class="profile-identity">
+            <h3 class="profile-name" id="profile-title">${escapeHtml(fullName)}</h3>
+            <div class="profile-handle">@${escapeHtml(user.username || '')}</div>
+            <div class="profile-badges">
+              <span class="badge badge-info">${escapeHtml(roleLabel)}</span>
+              <span class="badge ${isActive ? 'badge-success' : 'badge-neutral'}">${isActive ? 'Activo' : 'Inactivo'}</span>
+            </div>
+          </div>
+        </header>
+
+        <div id="profile-view">
+          <dl class="profile-grid">
+            <div class="profile-field"><dt>Correo</dt><dd>${escapeHtml(user.email || 'Sin correo registrado')}</dd></div>
+            <div class="profile-field"><dt>Usuario</dt><dd>${escapeHtml(user.username || '')}</dd></div>
+            <div class="profile-field"><dt>Rol</dt><dd>${escapeHtml(roleLabel)}</dd></div>
+            <div class="profile-field"><dt>Último acceso</dt><dd id="profile-last-login">${escapeHtml(this._formatProfileDate(user.last_login))}</dd></div>
+          </dl>
+          <div class="profile-section">
+            <div class="profile-section-title">Acceso de tu rol</div>
+            <ul class="profile-chips">
+              ${this._profilePermissions(user.role).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="profile-actions">
+            <button type="button" class="btn btn-secondary" id="profile-password-toggle">Cambiar contraseña</button>
+            <button type="button" class="btn btn-danger" id="profile-logout">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <form class="profile-password" id="profile-password-form" hidden novalidate>
+          <div class="profile-section-title">Cambiar contraseña</div>
+          <div class="form-group">
+            <label class="form-label" for="profile-current-password">Contraseña actual</label>
+            <input class="form-input" type="password" id="profile-current-password" autocomplete="current-password" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-new-password">Nueva contraseña</label>
+            <input class="form-input" type="password" id="profile-new-password" autocomplete="new-password" required aria-describedby="profile-password-hint">
+            <small class="profile-hint" id="profile-password-hint">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-confirm-password">Confirmar nueva contraseña</label>
+            <input class="form-input" type="password" id="profile-confirm-password" autocomplete="new-password" required>
+          </div>
+          <p class="profile-error" id="profile-password-error" role="alert"></p>
+          <div class="profile-actions">
+            <button type="button" class="btn btn-secondary" id="profile-password-cancel">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="profile-password-save">Guardar contraseña</button>
+          </div>
+        </form>
+      </section>`;
+  },
+
   showUserProfile() {
     const user = AuthService.getUser();
     if (!user) return;
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay visible';
-    overlay.innerHTML = `
-      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-title">
-        <div class="modal-header">
-          <h3 class="modal-title" id="profile-title">Perfil de usuario</h3>
-          <button class="modal-close" aria-label="Cerrar perfil">✕</button>
-        </div>
-        <dl>
-          <dt>Nombre</dt><dd>${escapeHtml([user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '')}</dd>
-          <dt>Usuario</dt><dd>${escapeHtml(user.username || '')}</dd>
-          <dt>Correo</dt><dd>${escapeHtml(user.email || 'Sin correo registrado')}</dd>
-          <dt>Rol</dt><dd>${escapeHtml(user.role || '')}</dd>
-        </dl>
-      </section>`;
+    overlay.innerHTML = this._profileTemplate(user);
+
+    const find = selector => overlay.querySelector(selector);
     const close = () => {
       overlay.remove();
       document.getElementById('user-profile-btn')?.focus();
     };
-    overlay.querySelector('button').addEventListener('click', close);
+    const view = find('#profile-view');
+    const form = find('#profile-password-form');
+    const errorBox = find('#profile-password-error');
+    const showForm = visible => {
+      form.hidden = !visible;
+      view.hidden = visible;
+      errorBox.textContent = '';
+      find(visible ? '#profile-current-password' : '#profile-password-toggle').focus();
+    };
+
+    find('#profile-close').addEventListener('click', close);
+    find('#profile-password-toggle').addEventListener('click', () => showForm(true));
+    find('#profile-password-cancel').addEventListener('click', () => { form.reset?.(); showForm(false); });
+    find('#profile-logout').addEventListener('click', async () => {
+      overlay.remove();
+      await AuthService.logout();
+      window.location.hash = '#/login';
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const current = find('#profile-current-password').value;
+      const next = find('#profile-new-password').value;
+      const repeat = find('#profile-confirm-password').value;
+      const strong = next.length >= 8 && /[A-Z]/.test(next) && /[a-z]/.test(next) && /\d/.test(next) && /[^A-Za-z0-9]/.test(next);
+      let message = '';
+      if (!current || !next) message = 'Completa la contraseña actual y la nueva.';
+      else if (!strong) message = 'La nueva contraseña no cumple los requisitos.';
+      else if (next !== repeat) message = 'La confirmación no coincide con la nueva contraseña.';
+      else if (next === current) message = 'La nueva contraseña debe ser diferente de la actual.';
+      if (message) { errorBox.textContent = message; return; }
+
+      const save = find('#profile-password-save');
+      save.disabled = true;
+      try {
+        await AuthService.changePassword(current, next);
+        overlay.remove();
+        Toast.success('Contraseña actualizada. Inicia sesión de nuevo.');
+        await AuthService.logout();
+        window.location.hash = '#/login';
+      } catch (error) {
+        errorBox.textContent = error?.message || 'No fue posible cambiar la contraseña.';
+        save.disabled = false;
+      }
+    });
+
     overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
     overlay.addEventListener('keydown', event => {
-      if (event.key === 'Escape') close();
-      if (event.key === 'Tab') { event.preventDefault(); overlay.querySelector('button').focus(); }
+      if (event.key === 'Escape') { close(); return; }
+      if (event.key !== 'Tab' || !overlay.querySelectorAll) return;
+      const focusable = [...overlay.querySelectorAll('button, input')]
+        .filter(el => !el.disabled && !el.closest('[hidden]'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
     document.body.appendChild(overlay);
-    overlay.querySelector('button').focus();
+    find('#profile-close').focus();
+
+    // El último acceso viene del servidor; se completa sin bloquear la apertura.
+    AuthService.getMe?.().then(me => {
+      const target = document.getElementById('profile-last-login');
+      if (me && target) target.textContent = this._formatProfileDate(me.last_login);
+    }).catch(() => {});
   },
 
   bindShellEvents() {

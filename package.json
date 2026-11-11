@@ -1,6 +1,6 @@
 {
   "name": "aeroguard-cuas",
-  "version": "1.2.0-rc.1",
+  "version": "1.2.0-rc.2",
   "description": "AeroGuard — Prototipo académico de detección experimental y monitoreo de drones",
   "private": true,
   "type": "module",

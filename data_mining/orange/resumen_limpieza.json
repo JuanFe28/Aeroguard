@@ -1,0 +1,30 @@
+{
+  "aeroguard_entrenamiento.csv.gz": {
+    "registros_brutos": 125000,
+    "duplicados_eliminados": 3750,
+    "celdas_corruptas": 1096,
+    "filas_fuera_de_rango_fisico": 12500,
+    "nulos_imputados": 8750,
+    "registros_limpios": 108750,
+    "distribucion_threat_level": {
+      "MEDIUM": 40395,
+      "HIGH": 37121,
+      "LOW": 22325,
+      "CRITICAL": 8909
+    }
+  },
+  "aeroguard_prueba_lote2.csv.gz": {
+    "registros_brutos": 120000,
+    "duplicados_eliminados": 3600,
+    "celdas_corruptas": 1050,
+    "filas_fuera_de_rango_fisico": 12000,
+    "nulos_imputados": 8400,
+    "registros_limpios": 104400,
+    "distribucion_threat_level": {
+      "MEDIUM": 38902,
+      "HIGH": 35496,
+      "LOW": 21459,
+      "CRITICAL": 8543
+    }
+  }
+}

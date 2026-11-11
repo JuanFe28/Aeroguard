@@ -1,0 +1,1 @@
+{"service": "aeroguard-ai-service", "result": {"is_drone": true, "confidence": 0.95, "model_used": "OpenCV-Heuristic", "processing_ms": 1.0701699999913217, "bounding_box": {"x": 119, "y": 39, "w": 72, "h": 52}, "raw_detections": 1}, "model_validated": false}

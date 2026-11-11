@@ -1,0 +1,1 @@
+{"status": "healthy", "service": "aeroguard-ai-service", "version": "1.2.0-rc.1", "endpoint": "POST /analyze", "model_validated": false}

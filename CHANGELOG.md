@@ -1,13 +1,31 @@
 # Changelog
 
-## [Unreleased] — aceptación completa de interfaz
+## [1.2.0-rc.2] — en preparación, sin publicar
+
+Identificación alineada en API, `.env.example`, Python, frontend, ai-service y package. Integrado en `main` el 09-11-2026. Faltan la construcción y publicación de imágenes, la etiqueta Git y la actualización del servidor; `deploy/` sigue apuntando a los digests de rc.1.
+
+### Perfil, minería de datos, Orange y entrega — 11-11-2026
+
+- Perfil de usuario rediseñado: avatar, rol y estado, último acceso, accesos del rol, cambio de contraseña con validación y cierre de sesión; adaptado a móvil y con foco atrapado en el diálogo.
+- Las reglas de conocimiento de `02_crisp_dm_pipeline.py` se calculan sobre el dataset limpio y se guardan en `data_mining/reports/reglas_conocimiento.json`. Antes eran textos fijos: 98,4 % pasa a 87,8 % y +42 % pasa a +34,1 puntos. El documento CRISP-DM aclara que los datos son sintéticos.
+- Limpieza compartida en `data_mining/limpieza.py`; el lote adicional de 120.000 registros se limpia con las mismas reglas (104.400 registros válidos).
+- Nuevo flujo de Orange (`data_mining/orange/AeroGuard_CRISP_DM.ows`) que entrena con el dataset principal y evalúa con el lote independiente: Random Forest 95,4 %, árbol 94,8 %, regresión logística 58,3 %. Sustituye `Orange_lote_adicional.ows`, que no definía la clase y leía tres variables numéricas como texto.
+- `scripts/set_release_digests.py` fija los digests publicados en `deploy/compose.yml` y `deploy/release.json` a la vez; guía de entrega en `deploy/ENTREGA_RC2.md`.
+- Raíz ordenada: notas de continuidad en `docs/continuidad/`, comandos del servidor en `deploy/`, release del 11-11 en `docs/release-2026-11-11/`, colección de la exposición en `postman/exposicion-fase-test/` y `Estructura.txt` en `docs/tecnica/`.
+
+### Mapa y documentación — 10-11-2026
+
+- Corregida la política de contenido de Nginx, que bloqueaba las teselas de OpenStreetMap y dejaba los mapas sin fondo en el despliegue con Docker; añadida una regresión que compara la CSP con los servidores de teselas usados por las vistas.
+- Nuevo mapa de documentación en `docs/README.md` y documentos de proyecto (resumen ejecutivo, propuesta, TRL, presupuesto y equipo, modelo de negocio, guía de postulación) y técnicos (arquitectura, manual de usuario).
+
+### Aceptación completa de interfaz
 
 - Batería de 51 casos de navegador con Playwright/axe: once módulos a tres tamaños, formularios, botones, roles, descargas, WebSocket, contraste, excepciones y recortes interiores; informe y galería privados para aceptación visual humana.
 - El TXT del servidor ejecuta la batería al terminar el arranque de QA; proyecto/versión de QA validados antes de crear datos sintéticos.
 - Corregidos enlaces de detecciones/alertas, mensajes de alertas y selector de sensores reales en IA; logout revoca la sesión en backend.
 - Mejorados contraste, semántica ARIA y diseño móvil; mapas cancelan animaciones al salir. Dashboard usa OSM y describe 120 m como referencia visual de ejemplo.
 
-## [Unreleased] — QA del 29-10-2026
+### QA del 29-10-2026
 
 - Corregidos configuración, edición de sensores/usuarios, Perfil y mapas; trayectorias históricas con tabla y estados explícitos.
 - Eliminados incidentes iniciales y telemetría de respaldo ficticios de SOAR.
