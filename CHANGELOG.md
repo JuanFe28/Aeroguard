@@ -1,8 +1,8 @@
 # Changelog
 
-## [1.2.0-rc.2] — en preparación, sin publicar
+## [1.2.0-rc.2] — 2026-11-11
 
-Identificación alineada en API, `.env.example`, Python, frontend, ai-service y package. Integrado en `main` el 09-11-2026. Faltan la construcción y publicación de imágenes, la etiqueta Git y la actualización del servidor; `deploy/` sigue apuntando a los digests de rc.1.
+Imágenes publicadas en GHCR desde el commit `6c38df5` ([ejecución 43075746836](https://github.com/JuanFe28/Aeroguard/actions/runs/43075746836)); `deploy/compose.yml` y `deploy/release.json` apuntan a sus digests. Falta actualizar el servidor siguiendo `deploy/ENTREGA_RC2.md` (parte B). Identificación alineada en API, `.env.example`, Python, frontend, ai-service y package.
 
 ### Perfil, minería de datos, Orange y entrega — 11-11-2026
 

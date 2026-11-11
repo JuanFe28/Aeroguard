@@ -1,6 +1,6 @@
 # Deploy privado de la candidata académica
 
-Este paquete prepara **una instalación nueva** de `1.2.0-rc.1` en un servidor Linux `x86_64`. Usa las imágenes publicadas por digest: no reconstruye ni sustituye la candidata. Sirve para un servidor físico o una VM; se necesita un solo destino.
+Este paquete prepara **una instalación nueva** de `1.2.0-rc.2` en un servidor Linux `x86_64`. Usa las imágenes publicadas por digest: no reconstruye ni sustituye la candidata. Sirve para un servidor físico o una VM; se necesita un solo destino.
 
 ## Acceso y alcance
 

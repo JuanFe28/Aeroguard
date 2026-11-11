@@ -1,8 +1,8 @@
 # AeroGuard
 
-Estado al 10/11/2026: las correcciones de QA del 29/10 y el paquete de despliegue privado ya están integrados en `main` (PR #1 y #2 fusionados el 09/11). La identificación del código es **1.2.0-rc.2, en preparación**: todavía no hay imágenes ni release publicadas con ese nombre, y el servidor privado conserva las imágenes de `1.2.0-rc.1`. Los pasos para publicar rc.2 y actualizar el servidor están en [deploy/ENTREGA_RC2.md](deploy/ENTREGA_RC2.md); las puertas pendientes antes de publicar, en [SIGUIENTE_CANDIDATA.md](docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md).
+Estado al 11/11/2026: **1.2.0-rc.2 publicada** en GHCR y fijada por digest en `deploy/`. El servidor privado conserva `1.2.0-rc.1` hasta que se ejecute la parte B de [deploy/ENTREGA_RC2.md](deploy/ENTREGA_RC2.md).
 
-Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Última candidata publicada: **1.2.0-rc.1** (GitHub Actions y GHCR). Candidata en preparación: **1.2.0-rc.2**. La política de versiones está en [VERSIONING.md](VERSIONING.md).
+Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Última candidata publicada: **1.2.0-rc.2** (GitHub Actions y GHCR). La política de versiones está en [VERSIONING.md](VERSIONING.md).
 
 La API y el frontend usan datos persistidos por defecto. La exposición local puede sembrar ejemplos de forma explícita. La visión usa heurísticas OpenCV/Pillow o un adaptador YOLO opcional: **no existe un modelo de drones validado con un conjunto de prueba independiente**. No se han probado sensores físicos, identificación de fabricante ni funciones de neutralización.
 
