@@ -145,16 +145,14 @@ El pipeline generó 6 visualizaciones en alta resolución (300 DPI):
 ## 6. Fase 6: Despliegue y Conocimiento Táctico Descubierto (Deployment & Knowledge)
 
 ### 6.1 Reglas de Conocimiento Operativo (Business Insights)
-A partir de la inducción de los árboles de decisión y el análisis de importancia de variables, se extrajeron 4 reglas clave para el sistema de defensa C-UAS de AeroGuard:
+Las cuatro reglas se **calculan** en `02_crisp_dm_pipeline.py` sobre el dataset limpio (108,750 registros) y se guardan en `data_mining/reports/reglas_conocimiento.json`. Valores obtenidos con la semilla 42:
 
-1. **Regla de Proximidad y Vector Cinético (Amenaza Crítica Inminente):**
-   $$\text{Si } (\text{distance\_to\_zone\_m} < 150\text{ m}) \land (\text{speed\_ms} > 20\text{ m/s}) \land (\text{flight\_pattern} \in \{\text{'Directo'}, \text{'Evasivo'}\}) \implies \text{CRITICAL } (98.4\%)$$
-2. **Regla de Transgresión del Techo Reglamentario (120 m AGL):**
-   Vuelos por encima de la cota máxima permitida por la autoridad aeronáutica (120 m) combinados con aeronaves no registradas (`diy_custom` o `fixed_wing`) aumentan en un **42% la probabilidad de clasificación HIGH/CRITICAL**.
-3. **Regla de Descarte Inteligente de Falsos Positivos:**
-   Cualquier contacto clasificado por el motor de visión como `bird_false_pos` converge de forma estable a nivel `LOW`, permitiendo silenciar la sirena táctica y evitar la activación innecesaria del protocolo SOAR.
-4. **Regla de Proximidad del Piloto Hostil por Potencia RF:**
-   Señales de enlace de control superiores a **-50 dBm** señalan que la estación terrena o piloto del dron se encuentra operando en las inmediaciones directas del perímetro protegido.
+> **Advertencia metodológica.** El dataset es **sintético**: `threat_level` lo asigna `01_generate_dataset.py` con un puntaje por reglas (distancia, velocidad, patrón, tipo de dron, RF, etc.). Por eso las reglas y el accuracy del 94% muestran que el modelo **recupera las reglas del generador**; no demuestran el comportamiento de drones reales. Validar con datos reales antes de usarlas operativamente.
+
+1. **Proximidad y vector cinético:** si `distance_to_zone_m` < 150 m, `speed_ms` > 20 m/s y `flight_pattern` es `Directo` o `Evasivo`, el **87.8%** de los 1,237 eventos es `CRITICAL` (frente al 8.2% de base general).
+2. **Techo de 120 m AGL y drones no comerciales:** con altitud > 120 m y tipo `diy_custom` o `fixed_wing`, la proporción `HIGH`/`CRITICAL` es **69.9%** frente a 35.8% en el resto (**+34.1 puntos porcentuales**, n = 20,747).
+3. **Descarte de falsos positivos (aves):** el **100%** de los 8,761 registros `bird_false_pos` es `LOW`, porque el generador así lo define.
+4. **Potencia RF:** con señal > -50 dBm la proporción `HIGH`/`CRITICAL` es **53.2%** frente a 39.4% con señal ≤ -50 dBm (n = 23,217). Es una asociación en el dataset sintético; no prueba la ubicación del piloto.
 
 ### 6.2 Artefactos de Despliegue Generados
 - **Modelo Serializado:** `data_mining/models/aeroguard_threat_model.pkl` (0.20 MB). Contiene el clasificador entrenado, el escalador `StandardScaler`, los diccionarios de codificación categórica y los metadatos de versión.

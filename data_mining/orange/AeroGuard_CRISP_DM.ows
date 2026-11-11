@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="AeroGuard - CRISP-DM en Orange" description="Entrena con el dataset principal y evalua con el lote adicional independiente.">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="Entrenamiento (dataset principal)" position="(80, 200)" />
+		<node id="1" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="Prueba independiente (lote 2)" position="(80, 420)" />
+		<node id="2" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Tabla de datos" position="(300, 40)" />
+		<node id="3" name="Column Statistics" qualified_name="Orange.widgets.data.owfeaturestatistics.OWFeatureStatistics" project_name="Orange3" version="" title="Estadísticas" position="(300, 120)" />
+		<node id="4" name="Box Plot" qualified_name="Orange.widgets.visualize.owboxplot.OWBoxPlot" project_name="Orange3" version="" title="Box Plot" position="(300, 200)" />
+		<node id="5" name="Rank" qualified_name="Orange.widgets.data.owrank.OWRank" project_name="Orange3" version="" title="Ranking de variables" position="(300, 280)" />
+		<node id="6" name="Tree" qualified_name="Orange.widgets.model.owtree.OWTreeLearner" project_name="Orange3" version="" title="Árbol de decisión" position="(520, 140)" />
+		<node id="7" name="Random Forest" qualified_name="Orange.widgets.model.owrandomforest.OWRandomForest" project_name="Orange3" version="" title="Random Forest" position="(520, 260)" />
+		<node id="8" name="Logistic Regression" qualified_name="Orange.widgets.model.owlogisticregression.OWLogisticRegression" project_name="Orange3" version="" title="Regresión logística" position="(520, 380)" />
+		<node id="9" name="Test and Score" qualified_name="Orange.widgets.evaluate.owtestandscore.OWTestAndScore" project_name="Orange3" version="" title="Test and Score" position="(760, 300)" />
+		<node id="10" name="Confusion Matrix" qualified_name="Orange.widgets.evaluate.owconfusionmatrix.OWConfusionMatrix" project_name="Orange3" version="" title="Matriz de confusión" position="(960, 300)" />
+		<node id="11" name="Tree Viewer" qualified_name="Orange.widgets.visualize.owtreeviewer.OWTreeGraph" project_name="Orange3" version="" title="Visor del árbol" position="(760, 140)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="0" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="0" sink_node_id="4" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="0" sink_node_id="5" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="4" source_node_id="0" sink_node_id="6" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="5" source_node_id="0" sink_node_id="7" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="6" source_node_id="0" sink_node_id="8" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="7" source_node_id="0" sink_node_id="9" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="train_data" />
+		<link id="8" source_node_id="1" sink_node_id="9" source_channel="Data" sink_channel="Test Data" enabled="true" source_channel_id="data" sink_channel_id="test_data" />
+		<link id="9" source_node_id="6" sink_node_id="9" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="10" source_node_id="7" sink_node_id="9" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="11" source_node_id="8" sink_node_id="9" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="12" source_node_id="9" sink_node_id="10" source_channel="Evaluation Results" sink_channel="Evaluation Results" enabled="true" source_channel_id="evaluations_results" sink_channel_id="evaluation_results" />
+		<link id="13" source_node_id="6" sink_node_id="11" source_channel="Model" sink_channel="Tree" enabled="true" source_channel_id="model" sink_channel_id="tree" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties node_id="0" format="pickle">gASVRAEAAAAAAAB9lCiMDHJlY2VudF9wYXRoc5RdlIweb3Jhbmdld2lkZ2V0LnV0aWxzLmZpbGVk
+aWFsb2dzlIwKUmVjZW50UGF0aJSTlCmBlH2UKIwHYWJzcGF0aJSMZUM6L1VzZXJzL2ludGVsaWdl
+bmNpYS9Eb2N1bWVudHMvUC4gQWx2aW5vL0Flcm9ndWFyZC9kYXRhX21pbmluZy9vcmFuZ2UvYWVy
+b2d1YXJkX2VudHJlbmFtaWVudG8uY3N2Lmd6lIwGcHJlZml4lIwHYmFzZWRpcpSMB3JlbHBhdGiU
+jB5hZXJvZ3VhcmRfZW50cmVuYW1pZW50by5jc3YuZ3qUjAV0aXRsZZRoDYwFc2hlZXSUjACUjAtm
+aWxlX2Zvcm1hdJROdWJhjAZzb3VyY2WUSwCMEmNvbnRyb2xBcmVhVmlzaWJsZZSIdS4=
+</properties>
+		<properties node_id="1" format="pickle">gASVQgEAAAAAAAB9lCiMDHJlY2VudF9wYXRoc5RdlIweb3Jhbmdld2lkZ2V0LnV0aWxzLmZpbGVk
+aWFsb2dzlIwKUmVjZW50UGF0aJSTlCmBlH2UKIwHYWJzcGF0aJSMZEM6L1VzZXJzL2ludGVsaWdl
+bmNpYS9Eb2N1bWVudHMvUC4gQWx2aW5vL0Flcm9ndWFyZC9kYXRhX21pbmluZy9vcmFuZ2UvYWVy
+b2d1YXJkX3BydWViYV9sb3RlMi5jc3YuZ3qUjAZwcmVmaXiUjAdiYXNlZGlylIwHcmVscGF0aJSM
+HWFlcm9ndWFyZF9wcnVlYmFfbG90ZTIuY3N2Lmd6lIwFdGl0bGWUaA2MBXNoZWV0lIwAlIwLZmls
+ZV9mb3JtYXSUTnViYYwGc291cmNllEsAjBJjb250cm9sQXJlYVZpc2libGWUiHUu
+</properties>
+		<properties node_id="6" format="literal">{'max_depth': 12, 'limit_depth': True, 'min_internal': 10, 'limit_min_internal': True, 'min_leaf': 5, 'limit_min_leaf': True}</properties>
+		<properties node_id="7" format="literal">{'n_estimators': 100, 'max_depth': 16, 'use_max_depth': True, 'min_samples_split': 5, 'use_min_samples_split': True, 'use_random_state': True}</properties>
+		<properties node_id="9" format="literal">{'resampling': 5}</properties>
+	</node_properties>
+	<session_state>
+		<window_groups />
+	</session_state>
+</scheme>

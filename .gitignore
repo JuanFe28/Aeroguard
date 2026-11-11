@@ -28,6 +28,7 @@ MANIFEST
 
 # --- Virtual Environments ---
 .venv/
+.venv-dm/
 venv/
 ENV/
 env/
@@ -123,5 +124,6 @@ docs/evidencias/TEST-03/*_antes.xml
  
 # --- Data Mining Artifacts ---
 data_mining/data/*.csv
+!data_mining/data/aeroguard_lote_adicional_120000.csv
 data_mining/models/*.pkl
 *.pkl
