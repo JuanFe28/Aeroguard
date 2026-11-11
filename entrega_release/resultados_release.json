@@ -1,0 +1,123 @@
+{
+  "version": "1.2.0-rc.1",
+  "actor": "camachoab21-cmd",
+  "commit": "33f1cfd5aa9f7ef3d059c2dbc054f293ae4e7db1",
+  "workflow": "https://github.com/JuanFe28/Aeroguard/actions/runs/40342511908",
+  "images": [
+    "ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.1@sha256:e9f63aa07bee5e5f3df1ffc680c0fb66163217bb617516eff6654191ac707727",
+    "ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.1@sha256:1ef125089ea8d8dd57ba887459ad7c332198d1c8d43f0546ed017daf0df6360a",
+    "ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.1@sha256:77103c34eafde7f4931837940af6fd00f6290ff159bc221e2bd782752322d24a",
+    "ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.1@sha256:e0162c6efeba03c18331507da89d59092e185ed71a4abe718922c8544fcf233e"
+  ],
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "94",
+    "time": "11.845",
+    "timestamp": "2026-10-26T14:45:42.599617+00:00",
+    "hostname": "runnervmtai0g"
+  },
+  "checks": [
+    {
+      "name": "syntax-python",
+      "command": [
+        "/opt/hostedtoolcache/Python/3.11.17/x64/bin/python",
+        "scripts/check_python_syntax.py"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-26T14:45:38.819936+00:00",
+      "passed": true
+    },
+    {
+      "name": "syntax-js",
+      "command": [
+        "node",
+        "scripts/check_js_syntax.js"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-26T14:45:38.934692+00:00",
+      "passed": true
+    },
+    {
+      "name": "pytest",
+      "command": [
+        "/opt/hostedtoolcache/Python/3.11.17/x64/bin/python",
+        "-m",
+        "pytest",
+        "backend/tests",
+        "--ignore=backend/tests/test_websocket_load.py",
+        "-q",
+        "--tb=short",
+        "--basetemp=/home/runner/work/Aeroguard/Aeroguard/tmp/release-checks/20261026T144538819639/functional",
+        "--cov=backend/app",
+        "--cov-report=json:/home/runner/work/Aeroguard/Aeroguard/tmp/publish-checks/coverage.json",
+        "--junitxml=/home/runner/work/Aeroguard/Aeroguard/tmp/publish-checks/pytest.xml"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-26T14:45:39.350606+00:00",
+      "passed": true
+    },
+    {
+      "name": "load",
+      "command": [
+        "/opt/hostedtoolcache/Python/3.11.17/x64/bin/python",
+        "-m",
+        "pytest",
+        "backend/tests/test_websocket_load.py",
+        "-q",
+        "-s",
+        "--basetemp=/home/runner/work/Aeroguard/Aeroguard/tmp/release-checks/20261026T144538819639/load",
+        "--junitxml=/home/runner/work/Aeroguard/Aeroguard/tmp/publish-checks/load.xml"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-26T14:45:54.897319+00:00",
+      "passed": true
+    },
+    {
+      "name": "bandit",
+      "command": [
+        "/opt/hostedtoolcache/Python/3.11.17/x64/bin/python",
+        "-m",
+        "bandit",
+        "-r",
+        "backend/app",
+        "ai_service",
+        "sensor_simulator",
+        "scripts",
+        "-f",
+        "json",
+        "-o",
+        "/home/runner/work/Aeroguard/Aeroguard/tmp/publish-checks/bandit.json"
+      ],
+      "exit_code": 1,
+      "started_utc": "2026-10-26T14:46:02.077176+00:00",
+      "passed": true,
+      "severity_counts": {
+        "LOW": 40,
+        "MEDIUM": 0,
+        "HIGH": 0
+      },
+      "criterion": "Sin errores de análisis ni avisos medios/altos; bajos conservados"
+    },
+    {
+      "name": "dependencies",
+      "command": [
+        "/opt/hostedtoolcache/Python/3.11.17/x64/bin/python",
+        "-m",
+        "pip_audit",
+        "--progress-spinner",
+        "off",
+        "--format",
+        "json",
+        "--output",
+        "/home/runner/work/Aeroguard/Aeroguard/tmp/publish-checks/dependencies.json"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-10-26T14:46:02.894154+00:00",
+      "passed": true
+    }
+  ],
+  "release": "https://github.com/JuanFe28/Aeroguard/releases/tag/v1.2.0-rc.1"
+}
