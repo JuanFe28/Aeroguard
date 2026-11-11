@@ -1,6 +1,6 @@
 # Mapa de la documentación de AeroGuard
 
-Actualizado: 10-11-2026. Este índice ordena toda la documentación del repositorio por propósito. Empieza aquí.
+Actualizado: 11-11-2026. Este índice ordena toda la documentación del repositorio por propósito. Empieza aquí.
 
 **AeroGuard en una frase:** plataforma de software, desarrollada en las Unidades Tecnológicas de Santander (UTS), para recibir observaciones de objetos aéreos, vigilar zonas restringidas, generar alertas y dejar trazabilidad de las decisiones de un operador humano. Es un prototipo académico validado en laboratorio; todavía no detecta drones con sensores reales.
 
@@ -46,7 +46,8 @@ Actualizado: 10-11-2026. Este índice ordena toda la documentación del reposito
 | [Política de versionado](../VERSIONING.md) | SemVer, candidatas y pasos de Release | Vigente |
 | [Changelog](../CHANGELOG.md) | Cambios por versión | Vigente |
 | [Siguiente candidata](qa-2026-10-29/SIGUIENTE_CANDIDATA.md) | Puertas pendientes antes de publicar rc.2 | Vigente |
-| [Comandos del servidor](../COMANDOS_SERVIDOR_CASA.txt) | Pasos para retomar desde el portátil autorizado | Vigente |
+| [Entrega rc.2 al servidor](../deploy/ENTREGA_RC2.md) | Publicar imágenes, fijar digests y actualizar el servidor con respaldo y retorno | Vigente |
+| [Comandos del servidor](../deploy/COMANDOS_SERVIDOR_CASA.txt) | Diagnóstico, túneles y QA aislado desde el portátil autorizado (29-10-2026) | Vigente (pasos 1, 3 y 4) |
 | [Aceptación del servidor](qa-2026-10-29/ACEPTACION_SERVIDOR.md) | Lista de aceptación pendiente en el destino | Vigente |
 
 ## 4. Diseño, requisitos y referencia técnica
@@ -57,7 +58,8 @@ Actualizado: 10-11-2026. Este índice ordena toda la documentación del reposito
 | [Especificación OpenAPI](AeroGuard_OpenAPI.json) | Contrato de la API | Vigente |
 | [Colección Postman](AeroGuard_Postman_Collection.json) y carpeta `postman/` | Peticiones de ejemplo | Vigente |
 | [Minería de datos CRISP-DM](MINERIA_DATOS_CRISP_DM.md) | Ejercicio académico con **datos sintéticos**; no mide detección real | Vigente (académico) |
-| [Estructura del repositorio](../Estructura.txt) | Árbol de carpetas comentado | Histórico |
+| [Flujo de Orange Data Mining](../data_mining/orange/README.md) | Flujo `.ows` listo: entrena con el dataset principal y evalúa con el lote independiente de 120.000 registros | Vigente (académico) |
+| [Estructura del repositorio](tecnica/Estructura.txt) | Árbol de carpetas comentado | Histórico |
 
 ## 5. Calidad, pruebas y evidencias
 
@@ -73,10 +75,12 @@ Actualizado: 10-11-2026. Este índice ordena toda la documentación del reposito
 | [Resultado del despliegue del 28-10-2026](../deploy/RESULTADO_2026_10_28.md) | Evidencia de la instalación en servidor privado | Histórico |
 | `TRELLO_TEST_01/02/03.md`, `RESULTADOS_TEST_TRELLO.md`, `*.zip` | Evidencias de la fase TEST | Histórico |
 | [Guía de exposición](GUIA_EXPOSICION_LUNES.md) | Guion de la exposición de la fase TEST | Histórico (cifras desactualizadas) |
+| [Release del 11-11-2026](release-2026-11-11/) | Documento de release y evidencias de endpoints y Actions | Histórico |
+| Colección de la exposición (`postman/exposicion-fase-test/`) | Peticiones usadas en la exposición de la fase TEST | Histórico |
 
 ## 6. Notas internas de continuidad
 
-`promt de continuacion.txt`, `LEEME_PUBLICAR_CASA.txt` y `qa-2026-10-29/ENTREGA_CASA.md` son notas de traspaso entre sesiones de trabajo. Son históricas y no describen el producto.
+[`continuidad/PROMPT_CONTINUACION.txt`](continuidad/PROMPT_CONTINUACION.txt), [`continuidad/LEEME_PUBLICAR_CASA.txt`](continuidad/LEEME_PUBLICAR_CASA.txt) y `qa-2026-10-29/ENTREGA_CASA.md` son notas de traspaso entre sesiones de trabajo. Son históricas y no describen el producto.
 
 ## Reglas para mantener el orden
 

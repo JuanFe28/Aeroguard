@@ -1,6 +1,6 @@
 # AeroGuard
 
-Estado al 10/11/2026: las correcciones de QA del 29/10 y el paquete de despliegue privado ya están integrados en `main` (PR #1 y #2 fusionados el 09/11). La identificación del código es **1.2.0-rc.2, en preparación**: todavía no hay imágenes ni release publicadas con ese nombre, y el servidor privado conserva las imágenes de `1.2.0-rc.1`. Los comandos para actualizar el servidor desde el portátil autorizado están en [COMANDOS_SERVIDOR_CASA.txt](COMANDOS_SERVIDOR_CASA.txt); las puertas pendientes antes de publicar, en [SIGUIENTE_CANDIDATA.md](docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md).
+Estado al 10/11/2026: las correcciones de QA del 29/10 y el paquete de despliegue privado ya están integrados en `main` (PR #1 y #2 fusionados el 09/11). La identificación del código es **1.2.0-rc.2, en preparación**: todavía no hay imágenes ni release publicadas con ese nombre, y el servidor privado conserva las imágenes de `1.2.0-rc.1`. Los pasos para publicar rc.2 y actualizar el servidor están en [deploy/ENTREGA_RC2.md](deploy/ENTREGA_RC2.md); las puertas pendientes antes de publicar, en [SIGUIENTE_CANDIDATA.md](docs/qa-2026-10-29/SIGUIENTE_CANDIDATA.md).
 
 Prototipo académico de monitoreo de objetos aéreos: FastAPI, PostgreSQL/PostGIS, WebSockets, RabbitMQ y una interfaz JavaScript. Última candidata publicada: **1.2.0-rc.1** (GitHub Actions y GHCR). Candidata en preparación: **1.2.0-rc.2**. La política de versiones está en [VERSIONING.md](VERSIONING.md).
 
