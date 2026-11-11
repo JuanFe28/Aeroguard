@@ -38,7 +38,7 @@ services:
       retries: 20
 
   backend:
-    image: ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.1@sha256:e0162c6efeba03c18331507da89d59092e185ed71a4abe718922c8544fcf233e
+    image: ghcr.io/juanfe28/aeroguard-backend:1.2.0-rc.2@sha256:f8a8888938170e6f388604537ae26818ed50fa8fee537be4ca80ee160773e287
     restart: unless-stopped
     mem_limit: 1g
     cpus: 1
@@ -77,7 +77,7 @@ services:
       start_period: 30s
 
   frontend:
-    image: ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.1@sha256:e9f63aa07bee5e5f3df1ffc680c0fb66163217bb617516eff6654191ac707727
+    image: ghcr.io/juanfe28/aeroguard-frontend:1.2.0-rc.2@sha256:1900940e2fb27f2da372cd57f0b4dc727856e82fa7b7be54fbfb9aa389d4c48b
     restart: unless-stopped
     mem_limit: 128m
     cpus: 0.25
@@ -99,7 +99,7 @@ services:
 
   ai-worker:
     profiles: [ai]
-    image: ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.1@sha256:77103c34eafde7f4931837940af6fd00f6290ff159bc221e2bd782752322d24a
+    image: ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.2@sha256:4da3ff3946eccbd30a3065a821be2550424c016991dfc48ba543dfb04e655c41
     restart: unless-stopped
     mem_limit: 768m
     cpus: 1
@@ -116,7 +116,7 @@ services:
 
   simulator:
     profiles: [demo]
-    image: ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.1@sha256:1ef125089ea8d8dd57ba887459ad7c332198d1c8d43f0546ed017daf0df6360a
+    image: ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.2@sha256:f833ca2bef4fa6860ffdf23c5ef1e1f734222861c8b7b1d8dac348b0437d3043
     restart: unless-stopped
     mem_limit: 256m
     cpus: 0.25
