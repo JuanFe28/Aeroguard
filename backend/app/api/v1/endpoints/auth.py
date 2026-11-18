@@ -88,9 +88,9 @@ async def login(
 
     try:
         async with AsyncSessionLocal() as db:
-            user = await authenticate_user(db, form_data.username, form_data.password)
+            account = await authenticate_user(db, form_data.username, form_data.password)
 
-            if not user:
+            if account is None:
                 # Audit failed login attempt
                 try:
                     await log_audit(
@@ -111,16 +111,8 @@ async def login(
                     headers={"WWW-Authenticate": "Bearer"},
                 )
 
-            if not user.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Usuario desactivado. Contacta al administrador."
-                )
-
-            # Create tokens
-            from app.services.session_service import state_for
-            state = await state_for(db, user.id)
-            token_data = {"sub": user.username, "role": user.role, "ver": state.version}
+            user, version = account
+            token_data = {"sub": user.username, "role": user.role, "ver": version}
             access_token  = create_access_token(token_data)
             refresh_token = create_refresh_token(token_data)
 
@@ -167,11 +159,7 @@ async def refresh_token(body: RefreshRequest):
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=400, detail="Token de tipo incorrecto.")
     user = await get_user_from_token(body.refresh_token, expected_type="refresh")
-    from app.core.database import AsyncSessionLocal
-    from app.services.session_service import state_for
-    async with AsyncSessionLocal() as db:
-        state = await state_for(db, user.id)
-        new_token = create_access_token({"sub": user.username, "role": user.role, "ver": state.version})
+    new_token = create_access_token({"sub": user.username, "role": user.role, "ver": payload.get("ver", 0)})
     return {"access_token": new_token, "token_type": "bearer"}
 
 

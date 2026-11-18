@@ -6,6 +6,8 @@ Valida los criterios de aceptación Gherkin de HU-02:
 - Control de acceso RBAC: Analyst y Admin tienen acceso a reportes, Operador denegado.
 """
 
+import csv
+from datetime import datetime, timezone
 import io
 import pytest
 from fastapi.testclient import TestClient
@@ -109,3 +111,36 @@ def test_reports_post_export_unified(client: TestClient):
     )
     assert res_xl.status_code == 200
     assert "openxmlformats" in res_xl.headers["content-type"]
+
+
+def test_export_alert_without_detection(client: TestClient):
+    token = create_access_token({"sub": "report_alert_admin", "role": "admin"})
+    headers = {"Authorization": f"Bearer {token}"}
+    title = "Alerta manual sin telemetría"
+    response = client.post("/api/v1/alerts", headers=headers, json={"title": title, "message": title})
+    assert response.status_code == 201, response.text
+    alert = response.json()
+    created_at = datetime.fromisoformat(alert["created_at"])
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    params = {"type": "alerts", "date_from": created_at.isoformat(), "date_to": created_at.isoformat()}
+
+    exported_csv = client.get("/api/v1/reports/export/csv", headers=headers, params=params)
+    assert exported_csv.status_code == 200, exported_csv.text
+    rows = list(csv.DictReader(io.StringIO(exported_csv.content.decode("utf-8-sig"))))
+    assert len(rows) == 1
+    assert rows[0]["id"] == alert["id"]
+    assert rows[0]["alert_title"] == title
+    assert rows[0]["timestamp"] == created_at.isoformat()
+    assert rows[0]["detection_id"] == rows[0]["alt"] == ""
+
+    exported_excel = client.get("/api/v1/reports/export/excel", headers=headers, params=params)
+    assert exported_excel.status_code == 200, exported_excel.text
+    workbook = load_workbook(io.BytesIO(exported_excel.content))
+    assert workbook["Alertas"]["A5"].value == alert["id"]
+    assert workbook["Alertas"]["M5"].value == title
+    assert workbook["Alertas"]["F5"].value is None
+
+    exported_pdf = client.get("/api/v1/reports/export/pdf", headers=headers, params=params)
+    assert exported_pdf.status_code == 200, exported_pdf.text
+    assert exported_pdf.content.startswith(b"%PDF")

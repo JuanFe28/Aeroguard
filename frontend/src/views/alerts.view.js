@@ -153,7 +153,7 @@ export class AlertsViewModel {
               👤 Asignar
             </button>
           ` : ''}
-          ${a.latitude && a.longitude ? `
+          ${Number.isFinite(a.latitude) && Number.isFinite(a.longitude) ? `
             <button class="btn btn-secondary btn-sm" onclick="window.location.hash='#/dashboard'" aria-label="Ver en mapa">
               🗺️ Ver en mapa
             </button>

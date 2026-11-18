@@ -179,7 +179,11 @@ export class DashboardViewModel {
 
     // Reset previous instance
     if (this._map) {
-      try { this._map.remove(); } catch (e) {}
+      try {
+        this._map.remove();
+      } catch {
+        // El mapa anterior puede haberse desmontado al cambiar de vista.
+      }
       this._map = null;
     }
     if (container._leaflet_id) {
@@ -188,7 +192,7 @@ export class DashboardViewModel {
 
     // Default center around Bucaramanga / Palonegro airport or Bogotá
     let defaultCenter = [7.1265, -73.1848];
-    let defaultZoom = 13;
+    const defaultZoom = 13;
 
     if (this.state.sensors.length > 0 && this.state.sensors[0].latitude) {
       defaultCenter = [this.state.sensors[0].latitude, this.state.sensors[0].longitude];
@@ -229,17 +233,17 @@ export class DashboardViewModel {
     if (!this._map) return;
     const points = [];
     this.state.detections.forEach(d => {
-      if (d.latitude && d.longitude) points.push([d.latitude, d.longitude]);
+      if (Number.isFinite(d.latitude) && Number.isFinite(d.longitude)) points.push([d.latitude, d.longitude]);
     });
     this.state.sensors.forEach(s => {
-      if (s.latitude && s.longitude) points.push([s.latitude, s.longitude]);
+      if (Number.isFinite(s.latitude) && Number.isFinite(s.longitude)) points.push([s.latitude, s.longitude]);
     });
     this.state.zones.forEach(z => {
       if (z.polygon && z.polygon.length) {
         z.polygon.forEach(p => {
           const lat = p.lat ?? p[0];
           const lng = p.lng ?? p[1];
-          if (lat && lng) points.push([lat, lng]);
+          if (Number.isFinite(lat) && Number.isFinite(lng)) points.push([lat, lng]);
         });
       }
     });
@@ -247,7 +251,9 @@ export class DashboardViewModel {
     if (points.length > 1) {
       try {
         this._map.fitBounds(points, { padding: [50, 50], maxZoom: 15 });
-      } catch (e) {}
+      } catch {
+        // Conserva la vista actual si Leaflet no puede ajustar los límites.
+      }
     }
   }
 
@@ -910,7 +916,12 @@ export class DashboardViewModel {
       window.removeEventListener('resize', this._resizeHandler);
     }
     if (this._map) {
-      try { this._map.stop(); this._map.remove(); } catch (e) {}
+      try {
+        this._map.stop();
+        this._map.remove();
+      } catch {
+        // La vista puede haber desmontado el mapa durante la navegación.
+      }
       this._map = null;
     }
   }

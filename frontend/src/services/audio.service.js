@@ -159,14 +159,18 @@ export class TacticalAudioSiren {
         const now = this.audioCtx.currentTime;
         this.currentGain.gain.setValueAtTime(this.currentGain.gain.value, now);
         this.currentGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-      } catch (e) {}
+      } catch {
+        // La limpieza también se ejecuta cuando el contexto de audio ya está cerrado.
+      }
     }
 
     if (this.currentOscillator) {
       try {
         this.currentOscillator.stop(this.audioCtx ? this.audioCtx.currentTime + 0.06 : 0);
         this.currentOscillator.disconnect();
-      } catch (e) {}
+      } catch {
+        // El oscilador puede haber terminado por su cuenta.
+      }
       this.currentOscillator = null;
     }
 

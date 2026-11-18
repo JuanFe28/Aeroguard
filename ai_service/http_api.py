@@ -55,7 +55,7 @@ class Handler(BaseHTTPRequestHandler):
             if result.model_used == "Error":
                 raise ValueError("Imagen no analizable")
             self.send_json(200, {"service": "aeroguard-ai-service", "result": asdict(result), "model_validated": False})
-        except (ValueError, OSError):
+        except (ValueError, OSError, Image.DecompressionBombError):
             self.send_json(400, {"detail": "Imagen inválida"})
 
 

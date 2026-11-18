@@ -11,7 +11,7 @@ import json
 import time
 from datetime import datetime, timezone
 
-from app.core.security import get_current_user, decode_token
+from app.core.security import get_current_user, decode_token, has_permission
 
 router = APIRouter()
 
@@ -54,7 +54,8 @@ class ConnectionManager:
         if token:
             decode_token(token)  # Expiración en cada entrega, sin consulta por cada heartbeat.
             if time.monotonic() >= socket.state.next_auth_check:
-                await get_current_user(token)
+                user = await get_current_user(token)
+                socket.state.auth_role = user.role
                 socket.state.next_auth_check = time.monotonic() + 15
 
     async def send_to(self, user_id: str, message: dict):
@@ -68,7 +69,7 @@ class ConnectionManager:
                 except Exception:
                     await self.disconnect(ws, user_id)
 
-    async def broadcast(self, message: dict, role_filter: Optional[str] = None):
+    async def broadcast(self, message: dict, *, required_permission: Optional[str] = None):
         """Broadcast a todos los operadores conectados."""
         payload = json.dumps(message, default=str)
         disconnected: List[Tuple[WebSocket, str]] = []
@@ -83,6 +84,8 @@ class ConnectionManager:
                     except Exception:
                         await ws.close(code=4001, reason='Sesión expirada o revocada')
                         disconnected.append((ws, user_id))
+                        continue
+                    if required_permission and not has_permission(ws.state.auth_role, required_permission):
                         continue
                     await ws.send_text(payload)
                 except Exception:
@@ -122,6 +125,7 @@ async def websocket_live(websocket: WebSocket, token: str = Query(...)):
         return
 
     websocket.state.auth_token = token
+    websocket.state.auth_role = current_user.role
     websocket.state.next_auth_check = time.monotonic() + 15
     await manager.connect(websocket, user_id)
     try:
@@ -149,8 +153,10 @@ async def websocket_live(websocket: WebSocket, token: str = Query(...)):
                 raw_text = await asyncio.wait_for(websocket.receive_text(), timeout=25.0)
                 try:
                     data = json.loads(raw_text)
-                except Exception:
+                except json.JSONDecodeError:
                     data = {"type": raw_text.strip().lower()}
+                if not isinstance(data, dict):
+                    continue
 
                 msg_type = data.get("type")
                 if msg_type == "ping":
@@ -214,4 +220,4 @@ async def broadcast_sensor_update(sensor_data: dict):
     await manager.broadcast({
         "type": "sensor_update",
         "data": sensor_data,
-    })
+    }, required_permission="sensors:read")
