@@ -713,6 +713,35 @@ export class DashboardViewModel {
     if (elConf) {
       elConf.textContent = 'Sin precisión validada';
     }
+
+    // Explicación del modelo: el dictamen externo puede no incluir una decisión local.
+    // Todos los datos se insertan mediante textContent para evitar HTML no confiable.
+    const goal = verdict.goal_decision;
+    const goalPanel = document.getElementById('ai-goal-decision');
+    if (goalPanel) {
+      goalPanel.hidden = !goal || typeof goal !== 'object';
+      if (!goalPanel.hidden) {
+        const elAction = document.getElementById('ai-goal-action');
+        const elPriority = document.getElementById('ai-goal-priority');
+        const elExplanation = document.getElementById('ai-goal-explanation');
+        const elEvidence = document.getElementById('ai-goal-evidence');
+        const elReview = document.getElementById('ai-goal-review');
+        if (elAction) elAction.textContent = String(goal.action || 'SIN DECISIÓN').replaceAll('_', ' ');
+        if (elPriority) elPriority.textContent = String(goal.priority || 'INDETERMINATE');
+        if (elExplanation) elExplanation.textContent = String(goal.explanation || '');
+        if (elReview) elReview.textContent = goal.human_review_required
+          ? 'Requiere revisión humana; no constituye una amenaza confirmada.'
+          : 'Decisión informativa.';
+        if (elEvidence) {
+          elEvidence.replaceChildren();
+          (Array.isArray(goal.evidence) ? goal.evidence : []).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = String(item);
+            elEvidence.appendChild(li);
+          });
+        }
+      }
+    }
   }
 
   renderAltimetry() {
