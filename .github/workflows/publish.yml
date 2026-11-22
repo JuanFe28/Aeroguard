@@ -9,6 +9,8 @@ on:
         type: string
 permissions:
   contents: read
+concurrency:
+  group: aeroguard-publish-${{ inputs.version }}
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -21,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install --upgrade setuptools==84.1.0
+      - run: python -m pip install --upgrade pip==26.3 setuptools==84.1.0
       - run: python -m pip install -c constraints.txt -r backend/requirements-expo.txt pip-audit==2.9.0
       - run: python scripts/release_checks.py --output tmp/publish-checks --audit-dependencies
       - name: Probar endpoint independiente de análisis
@@ -102,7 +104,7 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
         run: |
           echo "$IMAGE@$DIGEST" > digest.txt
-          docker buildx imagetools inspect "$IMAGE" > image-inspect.txt
+          docker buildx imagetools inspect "$IMAGE@$DIGEST" > image-inspect.txt
           cat image-inspect.txt
           echo "### Imagen publicada y comprobada" >> "$GITHUB_STEP_SUMMARY"
           echo "Usuario que ejecutó la publicación: $GITHUB_ACTOR" >> "$GITHUB_STEP_SUMMARY"
@@ -110,7 +112,7 @@ jobs:
       - name: Comprobar endpoint del microservicio
         if: matrix.name == 'backend' || matrix.name == 'ai-service'
         env:
-          IMAGE: ${{ steps.image.outputs.tag }}
+          IMAGE: ${{ steps.image.outputs.tag }}@${{ steps.build.outputs.digest }}
           COMPONENT: ${{ matrix.name }}
         run: |
           TOKEN="$(openssl rand -hex 32)"

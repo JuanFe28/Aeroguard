@@ -150,7 +150,11 @@ export const AuthService = {
   },
 
   async logout() {
-    try { await http.post('/auth/logout'); } catch (_) {}
+    try {
+      await http.post('/auth/logout');
+    } catch {
+      // Permite cerrar la sesión local cuando el servidor no responde.
+    }
     this.clearSession();
   },
 
@@ -743,7 +747,9 @@ export const WebSocketService = {
         console.warn(`[AeroGuard WS] Heartbeat timeout (${this._heartbeatTimeoutMs}ms sin respuesta). Forzando cierre de socket zombie.`);
         try {
           this._socket.close(4008, 'Heartbeat timeout');
-        } catch (_) {}
+        } catch {
+          // El socket puede haberse cerrado durante el timeout.
+        }
       }, this._heartbeatTimeoutMs);
 
     } catch (e) {
@@ -846,7 +852,9 @@ export const WebSocketService = {
           const items = Array.isArray(dets) ? dets : (dets.items || []);
           if (items.length > 0) this._emit('detections_polled', items);
         }
-      } catch (_) {}
+      } catch {
+        // El temporizador volverá a consultar en el próximo ciclo.
+      }
     }, 5000);
   },
 
@@ -886,7 +894,11 @@ export const WebSocketService = {
       this._simulatorTimer = null;
     }
     if (this._socket) {
-      try { this._socket.close(1000, 'User disconnect'); } catch (e) {}
+      try {
+        this._socket.close(1000, 'User disconnect');
+      } catch {
+        // La desconexión local continúa aunque el socket ya se haya cerrado.
+      }
       this._socket = null;
     }
     this._connected = false;

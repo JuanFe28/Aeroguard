@@ -315,12 +315,14 @@ class ReportGeneratorService:
         elements.append(Spacer(1, 12))
 
         # 4. Tabla Detallada de Incursiones (Sección 1.4 punto 4)
-        elements.append(Paragraph("<b>Registro Detallado de Incursiones y Telemetría Operativa:</b>", subtitle_style))
+        alert_report = data.get('report_type') == 'alerts'
+        section_title = 'Registro de alertas' if alert_report else 'Registro de incursiones y telemetría'
+        elements.append(Paragraph(f"<b>{section_title}</b>", subtitle_style))
         elements.append(Spacer(1, 4))
 
         headers = [
-            Paragraph("ID Dron", table_header_style),
-            Paragraph("Sensor / Zona", table_header_style),
+            Paragraph("ID Alerta" if alert_report else "ID Detección", table_header_style),
+            Paragraph("Alerta / Sensor / Zona" if alert_report else "Sensor / Zona", table_header_style),
             Paragraph("Coordenadas", table_header_style),
             Paragraph("Altitud", table_header_style),
             Paragraph("Velocidad", table_header_style),
@@ -333,13 +335,16 @@ class ReportGeneratorService:
             sev = inc.get("severity", "LOW")
             sev_color = "#dc2626" if sev == "CRITICAL" else ("#ea580c" if sev == "HIGH" else "#16a34a")
             sev_badge = f"<font color='{sev_color}'><b>{sev}</b></font>"
+            lat, lng = inc.get('lat'), inc.get('lng')
+            altitude, speed = inc.get('alt'), inc.get('speed')
+            title = f"<b>{escape(inc['alert_title'])}</b><br/>" if inc.get('alert_title') else ''
 
             table_rows.append([
                 Paragraph(escape(inc.get("id", "")), table_cell_mono),
-                Paragraph(f"<b>{escape(inc.get('sensor',''))}</b><br/><font color='#64748b'>{escape(inc.get('zone',''))}</font>", table_cell_style),
-                Paragraph(f"{inc.get('lat',0):.4f}, {inc.get('lng',0):.4f}", table_cell_mono),
-                Paragraph(f"{inc.get('alt',0):.0f} m", table_cell_style),
-                Paragraph(f"{inc.get('speed',0):.1f} km/h", table_cell_style),
+                Paragraph(f"{title}{escape(inc.get('sensor',''))}<br/><font color='#64748b'>{escape(inc.get('zone',''))}</font>", table_cell_style),
+                Paragraph(f"{lat:.4f}, {lng:.4f}" if lat is not None and lng is not None else 'Sin datos', table_cell_mono),
+                Paragraph(f"{altitude:.0f} m" if altitude is not None else 'Sin datos', table_cell_style),
+                Paragraph(f"{speed:.1f} km/h" if speed is not None else 'Sin datos', table_cell_style),
                 Paragraph(sev_badge, table_cell_style),
                 Paragraph(inc.get("timestamp", ""), table_cell_style),
             ])
@@ -444,6 +449,12 @@ class ReportGeneratorService:
             "Latitud", "Longitud", "Altitud (m)", "Velocidad (km/h)",
             "Rumbo (°)", "Severidad", "Dron Confirmado (IA)", "Confianza IA (%)", "Fecha / Hora (UTC)"
         ]
+        alert_report = data.get('report_type') == 'alerts'
+        if alert_report:
+            ws1.title = 'Alertas'
+            ws1['A1'] = 'AEROGUARD C-UAS — REPORTE DE ALERTAS'
+            cols[0] = 'ID Alerta'
+            cols.extend(['Título de alerta', 'ID Detección'])
 
         row_idx = 4
         for col_idx, text in enumerate(cols, 1):
@@ -456,6 +467,8 @@ class ReportGeneratorService:
         # Filas de datos
         for inc in data.get("incursions", []):
             row_idx += 1
+            is_drone = inc.get('is_drone')
+            confidence = inc.get('ai_confidence')
             row_vals = [
                 inc.get("id"),
                 inc.get("sensor"),
@@ -466,10 +479,12 @@ class ReportGeneratorService:
                 inc.get("speed"),
                 inc.get("heading"),
                 inc.get("severity"),
-                "SÍ" if inc.get("is_drone") else "NO",
-                round(inc.get("ai_confidence", 0) * 100, 1),
+                ("SÍ" if is_drone else "NO") if is_drone is not None else None,
+                round(confidence * 100, 1) if confidence is not None else None,
                 inc.get("timestamp"),
             ]
+            if alert_report:
+                row_vals.extend([inc.get('alert_title'), inc.get('detection_id')])
             for col_idx, val in enumerate(row_vals, 1):
                 if isinstance(val, str) and val.startswith(("=", "+", "-", "@", "\t", "\r")):
                     val = "'" + val

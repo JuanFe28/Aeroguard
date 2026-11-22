@@ -7,8 +7,9 @@ from app.core.validation import valid_uuid
 from typing import Optional, List
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from app.models.models import User, UserRole
+from sqlalchemy import func, select, update
+from starlette.concurrency import run_in_threadpool
+from app.models.models import AuthState, User, UserRole
 from app.core.security import hash_password, verify_password
 
 
@@ -33,21 +34,18 @@ async def get_user_by_id(db: AsyncSession, user_id: str) -> Optional[User]:
     return result.scalar_one_or_none()
 
 
-async def authenticate_user(db: AsyncSession, username: str, password: str) -> Optional[User]:
-    """
-    Autentica credenciales de usuario de forma segura.
-    Verifica hash de contraseña mediante passlib/bcrypt.
-    """
-    user = await get_user_by_username(db, username)
-    if not user and "@" in username:
-        user = await get_user_by_email(db, username)
-    if not user:
+async def authenticate_user(db: AsyncSession, username: str, password: str) -> tuple[User, int] | None:
+    """Lee la contraseña y la versión de sesión en la misma consulta."""
+    query = select(User, func.coalesce(AuthState.version, 0)).outerjoin(AuthState, AuthState.user_id == User.id)
+    account = (await db.execute(query.where(User.username == username))).one_or_none()
+    if account is None and "@" in username:
+        account = (await db.execute(query.where(User.email == username))).one_or_none()
+    if account is None:
         return None
-    if not user.is_active:
+    user, version = account
+    if not user.is_active or not await run_in_threadpool(verify_password, password, user.password_hash):
         return None
-    if not verify_password(password, user.password_hash):
-        return None
-    return user
+    return user, version
 
 
 async def update_last_login(db: AsyncSession, user_id: str) -> None:

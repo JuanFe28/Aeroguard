@@ -64,7 +64,11 @@ export class ZonesViewModel {
     if (!container) return;
 
     if (this._map) {
-      try { this._map.remove(); } catch (e) {}
+      try {
+        this._map.remove();
+      } catch {
+        // El mapa puede haberse desmontado al cambiar de vista.
+      }
       this._map = null;
     }
     if (container._leaflet_id) {
@@ -142,7 +146,7 @@ export class ZonesViewModel {
           title: `Zona ${zone.name}`,
           icon: L.divIcon({
             className: '',
-            html: `<div style="background:${color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${escapeHtml(zone.name)}</div>`,
+            html: `<div style="background:#0a0e1a;color:#f8fafc;border-inline-start:3px solid ${color};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5)">${escapeHtml(zone.name)}</div>`,
             iconAnchor: [0, 0],
           }),
         }).addTo(this._map);

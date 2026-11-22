@@ -8,6 +8,8 @@ services:
       target: runtime
     environment:
       APP_VERSION: 1.2.0-qa.${AEROGUARD_QA_TAG}
+      # Chromium comparte una IP con los usuarios sintéticos de la batería de QA.
+      AUTH_RATE_LIMIT: '10000'
   frontend:
     image: aeroguard-qa/frontend:${AEROGUARD_QA_TAG:?Define el commit corto de QA}
     build:
