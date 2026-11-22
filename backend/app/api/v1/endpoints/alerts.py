@@ -236,6 +236,41 @@ class TriggerIncidentSchema(BaseModel):
     zone: ZoneInfoSchema
 
 
+@router.post("/evaluate-goals", summary="Simular el agente basado en objetivos sin generar alertas")
+async def evaluate_goal_based_scenario(
+    body: TriggerIncidentSchema,
+    current_user=Depends(require_permission("alerts:read")),
+):
+    """Evaluación académica aislada: no escribe BD, no emite WebSocket ni contacta n8n.
+
+    La salida es una recomendación, no una identificación ni una alarma operativa.
+    """
+    from app.services.goal_based_agent import evaluate_goals
+
+    decision = evaluate_goals(body.drone.model_dump(), body.zone.model_dump())
+    level_by_priority = {
+        "CRITICAL": "CRITICAL",
+        "REVIEW": "MEDIUM",
+        "NORMAL": "LOW",
+        "INDETERMINATE": "UNKNOWN",
+    }
+    return {
+        "status": "success",
+        "simulation": True,
+        "data": {
+            "incident_id": body.incident_id or "SIMULACION-ACADEMICA",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "drone_id": body.drone.drone_id,
+            "agent_model": decision.model,
+            "goal_decision": decision.to_dict(),
+            "ai_verdict": f"{decision.action.replace('_', ' ')}: {decision.explanation}",
+            "threat_level": level_by_priority[decision.priority],
+            "execution_source": "goal_based_simulation",
+            "simulation": True,
+        },
+    }
+
+
 @router.post("/trigger-incident", summary="Disparar análisis de incidente táctico hacia n8n / Agente IA")
 async def trigger_tactical_incident(
     body: TriggerIncidentSchema,
