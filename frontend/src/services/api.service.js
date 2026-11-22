@@ -271,6 +271,10 @@ export const AlertService = {
     }
     return http.get('/alerts/ai-verdict');
   },
+  async evaluateGoalsScenario(payload) {
+    // Sandbox académico: nunca crea alertas, no envía datos a n8n ni emite eventos.
+    return http.post('/alerts/evaluate-goals', payload);
+  },
   async triggerIncident(payload = {}) {
     if (MockService.enabled) {
       const droneId = payload.drone?.drone_id || "UAV-HK-402";
