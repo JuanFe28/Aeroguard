@@ -108,3 +108,52 @@ def test_goal_based_response_visible_in_endpoint_and_latest_verdict(
     assert latest.status_code == 200
     assert latest.json()["goal_decision"]["action"] == action
     assert latest.json()["incident_id"] == result["incident_id"]
+
+
+@pytest.mark.parametrize("altitude,confidence,action,priority,level", [
+    (135.0, 0.95, "NOTIFICAR_Y_VERIFICAR", "CRITICAL", "CRITICAL"),
+    (135.0, 0.20, "VERIFICAR_DETECCION", "REVIEW", "MEDIUM"),
+    (80.0, 0.90, "MONITOREAR", "NORMAL", "LOW"),
+])
+def test_goal_demo_is_read_only_and_no_side_effects(
+    isolated_client, monkeypatch, altitude, confidence, action, priority, level
+):
+    """El laboratorio consulta el modelo sin generar una alerta o reemplazar el dictamen."""
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "SOAR_AI_AGENT_ENABLED", True)
+
+    verdict_before = isolated_client.get("/api/v1/alerts/ai-verdict", headers=AUTH)
+    alerts_before = isolated_client.get("/api/v1/alerts", headers=AUTH)
+    assert verdict_before.status_code == 200
+    assert alerts_before.status_code == 200
+
+    scenario = {
+        "incident_id": f"SIM-TEST-{altitude}-{confidence}",
+        "event_type": "GOAL_BASED_CLASSROOM_DEMO",
+        "drone": {
+            "drone_id": "OBJETO-SINTETICO", "latitude": 7.12, "longitude": -73.12,
+            "altitude_m": altitude, "speed_ms": 10, "heading_deg": 90,
+            "ai_confidence": confidence,
+        },
+        "zone": {
+            "name": "Zona sintética", "max_allowed_altitude_m": 120,
+            "restriction_type": "NO_FLY_ZONE",
+        },
+    }
+    response = isolated_client.post("/api/v1/alerts/evaluate-goals", json=scenario, headers=AUTH)
+    assert response.status_code == 200
+    result = response.json()
+    assert result["simulation"] is True
+    assert result["data"]["goal_decision"]["action"] == action
+    assert result["data"]["goal_decision"]["priority"] == priority
+    assert result["data"]["threat_level"] == level
+    assert result["data"]["execution_source"] == "goal_based_simulation"
+    assert result["data"]["goal_decision"]["human_review_required"] is True
+
+    assert isolated_client.get("/api/v1/alerts/ai-verdict", headers=AUTH).json() == verdict_before.json()
+    assert isolated_client.get("/api/v1/alerts", headers=AUTH).json() == alerts_before.json()
+
+
+def test_goal_demo_requires_authenticated_user(isolated_client):
+    response = isolated_client.post("/api/v1/alerts/evaluate-goals", json={})
+    assert response.status_code in (401, 403)
