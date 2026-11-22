@@ -177,6 +177,17 @@ export class DashboardView {
           <div style="font-size:12px;line-height:1.45;color:var(--text-secondary);background:rgba(255,23,68,0.06);border-left:3px solid var(--danger);padding:8px 10px;border-radius:0 var(--radius-sm) var(--radius-sm) 0" id="ai-verdict-text">
             Cargando evaluación táctica del agente...
           </div>
+          <section id="ai-goal-decision" hidden aria-label="Decisión del agente basado en objetivos"
+            style="border:1px solid rgba(0,212,255,0.2);background:rgba(0,212,255,0.04);border-radius:var(--radius-sm);padding:9px 10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-accent);margin-bottom:5px">MODELO BASADO EN OBJETIVOS</div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:5px">
+              <span id="ai-goal-action" style="font-size:12px;font-weight:700;color:var(--text-primary)"></span>
+              <span id="ai-goal-priority" class="badge badge-info" style="font-size:10px"></span>
+            </div>
+            <p id="ai-goal-explanation" style="font-size:11px;line-height:1.45;color:var(--text-secondary);margin:0 0 5px"></p>
+            <ul id="ai-goal-evidence" style="font-size:10px;line-height:1.45;color:var(--text-muted);padding-left:17px;margin:0 0 6px"></ul>
+            <div id="ai-goal-review" style="font-size:10px;color:var(--text-muted)"></div>
+          </section>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-muted);padding-top:4px">
             <span id="ai-verdict-incident" style="font-family:var(--font-mono);font-size:10px">Sin incidente</span>
             <button class="btn btn-secondary btn-sm" id="btn-trigger-soar" style="font-size:10px;padding:3px 8px;gap:4px;display:flex;align-items:center;" title="Ejecutar análisis de Agente IA SOAR">
