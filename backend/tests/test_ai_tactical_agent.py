@@ -74,3 +74,37 @@ def test_trigger_incident_endpoint_success():
     assert get_res.status_code == 200
     assert get_res.json()["incident_id"] == "INC-TEST-SOAR-001"
     assert get_res.json()["drone_id"] == "UAV-HK-TEST"
+
+@pytest.mark.parametrize("altitude,confidence,action,level", [
+    (135.0, 0.95, "NOTIFICAR_Y_VERIFICAR", "CRITICAL"),
+    (135.0, 0.20, "VERIFICAR_DETECCION", "MEDIUM"),
+    (80.0, 0.90, "MONITOREAR", "LOW"),
+])
+def test_goal_based_response_visible_in_endpoint_and_latest_verdict(
+    isolated_client, monkeypatch, altitude, confidence, action, level
+):
+    """Prueba HTTP: el modelo decide, comunica y deja consultar el dictamen."""
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "SOAR_AI_AGENT_ENABLED", False)
+    payload = {
+        "incident_id": f"TEST-GOALS-{altitude}-{confidence}",
+        "drone": {
+            "drone_id": "OBJETO-DE-PRUEBA", "latitude": 7.12, "longitude": -73.12,
+            "altitude_m": altitude, "speed_ms": 10, "heading_deg": 90,
+            "ai_confidence": confidence,
+        },
+        "zone": {"name": "Zona de prueba", "max_allowed_altitude_m": 120},
+    }
+    response = isolated_client.post("/api/v1/alerts/trigger-incident", json=payload, headers=AUTH)
+    assert response.status_code == 200
+    result = response.json()["data"]
+    assert result["goal_decision"]["action"] == action
+    assert result["threat_level"] == level
+    assert result["execution_source"] == "goal_based_local"
+    assert result["goal_decision"]["evidence"]
+    assert result["goal_decision"]["human_review_required"] is True
+
+    latest = isolated_client.get("/api/v1/alerts/ai-verdict", headers=AUTH)
+    assert latest.status_code == 200
+    assert latest.json()["goal_decision"]["action"] == action
+    assert latest.json()["incident_id"] == result["incident_id"]
