@@ -92,6 +92,69 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 5,
+      "title": "Ejecuciones Agente IA por Proveedor y Estado",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "aeroguard-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "sum by (provider, status) (rate(aeroguard_agent_requests_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Bloqueos Guardrails (Entrada / Salida)",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "aeroguard-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "sum(aeroguard_agent_guardrail_blocks_total)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Latencia P95 Grafo LangGraph (segundos)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "aeroguard-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(aeroguard_agent_latency_seconds_bucket[5m])))",
+          "refId": "A"
+        }
+      ]
     }
   ]
 }

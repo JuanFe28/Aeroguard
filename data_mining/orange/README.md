@@ -6,7 +6,8 @@ Flujo CRISP-DM listo para abrir en [Orange](https://orangedatamining.com/) 3.x. 
 
 | Archivo | Qué es |
 | --- | --- |
-| `AeroGuard_CRISP_DM.ows` | Flujo de Orange (12 widgets de clasificación). Ábrelo con *File → Open*. |
+| `AeroGuard_CRISP_DM.ows` | Flujo original de Orange (12 widgets de clasificación). Ábrelo con *File → Open*. |
+| `AeroGuard_CRISP_DM_6Modelos.ows` | **Flujo completo listo para abrir (17 widgets):** incluye los 12 widgets originales + **K-Means (`k=4`) → Scatter Plot** + **Regresión lineal (`aeroguard_regresion_riesgo.csv.gz`) → Test and Score (Regresión)** sin pasos manuales extra. |
 | `aeroguard_entrenamiento.csv.gz` | Dataset principal limpio: 125.000 → **108.750** registros (`cD#threat_level`). |
 | `aeroguard_prueba_lote2.csv.gz` | Lote adicional limpio: 120.000 → **104.400** registros (`cD#threat_level`). |
 | `aeroguard_regresion_riesgo.csv.gz` | Dataset limpio con puntaje continuo `cC#risk_score` (0–100) para Regresión Lineal en Orange (`threat_level` pasa como metadato `mS#` para evitar fuga). |
@@ -15,14 +16,12 @@ Flujo CRISP-DM listo para abrir en [Orange](https://orangedatamining.com/) 3.x. 
 
 Los tres `.csv.gz` ya vienen con el encabezado de Orange: en los dos primeros `threat_level` es la **clase** (variable objetivo); en `aeroguard_regresion_riesgo.csv.gz`, `risk_score` es el target continuo. Las 13 variables del modelo son atributos y los identificadores y coordenadas son metadatos. Orange abre los `.gz` directamente, sin descomprimirlos.
 
-## Cómo usarlo (Clasificación + Ampliación a K-Means y Regresión Lineal)
+## Cómo usarlo (Clasificación + K-Means + Regresión Lineal listos)
 
-1. Abre Orange → *File → Open* → `data_mining/orange/AeroGuard_CRISP_DM.ows`.
-2. Los dos widgets **File** cargan solos `aeroguard_entrenamiento.csv.gz` y `aeroguard_prueba_lote2.csv.gz`. Si Orange no los encuentra (por ejemplo, porque moviste el `.ows`), haz doble clic en cada File y elige el archivo.
-3. Abre **Test and Score**: ya está en modo *Test on test data*, así que entrena con el principal y evalúa con el lote 2.
-4. Abre **Matriz de confusión** y **Visor del árbol** para la sustentación.
-5. **Para validar K-Means en el mismo lienzo:** arrastra un widget **k-Means** (categoría *Unsupervised*, `k=4`, selecciona `distance_to_zone_m`, `altitude_m`, `speed_ms`) conectado desde **Entrenamiento**, y conéctalo a **Scatter Plot** (`Visualize`).
-6. **Para validar Regresión Lineal en el mismo lienzo:** arrastra un widget **File** cargando `aeroguard_regresion_riesgo.csv.gz`, conéctalo a **Linear Regression** (`Model`) y ambos a un segundo **Test and Score** (`Evaluate`). (Si usas Python 3.11 + Orange3, también puedes generar el `.ows` extendido directamente con `python data_mining/04_build_orange_workflow.py --extended`).
+1. Abre Orange → *File → Open* → selecciona **`data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`** (flujo completo con los 17 widgets ya conectados, o `AeroGuard_CRISP_DM.ows` si solo quieres la vista de clasificación).
+2. Los widgets **File** cargan automáticamente `aeroguard_entrenamiento.csv.gz`, `aeroguard_prueba_lote2.csv.gz` y `aeroguard_regresion_riesgo.csv.gz`. Si Orange pide reubicar algún archivo, haz doble clic en el widget `File` correspondiente y apunta al `.csv.gz` dentro de `data_mining/orange/`.
+3. Abre **Test and Score** (clasificación sobre Lote 2), **Matriz de confusión** y **Visor del árbol**.
+4. Haz doble clic directamente en **Scatter Plot (Perfiles)** conectado a **K-Means (k=4)** y en **Test and Score (Regresión)** conectado a **Regresión lineal** para obtener las capturas finales sin cablear widgets a mano. *(Regenerar con `python data_mining/04_build_orange_workflow.py --extended --output data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`.)*
 
 ```
 Entrenamiento ─┬─> Tabla de datos / Estadísticas / Box Plot / Ranking   (Fase 2: comprensión)

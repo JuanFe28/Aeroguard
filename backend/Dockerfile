@@ -33,11 +33,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Solo requirements primero → la capa de dependencias se cachea
 # mientras requirements.txt no cambie.
+ARG INSTALL_AGENT_DEPS=false
 COPY backend/requirements.txt .
+COPY backend/requirements-agent.txt .
 COPY constraints.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip wheel setuptools==84.1.0 \
-    && pip install -c constraints.txt -r requirements.txt
+    && pip install -c constraints.txt -r requirements.txt \
+    && if [ "$INSTALL_AGENT_DEPS" = "true" ]; then pip install -r requirements-agent.txt; fi
 
 # ------------------------------------------------------------
 # Stage 2: test (quality gate — no se publica)
@@ -88,7 +91,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgomp1 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 1000 --shell /usr/sbin/nologin aeroguard \
-    && mkdir -p /tmp/aeroguard/reports \
+    && mkdir -p /tmp/aeroguard/reports /tmp/aeroguard/qdrant \
     && chown -R aeroguard:aeroguard /tmp/aeroguard
 
 COPY --from=builder /opt/venv /opt/venv

@@ -195,14 +195,14 @@ Antes de abrir Orange, asegúrate de haber generado los tres archivos `.csv.gz` 
 .\.venv\Scripts\python.exe data_mining/03_export_orange.py
 ```
 
-#### Flujo Base (Clasificación y Exploración — `AeroGuard_CRISP_DM.ows`)
-1. Inicia **Orange** y selecciona en el menú superior **File $\rightarrow$ Open...** $\rightarrow$ abre [`data_mining/orange/AeroGuard_CRISP_DM.ows`](../data_mining/orange/AeroGuard_CRISP_DM.ows).
-2. Verifica que los dos widgets **File** de la izquierda cargaron automáticamente `aeroguard_entrenamiento.csv.gz` (108,750 filas) y `aeroguard_prueba_lote2.csv.gz` (104,400 filas). *(Si alguno aparece con signo de advertencia porque moviste la carpeta, haz doble clic en él, pulsa el icono de carpeta y selecciona el `.csv.gz` correspondiente dentro de `data_mining/orange/`).*
+#### Flujo Completo Listo para Abrir (`AeroGuard_CRISP_DM_6Modelos.ows` y `AeroGuard_CRISP_DM.ows`)
+1. Inicia **Orange** y selecciona en el menú superior **File $\rightarrow$ Open...** $\rightarrow$ abre [`data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`](../data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows) *(flujo extendido de **17 widgets** que ya incluye K-Means y Regresión Lineal pre-conectados; también se conserva el flujo base de 12 widgets [`AeroGuard_CRISP_DM.ows`](../data_mining/orange/AeroGuard_CRISP_DM.ows))*.
+2. Verifica que los tres widgets **File** de la izquierda cargaron automáticamente `aeroguard_entrenamiento.csv.gz` (108,750 filas), `aeroguard_prueba_lote2.csv.gz` (104,400 filas) y `aeroguard_regresion_riesgo.csv.gz` (108,750 filas). *(Si alguno aparece con signo de advertencia porque moviste la carpeta, haz doble clic en él, pulsa el icono de carpeta y selecciona el `.csv.gz` correspondiente dentro de `data_mining/orange/`).*
 
 > **[INSERTAR CAPTURA 1]**  
-> * **Archivo abierto:** `data_mining/orange/AeroGuard_CRISP_DM.ows`  
+> * **Archivo abierto:** `data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`  
 > * **Acción:** Vista principal del lienzo completo (canvas de Orange) sin ventanas encima.  
-> * **Qué debe verse:** Los 12 widgets conectados desde los 2 nodos `File` hasta `Tabla de datos`, `Estadísticas`, `Box Plot`, `Ranking de variables`, los 3 modelos, `Test and Score`, `Matriz de confusión` y `Visor del árbol`.
+> * **Qué debe verse:** Los 17 widgets conectados desde los 3 nodos `File` hasta EDA, los 3 modelos de clasificación + `Test and Score`, `Matriz de confusión`, `Visor del árbol`, **`K-Means (k=4)` $\rightarrow$ `Scatter Plot`** y **`Regresión lineal` $\rightarrow$ `Test and Score (Regresión)`**.
 
 3. **Inspección de columnas y variable objetivo:** Haz doble clic en el widget **`Entrenamiento (dataset principal)`** (`File`). Observa la tabla inferior donde `threat_level` tiene el rol **Target**, las 13 variables operativas tienen el rol **Feature** y los IDs/coordenadas figuran como **Meta**.
 
@@ -228,17 +228,17 @@ Antes de abrir Orange, asegúrate de haber generado los tres archivos `.csv.gz` 
 > * **Widgets (doble clic):** `Matriz de confusión` (con modelo `Random Forest` seleccionado) y `Visor del árbol`.  
 > * **Qué capturar:** La matriz 4×4 (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) y los primeros niveles jerárquicos del árbol (`distance_to_zone_m`, `drone_class`, `speed_ms`).
 
-#### Extensión Interactiva en el Mismo Lienzo (K-Means + Regresión Lineal)
-7. **Clustering K-Means (Perfiles de Vuelo):** En el panel izquierdo de widgets (categoría **Unsupervised**), arrastra el widget **k-Means** al lienzo y conéctalo desde la salida `Data` de **`Entrenamiento (dataset principal)`**. Haz doble clic en **k-Means**, selecciona `Fixed: 4` clústeres y conecta su salida `Annotated Data` a un widget **Scatter Plot** (categoría **Visualize**). En *Scatter Plot*, configura eje X = `distance_to_zone_m`, eje Y = `altitude_m` (o `speed_ms`) y *Color* = `Cluster`.
+#### Ramas Adicionales Ya Conectadas en `AeroGuard_CRISP_DM_6Modelos.ows` (K-Means + Regresión Lineal)
+7. **Clustering K-Means (Perfiles de Vuelo):** En el mismo lienzo de `AeroGuard_CRISP_DM_6Modelos.ows`, ya están conectados **`K-Means (k=4)`** y **`Scatter Plot (Perfiles)`**. Haz doble clic en **k-Means** (para confirmar `4` clústeres usando `distance_to_zone_m`, `altitude_m`, `speed_ms`) y luego doble clic en **Scatter Plot (Perfiles)** configurando eje X = `distance_to_zone_m`, eje Y = `altitude_m` (o `speed_ms`) y *Color* = `Cluster`.
 
 > **[INSERTAR CAPTURA 6]**  
-> * **Widgets (doble clic):** `k-Means` (fijado en `4` clústeres) y `Scatter Plot` conectado a su salida.  
+> * **Widgets (doble clic):** `K-Means (k=4)` y `Scatter Plot (Perfiles)` en `AeroGuard_CRISP_DM_6Modelos.ows`.  
 > * **Qué capturar:** Ventana de `Scatter Plot` mostrando la segmentación por colores de los 4 clústeres sobre `distance_to_zone_m` vs `altitude_m`.
 
-8. **Regresión Lineal sobre `risk_score`:** Arrastra un nuevo widget **File** (categoría **Data**), haz doble clic y carga `data_mining/orange/aeroguard_regresion_riesgo.csv.gz` (verifica que `risk_score` aparezca como **Target** numérico `cC#` y `threat_level` como **Meta** `mS#`). Conéctalo a **Linear Regression** (categoría **Model**) y conecta tanto el **File** como **Linear Regression** a un segundo widget **Test and Score** (con *Cross validation 5 folds*).
+8. **Regresión Lineal sobre `risk_score`:** En la fila inferior de `AeroGuard_CRISP_DM_6Modelos.ows` ya figuran **`Regresión riesgo (dataset)`** (`aeroguard_regresion_riesgo.csv.gz`), **`Regresión lineal`** y **`Test and Score (Regresión)`** pre-conectados. Haz doble clic en **`Test and Score (Regresión)`** (validación cruzada 5 folds) para ver las métricas continuas.
 
 > **[INSERTAR CAPTURA 7]**  
-> * **Widgets (doble clic):** Nuevo `Test and Score` conectado a `aeroguard_regresion_riesgo.csv.gz` y `Linear Regression`.  
+> * **Widgets (doble clic):** `Test and Score (Regresión)` conectado a `Regresión lineal` sobre `aeroguard_regresion_riesgo.csv.gz` en `AeroGuard_CRISP_DM_6Modelos.ows`.  
 > * **Qué capturar:** Tabla de evaluación de regresión mostrando `MSE`, `RMSE`, `MAE` y **`R2` (~0.935)** sobre el puntaje continuo `risk_score`.
 
 *(Nota sobre ARIMA: Orange 3 base está orientado a análisis tabular; las series temporales ARIMA(1,1,1) se ejecutan en `data_mining/05_predictive_models_benchmark.py` con `statsmodels`, generando `09_arima_pronostico_incursiones.png` y alimentando el endpoint `/api/v1/predictions/forecast` en tiempo real.)*

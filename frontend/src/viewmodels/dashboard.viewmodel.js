@@ -4,7 +4,7 @@ import { escapeHtml } from '../utils/html.js';
  * Gestiona estado, datos y comunicación del Dashboard en tiempo real.
  */
 
-import { DetectionService, AlertService, SensorService, ZoneService, WebSocketService, MockService, PredictionService } from '../services/api.service.js';
+import { DetectionService, AlertService, SensorService, ZoneService, WebSocketService, MockService, PredictionService, AgentService } from '../services/api.service.js';
 import { DetectionModel, AlertModel, SensorModel, RestrictedZoneModel } from '../models/models.js';
 import { Toast } from '../app.js';
 import { tacticalAudio } from '../services/audio.service.js';
@@ -26,6 +26,9 @@ export class DashboardViewModel {
       predictiveSummary: null,
       predictiveForecast: null,
       predictiveResult: null,
+      agentSessionId: null,
+      agentResult: null,
+      agentLlmOps: null,
       previousAltitudes: new Map(),
     };
 
@@ -57,6 +60,7 @@ export class DashboardViewModel {
           this._loadZones(),
           this._loadAiVerdict(),
           this._loadPredictiveAnalytics(),
+          this._loadAgentMonitor(),
         ]);
       }
       this._computeStats();
@@ -113,6 +117,18 @@ export class DashboardViewModel {
       }
     } catch (e) {
       console.warn('Error loading predictive analytics:', e);
+    }
+  }
+
+  async _loadAgentMonitor() {
+    if (typeof AgentService === 'undefined') return;
+    try {
+      const res = await AgentService.getLlmOpsSummary();
+      if (res?.data) {
+        this.state.agentLlmOps = res.data;
+      }
+    } catch (e) {
+      console.warn('Error loading agent LLMOps summary:', e);
     }
   }
 
@@ -827,6 +843,55 @@ export class DashboardViewModel {
         }
       }
     });
+
+    const agentBtn = document.getElementById('btn-agent-query');
+    const agentInput = document.getElementById('agent-query-input');
+    if (agentBtn) {
+      agentBtn.addEventListener('click', async () => {
+        if (typeof AgentService === 'undefined') return;
+        const query = (agentInput?.value || '').trim() || 'Evaluar detección activa y protocolo cota 120 m.';
+        const selectedDet = this.state.selectedDetection || (this.state.detections || [])[0] || null;
+        const payload = {
+          query,
+          session_id: this.state.agentSessionId || undefined,
+          telemetry: selectedDet
+            ? {
+                drone_id: String(selectedDet.id || 'UAV-ACTIVO'),
+                altitude_m: Number.isFinite(selectedDet.altitude) ? Math.min(1500, Math.max(0, selectedDet.altitude)) : 120,
+                speed_ms: Number.isFinite(selectedDet.speed) ? Math.min(100, Math.max(0, selectedDet.speed / 3.6)) : 15,
+                distance_to_zone_m: 180,
+                ai_confidence: Number.isFinite(selectedDet.aiConfidence) ? Math.min(1, Math.max(0, selectedDet.aiConfidence)) : 0.85,
+                drone_class: 'quadcopter',
+                flight_pattern: 'Directo',
+              }
+            : undefined,
+        };
+        agentBtn.disabled = true;
+        agentBtn.textContent = 'Consultando...';
+        try {
+          const res = await AgentService.query(payload);
+          if (res?.data) {
+            this.state.agentResult = res.data;
+            if (res.data.session_id) {
+              this.state.agentSessionId = res.data.session_id;
+            }
+            await this._loadAgentMonitor();
+            this._renderAgentMonitor();
+            if (res.data.guardrails?.input_passed === false || res.data.guardrails?.output_passed === false) {
+              Toast.error('Guardrail activado en consulta agéntica.');
+            } else {
+              Toast.success(`Agente IA: ${String(res.data.output?.recommended_action || 'OK').replaceAll('_', ' ')}`);
+            }
+          }
+        } catch (err) {
+          console.error('Error consultando Agente IA:', err);
+          Toast.error('No se pudo ejecutar la consulta agéntica.');
+        } finally {
+          agentBtn.disabled = false;
+          agentBtn.textContent = 'Consultar Agente';
+        }
+      });
+    }
   }
 
   _renderAiVerdict() {
@@ -1011,6 +1076,95 @@ export class DashboardViewModel {
     ctx.fillStyle = '#e2e8f0';
     ctx.font = '10px monospace';
     ctx.fillText(`Horizonte ARIMA ${points.length}d`, padX, 11);
+  }
+
+  _renderAgentMonitor() {
+    const summaryEl = document.getElementById('agent-llmops-summary');
+    const ops = this.state.agentLlmOps;
+    if (summaryEl && ops) {
+      const blocked = (ops.blocked_input_count || 0) + (ops.blocked_output_count || 0);
+      const backend = ops.rag_status?.vector_backend || 'qdrant';
+      summaryEl.textContent = `${ops.total_runs || 0} ejecuciones · ${blocked} bloqueos · ${backend}`;
+    }
+
+    const badge = document.getElementById('agent-guardrail-badge');
+    const resultBox = document.getElementById('agent-monitor-result');
+    const res = this.state.agentResult;
+    if (!res) {
+      if (badge) {
+        badge.textContent = 'LISTO';
+        badge.className = 'badge badge-info';
+      }
+      if (resultBox) resultBox.hidden = true;
+      return;
+    }
+
+    const inputOk = res.guardrails?.input_passed !== false;
+    const outputOk = res.guardrails?.output_passed !== false;
+    if (badge) {
+      if (!inputOk) {
+        badge.textContent = 'BLOQUEADO IN';
+        badge.className = 'badge badge-danger';
+      } else if (!outputOk) {
+        badge.textContent = 'BLOQUEADO OUT';
+        badge.className = 'badge badge-danger';
+      } else {
+        badge.textContent = 'GUARDRAIL OK';
+        badge.className = 'badge badge-success';
+      }
+    }
+
+    if (resultBox) resultBox.hidden = false;
+
+    const actionEl = document.getElementById('agent-res-action');
+    const prioEl = document.getElementById('agent-res-priority');
+    const summaryTextEl = document.getElementById('agent-res-summary');
+    const traceEl = document.getElementById('agent-res-trace');
+    const toolsEl = document.getElementById('agent-res-tools');
+    const citationsEl = document.getElementById('agent-res-citations');
+
+    if (actionEl) {
+      actionEl.textContent = String(res.output?.recommended_action || 'SIN_ACCION').replaceAll('_', ' ');
+    }
+    if (prioEl) {
+      const prio = String(res.output?.priority || 'INFO').toUpperCase();
+      prioEl.textContent = prio;
+      if (!inputOk || !outputOk || prio === 'BLOCKED' || prio === 'CRITICAL') {
+        prioEl.className = 'badge badge-danger';
+      } else if (prio === 'HIGH') {
+        prioEl.className = 'badge badge-warning';
+      } else {
+        prioEl.className = 'badge badge-info';
+      }
+    }
+    if (summaryTextEl) {
+      summaryTextEl.textContent = String(res.output?.summary || '');
+    }
+    if (traceEl) {
+      const lat = res.telemetry_trace?.total_latency_ms ?? 0;
+      const tok = res.telemetry_trace?.estimated_tokens ?? 0;
+      traceEl.textContent = `${res.engine || 'langgraph'} · ${res.provider || 'deterministic'} · ${lat} ms · ${tok} tok`;
+    }
+    if (toolsEl) {
+      const tools = Array.isArray(res.tools_called) ? res.tools_called : [];
+      toolsEl.textContent = tools.length
+        ? `Herramientas: ${tools.join(', ')}`
+        : 'Herramientas: ninguna (respuesta directa / guardrail)';
+    }
+    if (citationsEl) {
+      if (typeof citationsEl.replaceChildren === 'function') {
+        citationsEl.replaceChildren();
+      } else {
+        citationsEl.textContent = '';
+      }
+      const citations = Array.isArray(res.rag_citations) ? res.rag_citations : [];
+      citations.forEach((cit) => {
+        const li = document.createElement('li');
+        const scoreTxt = typeof cit.score === 'number' ? ` (${cit.score.toFixed(2)})` : '';
+        li.textContent = `[${cit.source || 'doc'}] ${cit.section || ''}${scoreTxt}`;
+        citationsEl.appendChild(li);
+      });
+    }
   }
 
   renderAltimetry() {

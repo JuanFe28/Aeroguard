@@ -1,0 +1,201 @@
+# Stack AeroGuard optimizado para Oracle Cloud (techo <= 4 GiB RAM / 2 vCPU, x86_64 y ARM64 aarch64).
+# Uso base (Qdrant embebido en volumen persistente, 0 contenedores vectoriales extra):
+#   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml up -d --build
+# Con monitoreo LLMOps (Prometheus + Grafana):
+#   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml -f deploy/compose.monitoring.yml up -d --build
+# Con Qdrant externo opcional: agregar `--profile qdrant-external` y definir QDRANT_URL=http://qdrant:6333
+
+name: ${COMPOSE_PROJECT_NAME:-aeroguard-oracle}
+
+services:
+  postgres:
+    image: ${POSTGIS_IMAGE:-postgis/postgis:16-3.5}
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 0.50
+    environment:
+      POSTGRES_DB: aeroguard
+      POSTGRES_USER: aeroguard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en deploy/.env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks: [default]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U aeroguard -d aeroguard']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4.3.6-management-alpine
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: 0.30
+    environment:
+      RABBITMQ_DEFAULT_USER: aeroguard
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Define RABBITMQ_DEFAULT_PASS en deploy/.env}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 2:2"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks: [default]
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  backend:
+    image: ${BACKEND_ORACLE_IMAGE:-aeroguard-oracle/backend:latest}
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+      target: runtime
+      args:
+        INSTALL_AGENT_DEPS: "true"
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 0.85
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=128m"]
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      ALLOW_DEMO_TOKENS: "false"
+      SEED_DEMO_DATA: "false"
+      ALLOW_SQLITE_FALLBACK: "false"
+      DATABASE_URL: postgresql+asyncpg://aeroguard:${POSTGRES_PASSWORD}@postgres:5432/aeroguard
+      RABBITMQ_URL: amqp://aeroguard:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+      SECRET_KEY: ${SECRET_KEY:?Define SECRET_KEY en deploy/.env}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Define BOOTSTRAP_ADMIN_PASSWORD en deploy/.env}
+      PUBLIC_FRONTEND_URL: ${PUBLIC_FRONTEND_URL:-http://localhost:8080}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:8080"]}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Define METRICS_BEARER_TOKEN en deploy/.env}
+      REPORTS_DIR: /tmp/aeroguard/reports
+      SOAR_AI_AGENT_ENABLED: ${SOAR_AI_AGENT_ENABLED:-false}
+      OPENBLAS_NUM_THREADS: "2"
+      OMP_NUM_THREADS: "2"
+      AGENT_ENABLED: ${AGENT_ENABLED:-true}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deterministic}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-12.0}
+      QDRANT_PATH: /tmp/aeroguard/qdrant
+      QDRANT_URL: ${QDRANT_URL:-}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-aeroguard_cuas_knowledge}
+      RAG_CORPUS_DIR: /workspace/docs/conocimiento_cuas
+      RAG_REINDEX_INTERVAL_MINUTES: ${RAG_REINDEX_INTERVAL_MINUTES:-60}
+      EMBEDDING_API_URL: ${EMBEDDING_API_URL:-}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    volumes:
+      - reports_data:/tmp/aeroguard/reports
+      - qdrant_data:/tmp/aeroguard/qdrant
+      - ../docs/conocimiento_cuas:/workspace/docs/conocimiento_cuas:ro
+      - ../data_mining/models:/workspace/data_mining/models:ro
+    networks: [default, egress]
+    depends_on:
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=5)"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  frontend:
+    image: ${FRONTEND_ORACLE_IMAGE:-aeroguard-oracle/frontend:latest}
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: runtime
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.15
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,nodev,size=32m
+      - /var/run:rw,noexec,nosuid,nodev,size=4m
+    networks: [default, entry]
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:80"
+    depends_on:
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1/health]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  qdrant:
+    profiles: [qdrant-external]
+    image: qdrant/qdrant:v1.13.6
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - qdrant_external_data:/qdrant/storage
+    networks: [default]
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  ai-worker:
+    profiles: [ai]
+    image: ${AI_SERVICE_IMAGE:-ghcr.io/juanfe28/aeroguard-ai-service:1.2.0-rc.2}
+    build:
+      context: ..
+      dockerfile: ai_service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.50
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      RABBITMQ_URL: amqp://aeroguard:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+      BACKEND_URL: http://backend:8000/api/v1
+      AI_WORKER_TOKEN: ${AI_WORKER_TOKEN:-}
+      AI_USE_YOLO: "false"
+    networks: [default]
+    depends_on:
+      backend: {condition: service_healthy}
+
+  simulator:
+    profiles: [demo]
+    image: ${SIMULATOR_IMAGE:-ghcr.io/juanfe28/aeroguard-simulator:1.2.0-rc.2}
+    restart: unless-stopped
+    mem_limit: 192m
+    cpus: 0.20
+    security_opt: [no-new-privileges:true]
+    environment:
+      BACKEND_URL: http://backend:8000/api/v1
+      SIMULATOR_TOKEN: ${SIMULATOR_TOKEN:-}
+    networks: [default]
+    depends_on:
+      backend: {condition: service_healthy}
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  reports_data:
+  qdrant_data:
+  qdrant_external_data:
+
+networks:
+  default:
+    internal: true
+  entry:
+  egress:

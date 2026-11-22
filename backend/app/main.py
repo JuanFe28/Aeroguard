@@ -27,7 +27,7 @@ from app.core.security import get_current_user
 
 # Router imports
 from app.api.v1.endpoints import (
-    auth, users, detections, sensors, alerts, zones, reports, audit, config, websocket, ai, predictions
+    auth, users, detections, sensors, alerts, zones, reports, audit, config, websocket, ai, predictions, agent
 )
 
 logger = structlog.get_logger(__name__)
@@ -53,12 +53,16 @@ async def lifespan(app: FastAPI):
     app.state.database_initialized = True
     import asyncio
     from app.services.report_scheduler_service import scheduler_loop
+    from app.services.rag_scheduler_service import start_rag_scheduler, stop_rag_scheduler
     scheduler = asyncio.create_task(scheduler_loop()) if settings.REPORT_SCHEDULER_ENABLED else None
+    rag_scheduler = start_rag_scheduler() if (settings.REPORT_SCHEDULER_ENABLED and settings.AGENT_ENABLED) else None
 
     logger.info("AeroGuard backend ready")
     try:
         yield
     finally:
+        if rag_scheduler is not None:
+            stop_rag_scheduler()
         if scheduler:
             scheduler.cancel()
             try:
@@ -184,6 +188,7 @@ app.include_router(audit.router,       prefix=f"{PREFIX}/audit",      tags=["Aud
 app.include_router(config.router,      prefix=f"{PREFIX}/config",     tags=["Configuración"])
 app.include_router(ai.router,          prefix=f"{PREFIX}/ai",         tags=["AI"])
 app.include_router(predictions.router, prefix=f"{PREFIX}/predictions", tags=["Analítica Predictiva"])
+app.include_router(agent.router,       prefix=f"{PREFIX}/agent",      tags=["Agente IA (LangGraph)"])
 app.include_router(websocket.router,   prefix="/ws",                  tags=["WebSocket"])
 
 

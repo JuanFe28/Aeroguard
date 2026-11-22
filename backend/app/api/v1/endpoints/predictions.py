@@ -8,38 +8,13 @@ el dictamen táctico operativo vigente:
 - POST /api/v1/predictions/evaluate  -> Evaluación multi-modelo sobre telemetría
 """
 
-import json
-from typing import Callable, Literal, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
+from typing import Literal, Optional
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.security import require_permission
+from app.core.validation import StrictJsonRoute
 from app.services.predictive_ml_service import predictive_ml_service
-
-
-class StrictJsonRoute(APIRoute):
-    """Rechaza literales JSON no finitos (NaN/Infinity) con HTTP 422 limpio."""
-
-    def get_route_handler(self) -> Callable[[Request], Response]:
-        original_handler = super().get_route_handler()
-
-        async def custom_handler(request: Request) -> Response:
-            if request.method in {"POST", "PUT", "PATCH"}:
-                raw_body = await request.body()
-                if raw_body:
-                    def _reject_non_finite(token: str):
-                        raise ValueError(f"Literal no finito no permitido en JSON: {token}")
-
-                    try:
-                        json.loads(raw_body.decode("utf-8"), parse_constant=_reject_non_finite)
-                    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
-                        return JSONResponse(status_code=422, content={"detail": str(exc)})
-            return await original_handler(request)
-
-        return custom_handler
-
 
 router = APIRouter(route_class=StrictJsonRoute)
 

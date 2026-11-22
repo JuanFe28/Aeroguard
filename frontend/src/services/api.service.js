@@ -378,6 +378,67 @@ export const PredictionService = {
 };
 
 // ============================================================
+// Agentic AI Service (LangGraph + RAG Qdrant + Guardrails + LLMOps)
+// ============================================================
+
+export const AgentService = {
+  async query(payload) {
+    if (MockService.enabled) {
+      const q = String(payload?.query || '');
+      const isInj = /ignora|system\s*prompt|jailbreak/i.test(q);
+      return {
+        status: 'success',
+        data: {
+          session_id: payload?.session_id || 'demo-agent-session',
+          status: isInj ? 'blocked_input' : 'completed',
+          engine: 'langgraph',
+          provider: isInj ? 'guardrail_policy' : 'deterministic',
+          vector_backend: 'qdrant_embedded',
+          guardrails: {
+            input_passed: !isInj,
+            input_category: isInj ? 'prompt_injection' : 'ok',
+            output_passed: true,
+          },
+          output: {
+            summary: isInj
+              ? 'Consulta bloqueada por Guardrail de Entrada (prompt injection).'
+              : 'Evaluación demo completada con respaldo RAG C-UAS y herramientas verificables.',
+            recommended_action: isInj ? 'BLOQUEADO_POR_GUARDRAIL' : 'VERIFICAR_DETECCION',
+            priority: isInj ? 'BLOCKED' : 'MEDIUM',
+            human_review_required: true,
+          },
+          rag_citations: isInj ? [] : [{ doc_id: '01_protocolos_operativos_cuas.md#1', source: '01_protocolos_operativos_cuas.md', score: 0.91 }],
+          tools_called: isInj ? [] : ['get_operational_snapshot', 'predict_telemetry_ml'],
+          telemetry_trace: { total_latency_ms: 12.4, estimated_tokens: 95 },
+        },
+      };
+    }
+    return http.post('/agent/query', payload);
+  },
+  async getLlmOpsSummary() {
+    if (MockService.enabled) {
+      return {
+        status: 'success',
+        data: {
+          total_runs: 1,
+          blocked_input_count: 0,
+          blocked_output_count: 0,
+          avg_latency_ms: 12.4,
+          rag_status: { vector_backend: 'qdrant_embedded', indexed_chunks: 8 },
+        },
+      };
+    }
+    return http.get('/agent/llmops/summary');
+  },
+  async listTraces(limit = 10) {
+    return http.get('/agent/traces', { limit });
+  },
+  async mcpListTools() {
+    return http.post('/agent/mcp', { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+  },
+};
+
+// ============================================================
 // Zones Service
 // ============================================================
 

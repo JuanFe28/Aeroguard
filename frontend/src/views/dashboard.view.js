@@ -25,6 +25,7 @@ export class DashboardView {
     this.vm._renderSensorStatus();
     this.vm._renderAiVerdict();
     this.vm._renderPredictivePanel();
+    this.vm._renderAgentMonitor();
 
     // Init map and interactive components (after DOM is ready)
     requestAnimationFrame(() => {
@@ -276,6 +277,39 @@ export class DashboardView {
             <div id="ml-pred-breach" style="color:var(--text-secondary);font-size:10px"></div>
             <div id="ml-pred-profile" style="color:var(--text-accent);font-size:10px;font-weight:600"></div>
             <ul id="ml-pred-factors" style="font-size:10px;color:var(--text-muted);padding-left:16px;margin:2px 0 0"></ul>
+          </section>
+        </div>
+      </div>
+
+      <!-- Agentic AI Monitor Widget (LangGraph + RAG + Guardrails + LLMOps) -->
+      <div class="card" style="flex-shrink:0;border:1px solid rgba(0,212,255,0.22)" role="region" aria-label="Asistente y Monitor Agéntico IA (LangGraph)">
+        <div class="card-header" style="padding-bottom:var(--spacing-xs)">
+          <div>
+            <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px">
+              <span>🧠</span> Agente IA (LangGraph + RAG)
+            </div>
+            <div class="card-subtitle" style="font-size:11px" id="agent-llmops-summary">Qdrant RAG · Guardrails IN/OUT · LLMOps</div>
+          </div>
+          <span class="badge badge-info" id="agent-guardrail-badge" style="font-size:10px">LISTO</span>
+        </div>
+        <div style="padding:var(--spacing-xs) var(--spacing-md) var(--spacing-md);display:flex;flex-direction:column;gap:7px">
+          <label for="agent-query-input" style="font-size:11px;color:var(--text-secondary)">Consulta operativa o táctica (verificada por Guardrails)</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="text" id="agent-query-input" maxlength="500"
+              placeholder="Ej: Protocolo cota 120 m y pico ARIMA en Bucaramanga"
+              style="flex:1;min-width:170px;padding:6px 8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);border-radius:var(--radius-sm);font-size:11px" />
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-agent-query" style="font-size:11px" title="Ejecutar grafo LangGraph con RAG, herramientas y guardrails">Consultar Agente</button>
+          </div>
+          <section id="agent-monitor-result" hidden aria-label="Respuesta y traza del Agente IA"
+            style="border:1px solid rgba(0,212,255,0.2);background:rgba(0,212,255,0.04);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+              <strong id="agent-res-action" style="color:var(--text-primary)"></strong>
+              <span id="agent-res-priority" class="badge badge-info" style="font-size:10px"></span>
+            </div>
+            <p id="agent-res-summary" style="color:var(--text-secondary);margin:0;line-height:1.45"></p>
+            <div id="agent-res-trace" style="font-family:var(--font-mono);font-size:10px;color:var(--text-accent)"></div>
+            <div id="agent-res-tools" style="font-size:10px;color:var(--text-muted)"></div>
+            <ul id="agent-res-citations" style="font-size:10px;color:var(--text-muted);padding-left:16px;margin:2px 0 0"></ul>
           </section>
         </div>
       </div>

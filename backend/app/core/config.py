@@ -96,6 +96,25 @@ class Settings(BaseSettings):
     N8N_WEBHOOK_TIMEOUT: float = 3.5
     SOAR_AI_AGENT_ENABLED: bool = False
 
+    # ====== Agente IA LangGraph + DeepSeek + Qdrant RAG + LLMOps ======
+    AGENT_ENABLED: bool = True
+    LLM_PROVIDER: str = "deterministic"  # deterministic | deepseek | openai
+    DEEPSEEK_API_KEY: str = ""
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
+    DEEPSEEK_MODEL: str = "deepseek-chat"
+    LLM_TIMEOUT_SECONDS: float = 12.0
+    QDRANT_PATH: str = Field(default_factory=lambda: str(Path.home() / ".aeroguard" / "qdrant"))
+    QDRANT_URL: str = ""
+    QDRANT_COLLECTION: str = "aeroguard_cuas_knowledge"
+    RAG_CORPUS_DIR: str = ""
+    RAG_REINDEX_INTERVAL_MINUTES: int = Field(default=60, ge=1)
+    EMBEDDING_API_URL: str = ""
+    EMBEDDING_API_KEY: str = ""
+    EMBEDDING_MODEL: str = ""
+    LANGSMITH_TRACING: bool = False
+    LANGSMITH_API_KEY: str = ""
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
+
     @model_validator(mode="after")
     def validate_production(self):
         if self.APP_ENV == "production":

@@ -14,3 +14,16 @@ groups:
           severity: warning
         annotations:
           summary: Hay sensores activos sin telemetría reciente
+      - alert: AeroGuardAgentHighGuardrailBlocks
+        expr: sum(increase(aeroguard_agent_guardrail_blocks_total[10m])) > 10
+        labels:
+          severity: warning
+        annotations:
+          summary: Incremento anómalo de bloqueos en Guardrails del Agente IA
+      - alert: AeroGuardAgentHighLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(aeroguard_agent_latency_seconds_bucket[5m]))) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Latencia P95 del grafo agéntico supera 5 segundos
