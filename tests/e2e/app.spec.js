@@ -458,3 +458,34 @@ test('Dashboard agente de objetivos: decisión explicada desde API real', async 
   await expect(page.locator('#ai-goal-review')).toContainText('Requiere revisión humana');
   await expect(page.locator('#ai-verdict-incident')).toHaveText(incidentId);
 });
+
+
+test('Laboratorio del único agente: tres escenarios sin efectos sobre alertas reales', async ({ page, qa }) => {
+  const previousVerdict = await qa.api.get('/api/v1/alerts/ai-verdict');
+  const previousAlerts = await qa.api.get('/api/v1/alerts?limit=500');
+  expect(previousVerdict.status()).toBe(200);
+  expect(previousAlerts.status()).toBe(200);
+  const before = await previousVerdict.json();
+  const alertsBefore = await previousAlerts.json();
+
+  await login(page, qa.roles.admin);
+  const cases = [
+    { option: 'critical', action: 'NOTIFICAR Y VERIFICAR', priority: 'CRITICAL' },
+    { option: 'review', action: 'VERIFICAR DETECCION', priority: 'REVIEW' },
+    { option: 'monitor', action: 'MONITOREAR', priority: 'NORMAL' },
+  ];
+  for (const scenario of cases) {
+    await page.locator('#goal-demo-case').selectOption(scenario.option);
+    await page.locator('#btn-goal-demo').click();
+    await expect(page.locator('#btn-goal-demo')).toBeEnabled();
+    await expect(page.locator('#ai-goal-decision')).toBeVisible();
+    await expect(page.locator('#ai-goal-simulation-note')).toBeVisible();
+    await expect(page.locator('#ai-goal-action')).toHaveText(scenario.action);
+    await expect(page.locator('#ai-goal-priority')).toHaveText(scenario.priority);
+    await expect(page.locator('#ai-goal-evidence')).toContainText('umbral: 120 m');
+    await expect(page.locator('#ai-verdict-badge')).toContainText('SIMULACIÓN');
+  }
+
+  expect((await (await qa.api.get('/api/v1/alerts/ai-verdict')).json())).toEqual(before);
+  expect((await (await qa.api.get('/api/v1/alerts?limit=500')).json())).toEqual(alertsBefore);
+});
