@@ -9,19 +9,18 @@
 3. El endpoint autenticado `POST /api/v1/alerts/trigger-incident` invoca la evaluación; `GET /api/v1/alerts/ai-verdict` recupera la última decisión en memoria, con evidencia, explicación y origen. No se crea automáticamente una fila persistente en la tabla de alertas.
 4. El Dashboard incluye un panel «MODELO BASADO EN OBJETIVOS», que muestra acción, prioridad, explicación, evidencias y necesidad de revisión humana. No interpreta HTML procedente de la API.
 5. Se añadieron pruebas HTTP para tres escenarios y dos pruebas de presentación del panel, incluyendo evidencia tratada como texto. Se conservan las cinco pruebas aisladas originales y la suite preexistente.
-6. Se mantienen `scripts/evaluar_agente_objetivos.py` y las tres gráficas en `docs/agente_objetivos/resultados/`.
+6. Se agregó laboratorio académico de tres casos, sin efectos sobre alertas, junto con pruebas HTTP de no persistencia y prueba de interfaz con Chromium. Se mantienen `scripts/evaluar_agente_objetivos.py`, las tres gráficas y el [informe para exposición](INFORME_PARA_EXPOSICION.md).
 
-## Guion de demostración (solo datos de prueba)
+## Guion de demostración (un solo modelo)
 
-1. Iniciar la exposición local de AeroGuard siguiendo el README. Usar el usuario de demostración definido para una base nueva; nunca compartir credenciales reales ni secretos.
-2. Entrar al Dashboard con el backend activo y los permisos `alerts:read` y `alerts:write`.
-3. Seleccionar un objeto de muestra y una zona en la interfaz. Pulsar **Disparar SOAR**; esta acción envía un evento de prueba al endpoint autenticado.
-4. Mostrar el dictamen y, debajo, la **decisión del agente basado en objetivos**, la evidencia numérica y la obligación de revisión humana. La decisión también puede consultarse desde `GET /api/v1/alerts/ai-verdict` y el evento `ai_verdict` de WebSocket.
-5. Explicar los tres escenarios esperados (pruebas automatizadas):
-   - Altitud **135 m** frente a límite **120 m**, confianza **0.95** → `NOTIFICAR_Y_VERIFICAR`, prioridad `CRITICAL`.
-   - Mismo evento con confianza **0.20** → `VERIFICAR_DETECCION`, prioridad `REVIEW` / severidad visual `MEDIUM`.
-   - Altitud **80 m** frente a límite **120 m** → `MONITOREAR`, prioridad `NORMAL` / severidad visual `LOW`.
-6. Abrir `docs/agente_objetivos/resultados/01_efectividad.png`, `02_tiempos.png` y `03_decisiones.png` y explicar los datos de muestra.
+1. Iniciar AeroGuard y entrar al Dashboard con credenciales de una base local de pruebas.
+2. Localizar **Laboratorio: agente basado en objetivos**. El selector usa **datos sintéticos**; no depende de tener detecciones asociadas a una zona ni crea alarmas reales.
+3. Escoger **Umbral superado · confianza alta** y pulsar **Evaluar modelo**: 135 m, límite 120 m, confianza 0,95 → `NOTIFICAR_Y_VERIFICAR`.
+4. Escoger **Umbral superado · confianza baja**: mismos 135 m, confianza 0,20 → `VERIFICAR_DETECCION` con revisión humana.
+5. Escoger **Dentro del umbral**: 80 m, confianza 0,90 → `MONITOREAR`.
+6. Explicar que el mismo agente interpreta tres situaciones usando objetivos explícitos. El panel muestra acción, prioridad, explicación y evidencias, con la etiqueta **SIMULACIÓN ACADÉMICA**. No hay sirena, persistencia, WebSocket ni n8n al usar el laboratorio.
+7. **Opcional:** seleccionar una detección vinculada a zona activa y pulsar **Disparar SOAR** para mostrar el recorrido operativo con API y WebSocket. No confundirlo con la simulación segura.
+8. Explicar y analizar las tres gráficas del [informe para exposición](INFORME_PARA_EXPOSICION.md). El reactivo simple sirve **solo como comparador experimental**; no se instaló como otro agente en AeroGuard.
 
 ## Verificaciones para un compañero
 
@@ -36,7 +35,9 @@ node --test tests/goal_agent_ui.test.js
 .\.venv\Scripts\python.exe scripts/evaluar_agente_objetivos.py
 ```
 
-Para verificar por HTTP el circuito completo hace falta un entorno local con backend arrancado, sesión con permisos y una instalación de desarrollo funcional. Si n8n está activado y devuelve un dictamen, este conserva su propio origen; las recomendaciones del agente aparecen separadas.
+Para comprobar los tres casos del laboratorio, con el backend ejecutándose y una sesión autorizada, usar `POST /api/v1/alerts/evaluate-goals`. Este endpoint usa exactamente el mismo motor `evaluate_goals()` y no altera el estado operativo.
+
+Para verificar por HTTP el circuito operativo completo hace falta un entorno local con backend arrancado, sesión con permisos y una instalación de desarrollo funcional. Si n8n está activado y devuelve un dictamen, este conserva su propio origen; las recomendaciones del agente aparecen separadas.
 
 ## Limitaciones importantes
 
