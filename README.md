@@ -88,3 +88,24 @@ docker build --target test -f backend/Dockerfile .
 Usa carpetas y nombres nuevos para conservar las ejecuciones anteriores. Los respaldos, bases, reportes generados, sesiones y `.env` quedan fuera de Git. El respaldo PostgreSQL contiene información privada: no debe subirse como código fuente.
 
 La publicación de imágenes, ejecución de Actions en GitHub, despliegue en una VM y aceptación docente siguen siendo pasos separados. Consulta [el changelog](CHANGELOG.md) y la [política de versionado](docs/correcciones-2026-10-21/VERSIONADO.md).
+
+
+## Agente basado en objetivos (experimento académico)
+
+El endpoint autenticado `POST /api/v1/alerts/trigger-incident` ahora incorpora el bloque
+`goal_decision` con objetivos, evidencia de telemetría, acción recomendada, prioridad y
+explicación. Es una **recomendación para revisión humana**, no un detector de drones ni
+un sistema de neutralización. El dictamen previo (`ai_verdict`) y su ruta n8n se conservan.
+La prioridad del bloque `goal_decision` es independiente del campo heredado `threat_level`.
+
+Para reproducir tres gráficas y su análisis con 153 casos **sintéticos**:
+
+```powershell
+python -m pip install matplotlib pytest
+python scripts/evaluar_agente_objetivos.py
+$env:PYTHONPATH = 'backend'
+python -m pytest -q backend/tests/test_goal_based_agent.py
+```
+
+Revisar `docs/agente_objetivos/resultados/ANALISIS.md`. Estas gráficas no acreditan
+precisión real de visión artificial ni latencia de infraestructura.

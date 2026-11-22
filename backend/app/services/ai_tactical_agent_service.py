@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from app.core.config import settings
 import structlog
+from app.services.goal_based_agent import evaluate_goals
 
 logger = structlog.get_logger()
 
@@ -41,6 +42,9 @@ class AITacticalAgentService:
         ai_verdict = ""
         threat_level = "CRITICAL"
 
+        # El agente determina una acción defensiva según objetivos explícitos.
+        goal_decision = evaluate_goals(drone_data, zone_data)
+
         # 1. Intentar orquestación con n8n Webhook
         if settings.SOAR_AI_AGENT_ENABLED:
             try:
@@ -72,6 +76,8 @@ class AITacticalAgentService:
             "drone_id": drone_id,
             "dispatched_to_n8n": dispatched_to_n8n,
             "execution_source": execution_source,
+            "agent_model": "basado_en_objetivos",
+            "goal_decision": goal_decision.to_dict(),
             "drone": drone_data,
             "zone": zone_data,
         }
