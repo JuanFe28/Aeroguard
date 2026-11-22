@@ -168,7 +168,10 @@ _latest_verdict: dict = {
     "timestamp": None,
     "ai_verdict": "Sin dictámenes registrados.",
     "threat_level": None,
-    "drone_id": None
+    "drone_id": None,
+    "agent_model": None,
+    "goal_decision": None,
+    "execution_source": None,
 }
 
 
@@ -190,7 +193,10 @@ async def register_ai_verdict(
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "ai_verdict": body.ai_verdict,
         "threat_level": body.threat_level,
-        "drone_id": body.drone_id
+        "drone_id": body.drone_id,
+        "agent_model": None,
+        "goal_decision": None,
+        "execution_source": "external_callback",
     }
 
     try:
@@ -228,6 +234,41 @@ class TriggerIncidentSchema(BaseModel):
     incident_id: Optional[str] = None
     drone: DroneTelemetrySchema
     zone: ZoneInfoSchema
+
+
+@router.post("/evaluate-goals", summary="Simular el agente basado en objetivos sin generar alertas")
+async def evaluate_goal_based_scenario(
+    body: TriggerIncidentSchema,
+    current_user=Depends(require_permission("alerts:read")),
+):
+    """Evaluación académica aislada: no escribe BD, no emite WebSocket ni contacta n8n.
+
+    La salida es una recomendación, no una identificación ni una alarma operativa.
+    """
+    from app.services.goal_based_agent import evaluate_goals
+
+    decision = evaluate_goals(body.drone.model_dump(), body.zone.model_dump())
+    level_by_priority = {
+        "CRITICAL": "CRITICAL",
+        "REVIEW": "MEDIUM",
+        "NORMAL": "LOW",
+        "INDETERMINATE": "UNKNOWN",
+    }
+    return {
+        "status": "success",
+        "simulation": True,
+        "data": {
+            "incident_id": body.incident_id or "SIMULACION-ACADEMICA",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "drone_id": body.drone.drone_id,
+            "agent_model": decision.model,
+            "goal_decision": decision.to_dict(),
+            "ai_verdict": f"{decision.action.replace('_', ' ')}: {decision.explanation}",
+            "threat_level": level_by_priority[decision.priority],
+            "execution_source": "goal_based_simulation",
+            "simulation": True,
+        },
+    }
 
 
 @router.post("/trigger-incident", summary="Disparar análisis de incidente táctico hacia n8n / Agente IA")

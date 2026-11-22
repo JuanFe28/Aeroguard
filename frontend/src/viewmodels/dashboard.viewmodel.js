@@ -629,6 +629,61 @@ export class DashboardViewModel {
       Toast.warn('🚨 Ráfaga táctica de prueba (1.5s)');
     });
 
+    // Demostración de clase sin eventos operativos ni notificaciones por WebSocket.
+    document.getElementById('btn-goal-demo')?.addEventListener('click', async () => {
+      const cases = {
+        critical: { altitude: 135, confidence: 0.95 },
+        review: { altitude: 135, confidence: 0.20 },
+        monitor: { altitude: 80, confidence: 0.90 },
+      };
+      const selected = document.getElementById('goal-demo-case')?.value;
+      const scenario = cases[selected];
+      if (!scenario) {
+        Toast.warn('Selecciona un escenario académico válido.');
+        return;
+      }
+      const btn = document.getElementById('btn-goal-demo');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Evaluando...';
+      }
+      try {
+        const res = await AlertService.evaluateGoalsScenario({
+          event_type: 'GOAL_BASED_CLASSROOM_DEMO',
+          incident_id: `SIM-${Date.now()}`,
+          drone: {
+            drone_id: 'OBJETO-SINTETICO',
+            latitude: 7.12,
+            longitude: -73.12,
+            altitude_m: scenario.altitude,
+            speed_ms: 10,
+            heading_deg: 90,
+            ai_confidence: scenario.confidence,
+          },
+          zone: {
+            name: 'Zona sintética para clase',
+            max_allowed_altitude_m: 120,
+            restriction_type: 'NO_FLY_ZONE',
+          },
+        });
+        if (!res?.simulation || res.data?.execution_source !== 'goal_based_simulation') {
+          throw new Error('La respuesta no es una simulación académica.');
+        }
+        // No llamar _onVerdictUpdate: puede activar la sirena ante prioridad crítica.
+        this.state.aiVerdict = res.data;
+        this._renderAiVerdict();
+        Toast.success('Evaluación académica completada sin generar alertas.');
+      } catch (err) {
+        console.error('Error evaluando escenario académico:', err);
+        Toast.error('No se pudo evaluar el escenario. Comprueba la sesión y la API.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Evaluar modelo';
+        }
+      }
+    });
+
     document.getElementById('btn-trigger-soar')?.addEventListener('click', async () => {
       const topDrone = this.state.selectedDetection || this.state.detections.find(d => d.status === 'active');
       const zone = topDrone && this.state.zones.find(z => z.id === topDrone.zoneId && z.isActive);
@@ -696,8 +751,9 @@ export class DashboardViewModel {
 
     if (elBadge) {
       const level = verdict.threat_level || '';
-      elBadge.textContent = level ? level.toUpperCase() : 'SIN DATOS';
-      elBadge.className = level.toLowerCase() === 'critical'
+      const academicSimulation = verdict.execution_source === 'goal_based_simulation';
+      elBadge.textContent = academicSimulation ? `SIMULACIÓN · ${level.toUpperCase()}` : (level ? level.toUpperCase() : 'SIN DATOS');
+      elBadge.className = academicSimulation ? 'badge badge-info' : level.toLowerCase() === 'critical'
         ? 'badge badge-danger' 
         : level.toLowerCase() === 'high'
           ? 'badge badge-warning' 
@@ -712,6 +768,38 @@ export class DashboardViewModel {
     }
     if (elConf) {
       elConf.textContent = 'Sin precisión validada';
+    }
+
+    const simulationNote = document.getElementById('ai-goal-simulation-note');
+    if (simulationNote) simulationNote.hidden = verdict.execution_source !== 'goal_based_simulation';
+
+    // Explicación del modelo: el dictamen externo puede no incluir una decisión local.
+    // Todos los datos se insertan mediante textContent para evitar HTML no confiable.
+    const goal = verdict.goal_decision;
+    const goalPanel = document.getElementById('ai-goal-decision');
+    if (goalPanel) {
+      goalPanel.hidden = !goal || typeof goal !== 'object';
+      if (!goalPanel.hidden) {
+        const elAction = document.getElementById('ai-goal-action');
+        const elPriority = document.getElementById('ai-goal-priority');
+        const elExplanation = document.getElementById('ai-goal-explanation');
+        const elEvidence = document.getElementById('ai-goal-evidence');
+        const elReview = document.getElementById('ai-goal-review');
+        if (elAction) elAction.textContent = String(goal.action || 'SIN DECISIÓN').replaceAll('_', ' ');
+        if (elPriority) elPriority.textContent = String(goal.priority || 'INDETERMINATE');
+        if (elExplanation) elExplanation.textContent = String(goal.explanation || '');
+        if (elReview) elReview.textContent = goal.human_review_required
+          ? 'Requiere revisión humana; no constituye una amenaza confirmada.'
+          : 'Decisión informativa.';
+        if (elEvidence) {
+          elEvidence.replaceChildren();
+          (Array.isArray(goal.evidence) ? goal.evidence : []).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = String(item);
+            elEvidence.appendChild(li);
+          });
+        }
+      }
     }
   }
 

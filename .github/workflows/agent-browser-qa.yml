@@ -1,0 +1,46 @@
+name: AeroGuard — Chromium QA (agente basado en objetivos)
+
+on:
+  push:
+    branches:
+      - feature/agente-objetivos
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-qa:
+    name: Chromium — interfaz y flujo del prototipo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Instalar dependencias del backend de exposición
+        run: python -m pip install -c constraints.txt -r backend/requirements-expo.txt
+      - name: Instalar dependencias de Playwright
+        run: npm ci --ignore-scripts --no-fund --no-audit
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Ejecutar pruebas aisladas con navegador real
+        run: python scripts/run_local_app_qa.py
+      - name: Probar reglas de objetivos
+        if: always()
+        env:
+          PYTHONPATH: backend
+        run: python -m pytest --noconftest -q backend/tests/test_goal_based_agent.py
+      - name: Comprobar presentación del agente en JavaScript
+        if: always()
+        run: node --test tests/goal_agent_ui.test.js

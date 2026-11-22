@@ -1,0 +1,23 @@
+{
+  "tipo_datos": "sinteticos",
+  "casos": 153,
+  "efectividad_por_reglas_pct": {
+    "Reactivo simple": 71.9,
+    "Basado en objetivos": 100.0
+  },
+  "tiempos_medianas_ms": {
+    "Reactivo simple": {
+      "10": 0.0025,
+      "50": 0.0115,
+      "100": 0.0226,
+      "500": 0.1167
+    },
+    "Basado en objetivos": {
+      "10": 0.0326,
+      "50": 0.1624,
+      "100": 0.3261,
+      "500": 1.6086
+    }
+  },
+  "advertencia": "No es precisión de visión artificial ni latencia extremo a extremo."
+}

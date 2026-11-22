@@ -88,3 +88,34 @@ docker build --target test -f backend/Dockerfile .
 Usa carpetas y nombres nuevos para conservar las ejecuciones anteriores. Los respaldos, bases, reportes generados, sesiones y `.env` quedan fuera de Git. El respaldo PostgreSQL contiene información privada: no debe subirse como código fuente.
 
 La publicación de imágenes, ejecución de Actions en GitHub, despliegue en una VM y aceptación docente siguen siendo pasos separados. Consulta [el changelog](CHANGELOG.md) y la [política de versionado](docs/correcciones-2026-10-21/VERSIONADO.md).
+
+
+## Agente basado en objetivos (experimento académico)
+
+El endpoint autenticado `POST /api/v1/alerts/trigger-incident` ahora incorpora el bloque
+`goal_decision` con objetivos, evidencia de telemetría, acción recomendada, prioridad y
+explicación. Es una **recomendación para revisión humana**, no un detector de drones ni
+un sistema de neutralización. El dictamen previo (`ai_verdict`) y su ruta n8n se conservan.
+En modo local, `threat_level` refleja la prioridad informativa del agente; si n8n
+proporciona un dictamen propio, ambos resultados se muestran por separado.
+
+El Dashboard incluye el **Laboratorio: agente basado en objetivos**, que permite
+seleccionar tres escenarios académicos con el botón **Evaluar modelo**. Este botón
+utiliza `POST /api/v1/alerts/evaluate-goals` (autenticado) y **no crea alertas,
+no transmite por WebSocket, no contacta n8n ni activa sirenas**. La simulación
+está etiquetada y no reemplaza el último dictamen operativo.
+
+Para reproducir tres gráficas y su análisis con 153 casos **sintéticos**:
+
+```powershell
+python -m pip install matplotlib pytest
+python scripts/evaluar_agente_objetivos.py
+$env:PYTHONPATH = 'backend'
+python -m pytest -q backend/tests/test_goal_based_agent.py
+```
+
+Para explicar por qué se escogió este único modelo, las características vistas en
+las diapositivas, el guion de tres casos y el análisis detallado de las gráficas,
+revisar [Informe para exposición](docs/agente_objetivos/INFORME_PARA_EXPOSICION.md).
+También se conserva `docs/agente_objetivos/resultados/ANALISIS.md`. Las gráficas no acreditan
+precisión real de visión artificial ni latencia de infraestructura.
