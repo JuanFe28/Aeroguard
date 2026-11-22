@@ -168,7 +168,10 @@ _latest_verdict: dict = {
     "timestamp": None,
     "ai_verdict": "Sin dictámenes registrados.",
     "threat_level": None,
-    "drone_id": None
+    "drone_id": None,
+    "agent_model": None,
+    "goal_decision": None,
+    "execution_source": None,
 }
 
 
@@ -190,7 +193,10 @@ async def register_ai_verdict(
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "ai_verdict": body.ai_verdict,
         "threat_level": body.threat_level,
-        "drone_id": body.drone_id
+        "drone_id": body.drone_id,
+        "agent_model": None,
+        "goal_decision": None,
+        "execution_source": "external_callback",
     }
 
     try:
