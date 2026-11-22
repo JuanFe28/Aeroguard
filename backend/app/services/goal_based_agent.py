@@ -72,10 +72,12 @@ def evaluate_goals(drone: Mapping[str, Any], zone: Mapping[str, Any]) -> GoalDec
 
     if exceeded:
         evidence.append("Se superó el umbral de altitud configurado")
-        if confidence is not None and 0 <= confidence < 0.5:
+        if confidence is None or not (0 <= confidence <= 1) or confidence < 0.5:
+            if confidence is None or not (0 <= confidence <= 1):
+                evidence.append("Confianza visual no disponible o inválida: revisión necesaria")
             return GoalDecision(
                 "basado_en_objetivos", GOALS, "VERIFICAR_DETECCION", "REVIEW",
-                tuple(evidence), "Priorizar verificación humana: la confianza visual declarada es baja.",
+                tuple(evidence), "Priorizar verificación humana: confianza visual baja o ausente.",
             )
         return GoalDecision(
             "basado_en_objetivos", GOALS, "NOTIFICAR_Y_VERIFICAR", "CRITICAL",
