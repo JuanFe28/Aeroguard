@@ -79,7 +79,7 @@ def evaluate_goals(drone: Mapping[str, Any], zone: Mapping[str, Any]) -> GoalDec
             )
         return GoalDecision(
             "basado_en_objetivos", GOALS, "NOTIFICAR_Y_VERIFICAR", "CRITICAL",
-            tuple(evidence), "Solicitar revisión humana del evento y notificar al responsable; no se infiere intención.",
+            tuple(evidence), "Solicitar revisión humana del evento y avisar al responsable de seguridad; no se infiere intención.",
         )
 
     evidence.append("No se superó el umbral de altitud configurado")
