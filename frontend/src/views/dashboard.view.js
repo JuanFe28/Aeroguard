@@ -191,7 +191,7 @@ export class DashboardView {
             <ul id="ai-goal-evidence" style="font-size:10px;line-height:1.45;color:var(--text-muted);padding-left:17px;margin:0 0 6px"></ul>
             <div id="ai-goal-review" style="font-size:10px;color:var(--text-muted)"></div>
           </section>
-          <div style="padding:10px;border:1px solid rgba(0,212,255,.16);border-radius:var(--radius-sm);background:rgba(0,212,255,.035);display:flex;flex-direction:column;gap:6px" aria-label="Laboratorio del modelo basado en objetivos">
+          <div style="padding:10px;border:1px solid rgba(0,212,255,.16);border-radius:var(--radius-sm);background:rgba(0,212,255,.035);display:flex;flex-direction:column;gap:6px" role="group" aria-label="Laboratorio del modelo basado en objetivos">
             <div style="font-size:11px;font-weight:700;color:var(--text-primary)">Laboratorio: agente basado en objetivos</div>
             <label for="goal-demo-case" style="font-size:11px;color:var(--text-secondary)">Escenario sintético para comprobar cómo decide</label>
             <div style="display:flex;flex-wrap:wrap;gap:6px">
