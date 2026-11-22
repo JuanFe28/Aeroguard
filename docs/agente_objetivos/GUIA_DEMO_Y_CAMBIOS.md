@@ -8,7 +8,7 @@
 2. El servicio `ai_tactical_agent_service.py` incluye `goal_decision` en la respuesta y en el evento WebSocket. En modo local, toma la gravedad del resultado del modelo (`CRITICAL` / `MEDIUM` / `LOW` / `UNKNOWN`), evitando contradicciones entre decisión y dictamen.
 3. El endpoint autenticado `POST /api/v1/alerts/trigger-incident` invoca la evaluación; `GET /api/v1/alerts/ai-verdict` recupera la última decisión en memoria, con evidencia, explicación y origen. No se crea automáticamente una fila persistente en la tabla de alertas.
 4. El Dashboard incluye un panel «MODELO BASADO EN OBJETIVOS», que muestra acción, prioridad, explicación, evidencias y necesidad de revisión humana. No interpreta HTML procedente de la API.
-5. Se añadieron pruebas de respuesta HTTP y consulta posterior para tres escenarios; se conservan las cinco pruebas aisladas originales del modelo y la suite preexistente.
+5. Se añadieron pruebas HTTP para tres escenarios y dos pruebas de presentación del panel, incluyendo evidencia tratada como texto. Se conservan las cinco pruebas aisladas originales y la suite preexistente.
 6. Se mantienen `scripts/evaluar_agente_objetivos.py` y las tres gráficas en `docs/agente_objetivos/resultados/`.
 
 ## Guion de demostración (solo datos de prueba)
@@ -32,6 +32,7 @@ $env:PYTHONPATH = "backend"
 .\.venv\Scripts\python.exe -m pytest -q backend/tests
 node --check frontend/src/viewmodels/dashboard.viewmodel.js
 node --check frontend/src/views/dashboard.view.js
+node --test tests/goal_agent_ui.test.js
 .\.venv\Scripts\python.exe scripts/evaluar_agente_objetivos.py
 ```
 
