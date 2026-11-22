@@ -36,3 +36,15 @@ def test_decision_has_trace_and_goals():
     record = decision.to_dict()
     assert record["goals"] and record["evidence"] and record["explanation"]
     assert record["model"] == "basado_en_objetivos"
+
+
+def test_missing_or_invalid_confidence_requires_review_instead_of_critical():
+    for confidence in (None, -1, 2, "nan", "invalid"):
+        d = evaluate_goals(
+            {"altitude_m": 140, "ai_confidence": confidence},
+            {"max_allowed_altitude_m": 120},
+        )
+        assert d.action == "VERIFICAR_DETECCION"
+        assert d.priority == "REVIEW"
+        assert d.human_review_required
+        assert any("Confianza visual" in item for item in d.evidence)
