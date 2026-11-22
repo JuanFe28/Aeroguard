@@ -419,3 +419,42 @@ test('Mapas: teselas reales disponibles y atribución visible', async ({ page, q
     await expect(page.locator(`#${id} .leaflet-control-attribution`)).toContainText('OpenStreetMap');
   }
 });
+
+test('Dashboard agente de objetivos: decisión explicada desde API real', async ({ page, qa }) => {
+  // Base aislada propia del runner. No se envían acciones a la instalación del usuario.
+  const incidentId = `QA-GOALS-${qa.prefix}`;
+  const response = await qa.api.post('/api/v1/alerts/trigger-incident', {
+    data: {
+      incident_id: incidentId,
+      event_type: 'TELEMETRY_REVIEW',
+      drone: {
+        drone_id: 'OBJETO-SINTETICO',
+        latitude: 7.005,
+        longitude: -72.995,
+        altitude_m: 135,
+        speed_ms: 10,
+        heading_deg: 90,
+        ai_confidence: 0.20,
+      },
+      zone: {
+        name: 'Zona académica sintética',
+        max_allowed_altitude_m: 120,
+        restriction_type: 'NO_FLY_ZONE',
+      },
+    },
+  });
+  expect(response.status()).toBe(200);
+  const data = (await response.json()).data;
+  expect(data.goal_decision.action).toBe('VERIFICAR_DETECCION');
+  expect(data.goal_decision.priority).toBe('REVIEW');
+  expect(data.threat_level).toBe('MEDIUM');
+
+  await login(page, qa.roles.admin);
+  await expect(page.locator('#ai-goal-decision')).toBeVisible();
+  await expect(page.locator('#ai-goal-action')).toHaveText('VERIFICAR DETECCION');
+  await expect(page.locator('#ai-goal-priority')).toHaveText('REVIEW');
+  await expect(page.locator('#ai-goal-explanation')).toContainText('verificación humana');
+  await expect(page.locator('#ai-goal-evidence')).toContainText('135');
+  await expect(page.locator('#ai-goal-review')).toContainText('Requiere revisión humana');
+  await expect(page.locator('#ai-verdict-incident')).toHaveText(incidentId);
+});
