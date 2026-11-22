@@ -27,7 +27,7 @@ from app.core.security import get_current_user
 
 # Router imports
 from app.api.v1.endpoints import (
-    auth, users, detections, sensors, alerts, zones, reports, audit, config, websocket, ai
+    auth, users, detections, sensors, alerts, zones, reports, audit, config, websocket, ai, predictions
 )
 
 logger = structlog.get_logger(__name__)
@@ -183,6 +183,7 @@ app.include_router(reports.router,     prefix=f"{PREFIX}/reports",    tags=["Rep
 app.include_router(audit.router,       prefix=f"{PREFIX}/audit",      tags=["Auditoría"])
 app.include_router(config.router,      prefix=f"{PREFIX}/config",     tags=["Configuración"])
 app.include_router(ai.router,          prefix=f"{PREFIX}/ai",         tags=["AI"])
+app.include_router(predictions.router, prefix=f"{PREFIX}/predictions", tags=["Analítica Predictiva"])
 app.include_router(websocket.router,   prefix="/ws",                  tags=["WebSocket"])
 
 

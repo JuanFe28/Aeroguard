@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 Generador del Jupyter Notebook interactivo CRISP_DM_AeroGuard.ipynb
-Estructurado en las 6 fases de la metodologia CRISP-DM.
+Estructurado en las 6 fases de la metodologia CRISP-DM (sin data leakage,
+comparativa de 6 modelos predictivos, reglas calculadas y artefacto runtime).
 """
 
-import os
 import json
+import os
+
 
 def build_notebook():
     nb = {
@@ -14,13 +16,12 @@ def build_notebook():
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
-                    "# Proyecto de Minería de Datos: Metodología CRISP-DM para AeroGuard C-UAS\n",
-                    "## Clasificación Inteligente del Nivel de Amenaza de Drones No Tripulados (UAVs)\n",
+                    "# Minería de Datos Predictiva (CRISP-DM) — AeroGuard C-UAS\n",
+                    "## Evaluación Comparativa de 6 Modelos y Despliegue en Producción\n",
                     "\n",
-                    "**Autor:** Equipo de Desarrollo e Investigación AeroGuard\n",
-                    "**Asignatura / Contexto:** Nuevas Tecnologías — Sistemas C-UAS Autónomos\n",
-                    "**Dataset:** 125,000 registros de telemetría multi-sensor (Bucaramanga y Bogotá)\n",
-                    "**Metodología:** CRISP-DM (Cross-Industry Standard Process for Data Mining) — Fases 1 a 6"
+                    "**Equipo:** AeroGuard — Unidades Tecnológicas de Santander (UTS)\n",
+                    "**Datasets:** 125,000 registros brutos $\\rightarrow$ **108,750 limpios** + **Lote 2 independiente (104,400 limpios)**\n",
+                    "**Nota metodológica:** Datos sintéticos para validación académica; las métricas comprueban consistencia sobre el generador y no desempeño en sensores físicos."
                 ]
             },
             {
@@ -30,11 +31,13 @@ def build_notebook():
                     "---\n",
                     "## Fase 1: Comprensión del Negocio (Business Understanding)\n",
                     "\n",
-                    "### 1.1 Contexto y Problema Operativo\n",
-                    "El espacio aéreo urbano y perimetral de infraestructuras críticas (bases, aeropuertos, campus universitarios) se encuentra vulnerable a incursiones de drones no autorizados (UAVs). La detección manual o aislada por operadores genera fatiga, falsas alarmas ante aves y tiempos de reacción lentos.\n",
-                    "\n",
-                    "### 1.2 Objetivo del Proyecto de Minería de Datos\n",
-                    "Desarrollar un pipeline predictivo capaz de inferir en tiempo real el **Nivel de Amenaza (`threat_level`: LOW, MEDIUM, HIGH, CRITICAL)** a partir de 20 variables cinemáticas, ambientales, de radiofrecuencia (RF) y de visión artificial (IA), alcanzando un **Accuracy y F1-Score superior al 92%** tras una rigurosa fase de depuración de ruido e irregularidades físicas."
+                    "Cada algoritmo responde a una pregunta predictiva concreta en AeroGuard:\n",
+                    "1. **Regresión Lineal:** ¿Cuál es el puntaje continuo de riesgo cinemático (`risk_score`, 0–100)?\n",
+                    "2. **Regresión Logística:** ¿Cuál es la probabilidad de violación / alto riesgo de geocerca (`HIGH`/`CRITICAL`) y qué umbral optimiza el F1?\n",
+                    "3. **K-Means:** ¿Qué perfiles operativos de vuelo emergen sin etiquetas previas?\n",
+                    "4. **Árbol de Decisión:** ¿Qué reglas jerárquicas auditables clasifican `threat_level`?\n",
+                    "5. **Random Forest:** ¿Qué ensamble logra la clasificación más robusta para operar en tiempo real?\n",
+                    "6. **ARIMA:** ¿Cuántas incursiones diarias de alto riesgo se pronostican en los próximos 14 días?"
                 ]
             },
             {
@@ -43,25 +46,32 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "# Importacion de librerias base para el ecosistema CRISP-DM\n",
-                    "import os\n",
+                    "import os, sys, json\n",
                     "import numpy as np\n",
                     "import pandas as pd\n",
                     "import matplotlib.pyplot as plt\n",
                     "import seaborn as sns\n",
-                    "import joblib\n",
-                    "\n",
                     "from sklearn.model_selection import train_test_split\n",
-                    "from sklearn.preprocessing import StandardScaler, LabelEncoder\n",
-                    "from sklearn.ensemble import RandomForestClassifier\n",
+                    "from sklearn.compose import ColumnTransformer\n",
+                    "from sklearn.pipeline import Pipeline\n",
+                    "from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder\n",
+                    "from sklearn.linear_model import LinearRegression, LogisticRegression\n",
+                    "from sklearn.cluster import KMeans\n",
                     "from sklearn.tree import DecisionTreeClassifier\n",
+                    "from sklearn.ensemble import RandomForestClassifier\n",
                     "from sklearn.metrics import (\n",
-                    "    accuracy_score, precision_score, recall_score, f1_score,\n",
-                    "    classification_report, confusion_matrix\n",
+                    "    r2_score, mean_absolute_error, root_mean_squared_error,\n",
+                    "    roc_auc_score, f1_score, accuracy_score, confusion_matrix, silhouette_score\n",
                     ")\n",
+                    "from statsmodels.tsa.arima.model import ARIMA\n",
+                    "\n",
+                    "dm_dir = 'data_mining' if os.path.exists('data_mining/limpieza.py') else '.'\n",
+                    "if dm_dir not in sys.path:\n",
+                    "    sys.path.insert(0, dm_dir)\n",
+                    "from limpieza import clean_telemetry, compute_risk_score\n",
                     "\n",
                     "sns.set_theme(style='whitegrid', palette='muted')\n",
-                    "print('Librerías importadas correctamente.')"
+                    "print('Entorno CRISP-DM predictivo (6 modelos) cargado correctamente.')"
                 ]
             },
             {
@@ -69,12 +79,9 @@ def build_notebook():
                 "metadata": {},
                 "source": [
                     "---\n",
-                    "## Fase 2: Comprensión de los Datos (Data Understanding)\n",
+                    "## Fase 2 y 3: Comprensión, Limpieza Compartida y Control de Data Leakage\n",
                     "\n",
-                    "En esta fase se explora la estructura del dataset de 125,000 registros y 20 columnas, cuantificando:\n",
-                    "- **80% base nominal:** Telemetría con correlaciones tácticas reales.\n",
-                    "- **10% outliers extremos:** Anomalías físicas (altitudes > 3,500m, velocidades supersónicas, distancias aberrantes).\n",
-                    "- **10% suciedad y ruido:** Valores nulos (NaN), tipos corruptos ('SENSOR_ERR') y duplicados exactos."
+                    "El pipeline aplica `clean_telemetry()` (deduplicación, normalización de tokens corruptos, rangos válidos e imputación por mediana/moda) y separa **Entrenamiento (80%) / Prueba (20%)** **antes** de ajustar escaladores y codificadores (`ColumnTransformer`)."
                 ]
             },
             {
@@ -83,46 +90,18 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "raw_path = 'data_mining/data/aeroguard_raw_telemetry.csv' if os.path.exists('data_mining/data/aeroguard_raw_telemetry.csv') else 'data/aeroguard_raw_telemetry.csv'\n",
+                    "raw_path = os.path.join(dm_dir, 'data', 'aeroguard_raw_telemetry.csv')\n",
                     "df_raw = pd.read_csv(raw_path, low_memory=False)\n",
-                    "print(f'Dimensiones del dataset bruto: {df_raw.shape[0]:,} filas x {df_raw.shape[1]} columnas')\n",
-                    "df_raw.head(5)"
-                ]
-            },
-            {
-                "cell_type": "code",
-                "execution_count": None,
-                "metadata": {},
-                "outputs": [],
-                "source": [
-                    "# Identificacion de Duplicados, Nulos y Ruido\n",
-                    "dupes_count = df_raw.duplicated().sum()\n",
-                    "print(f'Filas duplicadas exactas: {dupes_count:,} ({dupes_count / len(df_raw) * 100:.2f}%)')\n",
+                    "df_clean, resumen = clean_telemetry(df_raw)\n",
+                    "df_clean['risk_score'] = compute_risk_score(df_clean, seed=42)\n",
+                    "df_clean['high_risk_binary'] = df_clean['threat_level'].isin(['HIGH', 'CRITICAL']).astype(int)\n",
+                    "print(f\"Brutos: {resumen['registros_brutos']:,} | Duplicados: {resumen['duplicados_eliminados']:,} | Anomalías: {resumen['filas_fuera_de_rango_fisico']:,} | Limpios: {resumen['registros_limpios']:,}\")\n",
                     "\n",
-                    "corrupt_tokens = ['SENSOR_ERR', '???', 'CORRUPTED_HEX_0xFF']\n",
-                    "print('\\nResumen de Nulos y Valores Corruptos por Columna:')\n",
-                    "for col in ['rf_signal_dbm', 'ai_confidence', 'weather_condition', 'altitude_m', 'battery_est_pct']:\n",
-                    "    nulls = df_raw[col].isna().sum()\n",
-                    "    corrupts = df_raw[col].astype(str).isin(corrupt_tokens).sum()\n",
-                    "    print(f' - {col:20s}: {nulls:,} nulos | {corrupts:,} strings corruptos')"
-                ]
-            },
-            {
-                "cell_type": "code",
-                "execution_count": None,
-                "metadata": {},
-                "outputs": [],
-                "source": [
-                    "# Visualizacion Fase 2: Boxplots de Outliers Antes de Limpiar\n",
-                    "fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))\n",
+                    "fig, axes = plt.subplots(1, 2, figsize=(13, 4))\n",
                     "sns.boxplot(y=pd.to_numeric(df_raw['altitude_m'], errors='coerce'), ax=axes[0], color='#e74c3c')\n",
-                    "axes[0].set_title('Altitud (m) — Con Outliers > 3,500m')\n",
-                    "\n",
-                    "sns.boxplot(y=pd.to_numeric(df_raw['speed_ms'], errors='coerce'), ax=axes[1], color='#e67e22')\n",
-                    "axes[1].set_title('Velocidad (m/s) — Con Outliers > 300 m/s')\n",
-                    "\n",
-                    "sns.boxplot(y=pd.to_numeric(df_raw['distance_to_zone_m'], errors='coerce') / 1000.0, ax=axes[2], color='#9b59b6')\n",
-                    "axes[2].set_title('Distancia a Zona (km) — Con Outliers > 150 km')\n",
+                    "axes[0].set_title('Antes: Altitud Bruta (Outliers > 3,500 m)')\n",
+                    "sns.boxplot(y=df_clean['altitude_m'], ax=axes[1], color='#2ecc71')\n",
+                    "axes[1].set_title(f\"Después: Altitud Limpia (n={len(df_clean):,})\")\n",
                     "plt.tight_layout()\n",
                     "plt.show()"
                 ]
@@ -132,14 +111,7 @@ def build_notebook():
                 "metadata": {},
                 "source": [
                     "---\n",
-                    "## Fase 3: Preparación de los Datos (Data Preparation)\n",
-                    "\n",
-                    "Acciones de preprocesamiento aplicadas:\n",
-                    "1. **Deduplicación:** Eliminación de las 3,750 filas clonadas.\n",
-                    "2. **Limpieza de strings corruptos:** Conversión de `'SENSOR_ERR'`, `'???'` a `NaN` y coercion a tipos numéricos.\n",
-                    "3. **Filtrado físico racional de outliers:** Remoción de anomalías extremas conservando el dataset limpio con **más de 105,000 registros válidos**.\n",
-                    "4. **Imputación estadística:** Mediana para variables numéricas continuas y moda para categóricas.\n",
-                    "5. **Codificación y Escalado:** `LabelEncoder` para categorías y `StandardScaler` para características continuas."
+                    "## Fases 4 y 5: Modelado y Evaluación Comparativa de los 6 Algoritmos (Sin Data Leakage)"
                 ]
             },
             {
@@ -148,36 +120,60 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "# 1. Eliminar duplicados\n",
-                    "df_clean = df_raw.drop_duplicates().copy()\n",
+                    "NUM = ['altitude_m','speed_ms','vertical_speed_ms','heading_deg','distance_to_zone_m','rf_signal_dbm','battery_est_pct','ai_confidence','wind_speed_kmh']\n",
+                    "CAT = ['drone_class','flight_pattern','weather_condition','city_zone']\n",
+                    "for c in CAT:\n",
+                    "    df_clean[c] = df_clean[c].astype(str)\n",
                     "\n",
-                    "# 2. Reemplazar tokens corruptos\n",
-                    "for token in corrupt_tokens:\n",
-                    "    df_clean.replace(token, np.nan, inplace=True)\n",
+                    "df_train, df_test = train_test_split(df_clean, test_size=0.20, random_state=42, stratify=df_clean['threat_level'])\n",
+                    "X_tr, X_te = df_train[NUM + CAT], df_test[NUM + CAT]\n",
+                    "print(f'Train: {len(X_tr):,} | Test: {len(X_te):,} (split previo al fit)')\n",
                     "\n",
-                    "# 3. Coercion de numericas\n",
-                    "num_cols = ['altitude_m', 'speed_ms', 'vertical_speed_ms', 'heading_deg', 'distance_to_zone_m', 'rf_signal_dbm', 'battery_est_pct', 'ai_confidence', 'wind_speed_kmh']\n",
-                    "for col in num_cols:\n",
-                    "    df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce')\n",
+                    "def lin_pre():\n",
+                    "    return ColumnTransformer([('num', StandardScaler(), NUM), ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), CAT)])\n",
                     "\n",
-                    "# 4. Filtrado de anomalias fisicas extremas (drones comerciales)\n",
-                    "mask_physics = (\n",
-                    "    (df_clean['altitude_m'].isna() | ((df_clean['altitude_m'] >= 0.0) & (df_clean['altitude_m'] <= 1500.0))) &\n",
-                    "    (df_clean['speed_ms'].isna() | ((df_clean['speed_ms'] >= 0.0) & (df_clean['speed_ms'] <= 100.0))) &\n",
-                    "    (df_clean['distance_to_zone_m'].isna() | ((df_clean['distance_to_zone_m'] >= 0.0) & (df_clean['distance_to_zone_m'] <= 25000.0))) &\n",
-                    "    (df_clean['wind_speed_kmh'].isna() | ((df_clean['wind_speed_kmh'] >= 0.0) & (df_clean['wind_speed_kmh'] <= 120.0)))\n",
-                    ")\n",
-                    "df_clean = df_clean[mask_physics].copy()\n",
+                    "def tree_pre():\n",
+                    "    return ColumnTransformer([('num', StandardScaler(), NUM), ('cat', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1), CAT)])\n",
                     "\n",
-                    "# 5. Imputacion (Mediana en numericas, Moda en categoricas)\n",
-                    "for col in num_cols:\n",
-                    "    df_clean[col] = df_clean[col].fillna(df_clean[col].median())\n",
+                    "# 1. Regresion Lineal\n",
+                    "lr = Pipeline([('pre', lin_pre()), ('m', LinearRegression())]).fit(X_tr, df_train['risk_score'])\n",
+                    "lr_pred = np.clip(lr.predict(X_te), 0, 100)\n",
+                    "print(f'[1] Regresión Lineal   -> R²={r2_score(df_test[\"risk_score\"], lr_pred):.4f} | MAE={mean_absolute_error(df_test[\"risk_score\"], lr_pred):.2f} | RMSE={root_mean_squared_error(df_test[\"risk_score\"], lr_pred):.2f}')\n",
                     "\n",
-                    "cat_cols = ['weather_condition', 'drone_class', 'flight_pattern', 'city_zone']\n",
-                    "for col in cat_cols:\n",
-                    "    df_clean[col] = df_clean[col].fillna(df_clean[col].mode()[0])\n",
+                    "# 2. Regresion Logistica (Binaria HIGH/CRITICAL)\n",
+                    "log_bin = Pipeline([('pre', lin_pre()), ('m', LogisticRegression(max_iter=1000, random_state=42))]).fit(X_tr, df_train['high_risk_binary'])\n",
+                    "log_prob = log_bin.predict_proba(X_te)[:, 1]\n",
+                    "print(f'[2] Regresión Logística -> ROC-AUC={roc_auc_score(df_test[\"high_risk_binary\"], log_prob):.4f} | F1(umbral=0.40)={f1_score(df_test[\"high_risk_binary\"], (log_prob>=0.40).astype(int)):.4f}')\n",
                     "\n",
-                    "print(f'Registros limpios finales: {len(df_clean):,} (Supera requisito >= 105,000)')"
+                    "# 3. K-Means (k=4, 3 variables cinematicas clave)\n",
+                    "KM_COLS = ['distance_to_zone_m', 'altitude_m', 'speed_ms']\n",
+                    "km_sc = StandardScaler().fit(df_train[KM_COLS].to_numpy())\n",
+                    "km = KMeans(n_clusters=4, n_init=10, random_state=42).fit(km_sc.transform(df_train[KM_COLS].to_numpy()))\n",
+                    "X_km_te = km_sc.transform(df_test[KM_COLS].to_numpy())\n",
+                    "sil = silhouette_score(X_km_te[:10000], km.predict(X_km_te[:10000]))\n",
+                    "print(f'[3] K-Means (k=4)      -> Inertia={km.inertia_:,.1f} | Silhouette={sil:.4f}')\n",
+                    "\n",
+                    "# 4. Arbol de Decision y 5. Random Forest (Completo 100 y Runtime Compacto 12)\n",
+                    "dt = Pipeline([('pre', tree_pre()), ('m', DecisionTreeClassifier(max_depth=12, min_samples_split=10, min_samples_leaf=5, random_state=42))]).fit(X_tr, df_train['threat_level'])\n",
+                    "rf = Pipeline([('pre', tree_pre()), ('m', RandomForestClassifier(n_estimators=100, max_depth=16, max_features=0.75, min_samples_split=5, min_samples_leaf=2, random_state=42, n_jobs=-1))]).fit(X_tr, df_train['threat_level'])\n",
+                    "rf_c = Pipeline([('pre', tree_pre()), ('m', RandomForestClassifier(n_estimators=12, max_depth=13, max_features=0.75, min_samples_leaf=15, random_state=42, n_jobs=-1))]).fit(X_tr, df_train['threat_level'])\n",
+                    "\n",
+                    "dt_p, rf_p, rfc_p = dt.predict(X_te), rf.predict(X_te), rf_c.predict(X_te)\n",
+                    "print(f'[4] Árbol de Decisión   -> Acc={accuracy_score(df_test[\"threat_level\"], dt_p)*100:.2f}% | F1(W)={f1_score(df_test[\"threat_level\"], dt_p, average=\"weighted\"):.4f}')\n",
+                    "print(f'[5] Random Forest (100) -> Acc={accuracy_score(df_test[\"threat_level\"], rf_p)*100:.2f}% | F1(W)={f1_score(df_test[\"threat_level\"], rf_p, average=\"weighted\"):.4f}')\n",
+                    "print(f'    RF Runtime (12)     -> Acc={accuracy_score(df_test[\"threat_level\"], rfc_p)*100:.2f}% | F1(W)={f1_score(df_test[\"threat_level\"], rfc_p, average=\"weighted\"):.4f}')\n",
+                    "\n",
+                    "# 6. ARIMA (Serie diaria de incursiones HIGH/CRITICAL)\n",
+                    "ts = df_clean[['timestamp','high_risk_binary']].copy()\n",
+                    "ts['date'] = pd.to_datetime(ts['timestamp']).dt.floor('D')\n",
+                    "daily = ts.groupby('date')['high_risk_binary'].sum().sort_index()\n",
+                    "daily = daily.reindex(pd.date_range(daily.index.min(), daily.index.max(), freq='D'), fill_value=0).astype(float)\n",
+                    "cut = int(len(daily) * 0.80)\n",
+                    "arima_fit = ARIMA(daily.iloc[:cut], order=(1,1,1)).fit()\n",
+                    "arima_pred = arima_fit.forecast(steps=len(daily) - cut)\n",
+                    "y_t = daily.iloc[cut:].to_numpy()\n",
+                    "mape = np.mean(np.abs((y_t - arima_pred.to_numpy()) / np.where(y_t==0, 1, y_t))) * 100\n",
+                    "print(f'[6] ARIMA(1,1,1)        -> AIC={arima_fit.aic:.2f} | MAE={mean_absolute_error(y_t, arima_pred):.2f} | MAPE={mape:.2f}%')"
                 ]
             },
             {
@@ -186,95 +182,15 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "# Visualizacion Fase 3: Boxplots Limpios tras Depuracion\n",
-                    "fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))\n",
-                    "sns.boxplot(y=df_clean['altitude_m'], ax=axes[0], color='#2ecc71')\n",
-                    "axes[0].set_title('Altitud Limpia (m)')\n",
-                    "\n",
-                    "sns.boxplot(y=df_clean['speed_ms'], ax=axes[1], color='#3498db')\n",
-                    "axes[1].set_title('Velocidad Limpia (m/s)')\n",
-                    "\n",
-                    "sns.boxplot(y=df_clean['distance_to_zone_m'], ax=axes[2], color='#1abc9c')\n",
-                    "axes[2].set_title('Distancia Limpia (m)')\n",
-                    "plt.tight_layout()\n",
-                    "plt.show()"
-                ]
-            },
-            {
-                "cell_type": "markdown",
-                "metadata": {},
-                "source": [
-                    "---\n",
-                    "## Fase 4 y 5: Modelado y Evaluación (Modeling & Evaluation)\n",
-                    "\n",
-                    "Se dividen los datos en 80% Entrenamiento y 20% Prueba con muestreo estratificado (`stratify=y`).\n",
-                    "Se entrenan y comparan dos arquitecturas de aprendizaje supervisado:\n",
-                    "1. **Random Forest Classifier** (100 estimadores, profundidad máxima 16)\n",
-                    "2. **Decision Tree Classifier** (Profundidad máxima 12)"
-                ]
-            },
-            {
-                "cell_type": "code",
-                "execution_count": None,
-                "metadata": {},
-                "outputs": [],
-                "source": [
-                    "# Codificacion y Escalado\n",
-                    "encoders = {}\n",
-                    "df_features = df_clean[num_cols].copy()\n",
-                    "for col in cat_cols:\n",
-                    "    le = LabelEncoder()\n",
-                    "    df_features[col] = le.fit_transform(df_clean[col].astype(str))\n",
-                    "    encoders[col] = le\n",
-                    "\n",
-                    "X = df_features.values\n",
-                    "y = df_clean['threat_level'].values\n",
-                    "\n",
-                    "scaler = StandardScaler()\n",
-                    "X_scaled = scaler.fit_transform(X)\n",
-                    "\n",
-                    "X_train, X_test, y_train, y_test = train_test_split(\n",
-                    "    X_scaled, y, test_size=0.20, random_state=42, stratify=y\n",
-                    ")\n",
-                    "print(f'Train set: {X_train.shape[0]:,} muestras | Test set: {X_test.shape[0]:,} muestras')"
-                ]
-            },
-            {
-                "cell_type": "code",
-                "execution_count": None,
-                "metadata": {},
-                "outputs": [],
-                "source": [
-                    "# Entrenamiento y Comparacion\n",
-                    "rf = RandomForestClassifier(n_estimators=100, max_depth=16, random_state=42, n_jobs=-1)\n",
-                    "rf.fit(X_train, y_train)\n",
-                    "y_pred_rf = rf.predict(X_test)\n",
-                    "\n",
-                    "dt = DecisionTreeClassifier(max_depth=12, random_state=42)\n",
-                    "dt.fit(X_train, y_train)\n",
-                    "y_pred_dt = dt.predict(X_test)\n",
-                    "\n",
-                    "print('=== RESULTADOS COMPARATIVOS ===')\n",
-                    "print(f'Random Forest — Accuracy: {accuracy_score(y_test, y_pred_rf)*100:.2f}% | F1-Weighted: {f1_score(y_test, y_pred_rf, average=\"weighted\"):.4f}')\n",
-                    "print(f'Decision Tree — Accuracy: {accuracy_score(y_test, y_pred_dt)*100:.2f}% | F1-Weighted: {f1_score(y_test, y_pred_dt, average=\"weighted\"):.4f}')"
-                ]
-            },
-            {
-                "cell_type": "code",
-                "execution_count": None,
-                "metadata": {},
-                "outputs": [],
-                "source": [
-                    "# Matriz de Confusion del Mejor Modelo\n",
+                    "# Matriz de confusion del modelo seleccionado (Random Forest)\n",
                     "labels = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']\n",
-                    "cm = confusion_matrix(y_test, y_pred_dt, labels=labels)\n",
-                    "cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]\n",
-                    "\n",
-                    "plt.figure(figsize=(7.5, 6))\n",
+                    "cm = confusion_matrix(df_test['threat_level'], rf_p, labels=labels)\n",
+                    "cm_norm = cm.astype(float) / cm.sum(axis=1)[:, None]\n",
+                    "plt.figure(figsize=(7, 5.5))\n",
                     "sns.heatmap(cm_norm, annot=True, fmt='.2%', cmap='Blues', xticklabels=labels, yticklabels=labels)\n",
-                    "plt.title('Matriz de Confusión Normalizada (Evaluación Fase 5)', fontweight='bold')\n",
-                    "plt.xlabel('Predicción')\n",
-                    "plt.ylabel('Realidad')\n",
+                    "plt.title(f'Matriz de Confusión Normalizada — Random Forest ({accuracy_score(df_test[\"threat_level\"], rf_p)*100:.2f}%)', fontweight='bold')\n",
+                    "plt.xlabel('Predicción'); plt.ylabel('Real')\n",
+                    "plt.tight_layout()\n",
                     "plt.show()"
                 ]
             },
@@ -283,12 +199,10 @@ def build_notebook():
                 "metadata": {},
                 "source": [
                     "---\n",
-                    "## Fase 6: Despliegue y Conocimiento (Deployment & Knowledge)\n",
+                    "## Fase 6: Reglas de Conocimiento, Artefacto Productivo y Orange Data Mining\n",
                     "\n",
-                    "### 6.1 Reglas de Conocimiento Táctico Descubiertas\n",
-                    "1. **Proximidad perimetral crítica:** Drones a menos de 150m con velocidad > 20 m/s y trayectoria directa/evasiva activan dictamen CRITICAL en más del 98% de los casos.\n",
-                    "2. **Techo 120m AGL:** La transgresión de la altitud legal combinada con drones artesanales ('diy_custom') o de ala fija eleva el riesgo a HIGH/CRITICAL.\n",
-                    "3. **Descarte de Falsos Positivos:** El modelo discrimina unívocamente las aves (`bird_false_pos`) como LOW, reduciendo fatiga acústica y operativa en el SOC."
+                    "- **Decisión productiva:** Se exporta **Random Forest compacto (12 árboles, 95.08% Acc, 862 KB JSON)** junto con Regresión Lineal, Regresión Logística, K-Means (`k=4`) y pronóstico ARIMA(1,1,1) a `backend/app/data/predictive_models_artifact.json`, operado con inferencia pure-NumPy (0 contenedores extra en Oracle).\n",
+                    "- **Validación externa e independiente:** Flujo reproducible en `data_mining/orange/AeroGuard_CRISP_DM.ows` sobre lote independiente (`104,400` registros)."
                 ]
             },
             {
@@ -297,16 +211,12 @@ def build_notebook():
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "# Feature Importance (Variables con mayor ganancia de informacion)\n",
-                    "feat_names = num_cols + cat_cols\n",
-                    "importances = dt.feature_importances_\n",
-                    "feat_df = pd.DataFrame({'Feature': feat_names, 'Importance': importances}).sort_values(by='Importance', ascending=True)\n",
-                    "\n",
-                    "plt.figure(figsize=(9, 5))\n",
-                    "plt.barh(feat_df['Feature'], feat_df['Importance'], color='#2980b9')\n",
-                    "plt.title('Ranking de Importancia de Variables (CRISP-DM Fase 6)', fontweight='bold')\n",
-                    "plt.xlabel('Importancia (Gini)')\n",
-                    "plt.show()"
+                    "comp_file = os.path.join(dm_dir, 'reports', 'comparativa_6_modelos.json')\n",
+                    "if os.path.exists(comp_file):\n",
+                    "    with open(comp_file, encoding='utf-8') as fh:\n",
+                    "        comp = json.load(fh)\n",
+                    "    print('Artefacto JSON:', comp['runtime_artifact_kb'], 'KB | Paridad vs sklearn:', comp['runtime_rf_parity_pct'], '%')\n",
+                    "    print(json.dumps(comp['production_decision'], indent=2, ensure_ascii=False))"
                 ]
             }
         ],
@@ -317,17 +227,8 @@ def build_notebook():
                 "name": "python3"
             },
             "language_info": {
-                "codemirror_mode": {
-                    "name": "ipython",
-                    "version": 3
-                },
-                "file_extension": ".py",
-                "mimetype": "text/x-python",
                 "name": "python",
-                "nbformat": 4,
-                "nbformat_minor": 2,
-                "pygments_lexer": "ipython3",
-                "version": "3.12.0"
+                "version": "3.14.0"
             }
         },
         "nbformat": 4,
@@ -337,8 +238,8 @@ def build_notebook():
     nb_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CRISP_DM_AeroGuard.ipynb")
     with open(nb_path, "w", encoding="utf-8") as f:
         json.dump(nb, f, indent=2, ensure_ascii=False)
-    print(f"[OK] Notebook creado en: {nb_path}")
+    print(f"[OK] Notebook actualizado en: {nb_path}")
+
 
 if __name__ == "__main__":
     build_notebook()
-

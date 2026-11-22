@@ -1,8 +1,9 @@
-# Entorno del modulo de mineria de datos (Python 3.11). Separado del backend.
-# Versiones verificadas el 2026-11-11 con los cuatro scripts de data_mining/.
+# Entorno del modulo de mineria de datos (Python 3.11+). Separado del backend.
+# Versiones verificadas con los scripts de data_mining/.
 numpy==1.26.4
 pandas==3.0.6
 scikit-learn==1.9.1
+statsmodels==0.15.0
 matplotlib==3.11.2
 seaborn==0.13.2
 joblib==1.6.0

@@ -13,6 +13,7 @@ Requisitos: orange3 y PyQt5. Ejecutar antes 03_export_orange.py.
 Uso:  python data_mining/04_build_orange_workflow.py
 """
 
+import argparse
 import os
 import sys
 
@@ -31,8 +32,10 @@ ORANGE_DIR = os.path.join(BASE_DIR, "orange")
 WORKFLOW = os.path.join(ORANGE_DIR, "AeroGuard_CRISP_DM.ows")
 TRAIN = "aeroguard_entrenamiento.csv.gz"
 TEST = "aeroguard_prueba_lote2.csv.gz"
+REGRESSION_DATA = "aeroguard_regresion_riesgo.csv.gz"
 
 TEST_ON_TEST_DATA = 5  # indice de "Test on test data" en Test and Score
+CROSS_VALIDATION = 0   # indice de CV (5 folds) en Test and Score para regresion
 
 
 def build_registry():
@@ -48,7 +51,16 @@ def file_settings(filename):
 
 
 def main():
-    for name in (TRAIN, TEST):
+    parser = argparse.ArgumentParser(description="Construye el flujo CRISP-DM de AeroGuard en Orange.")
+    parser.add_argument(
+        "--extended",
+        action="store_true",
+        help="Agrega ramas de K-Means + Scatter Plot y Regresion Lineal (requiere aeroguard_regresion_riesgo.csv.gz).",
+    )
+    args = parser.parse_args()
+
+    required = (TRAIN, TEST, REGRESSION_DATA) if args.extended else (TRAIN, TEST)
+    for name in required:
         if not os.path.exists(os.path.join(ORANGE_DIR, name)):
             sys.exit(f"Falta orange/{name}. Ejecuta antes data_mining/03_export_orange.py.")
 
@@ -100,6 +112,21 @@ def main():
         link(learner, "Learner", score, "Learner")
     link(score, "Evaluation Results", confusion, "Evaluation Results")
     link(tree, "Model", viewer, "Tree")
+
+    if args.extended:
+        kmeans = node("Orange.widgets.unsupervised.owkmeans.OWKMeans", "K-Means (k=4)", 520, 500, {"k": 4})
+        scatter = node("Orange.widgets.visualize.owscatterplot.OWScatterPlot", "Scatter Plot (Perfiles)", 760, 500)
+        link(train, "Data", kmeans, "Data")
+        link(kmeans, "Annotated Data", scatter, "Data")
+
+        reg_file = node("Orange.widgets.data.owfile.OWFile", "Regresión riesgo (dataset)", 80, 620,
+                        file_settings(REGRESSION_DATA))
+        linreg = node("Orange.widgets.model.owlinearregression.OWLinearRegression", "Regresión lineal", 520, 620)
+        score_reg = node("Orange.widgets.evaluate.owtestandscore.OWTestAndScore", "Test and Score (Regresión)",
+                         760, 620, {"resampling": CROSS_VALIDATION})
+        link(reg_file, "Data", linreg, "Data")
+        link(reg_file, "Data", score_reg, "Data")
+        link(linreg, "Learner", score_reg, "Learner")
 
     os.makedirs(ORANGE_DIR, exist_ok=True)
     with open(WORKFLOW, "wb") as fh:

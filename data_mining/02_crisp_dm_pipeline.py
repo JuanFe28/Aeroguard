@@ -20,8 +20,10 @@ import joblib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from limpieza import clean_telemetry  # noqa: E402
 
+from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import (
@@ -257,55 +259,66 @@ def run_crisp_dm_pipeline():
     print(f" -> [GRAFICO] Guardado: {fig4_path}")
 
     # =========================================================================
-    # FASE 4 Y 5: MODELADO, ENTRENAMIENTO Y EVALUACION COMPARATIVA
+    # FASE 4 Y 5: MODELADO, ENTRENAMIENTO Y EVALUACION COMPARATIVA (SIN DATA LEAKAGE)
     # =========================================================================
-    print("\n>>> [CRISP-DM FASE 4 Y 5] Modelado y Evaluacion Comparativa...")
+    print("\n>>> [CRISP-DM FASE 4 Y 5] Modelado y Evaluacion Comparativa (Pipeline sin fuga de datos)...")
 
-    # Seleccion y Codificacion de Features
+    # Seleccion de Features
     features_numeric = [
         "altitude_m", "speed_ms", "vertical_speed_ms", "heading_deg",
         "distance_to_zone_m", "rf_signal_dbm", "battery_est_pct",
         "ai_confidence", "wind_speed_kmh"
     ]
     features_categorical = ["drone_class", "flight_pattern", "weather_condition", "city_zone"]
+    feature_names = features_numeric + features_categorical
 
-    # Codificadores de categorias
-    encoders = {}
-    df_features = df_clean[features_numeric].copy()
+    X_df = df_clean[features_numeric].copy()
     for cat_col in features_categorical:
-        le = LabelEncoder()
-        df_features[cat_col] = le.fit_transform(df_clean[cat_col].astype(str))
-        encoders[cat_col] = le
-
-    feature_names = list(df_features.columns)
-    X = df_features.values
+        X_df[cat_col] = df_clean[cat_col].astype(str)
     y = df_clean["threat_level"].values
 
-    # Escalado estandar
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    # Division 80% Entrenamiento / 20% Prueba estratificada
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.20, random_state=42, stratify=y
+    # Division estratificada 80% Entrenamiento / 20% Prueba ANTES de escalar o codificar
+    X_train_df, X_test_df, y_train, y_test = train_test_split(
+        X_df, y, test_size=0.20, random_state=42, stratify=y
     )
 
-    print(f" -> Conjunto de Entrenamiento: {X_train.shape[0]:,} registros")
-    print(f" -> Conjunto de Prueba:        {X_test.shape[0]:,} registros")
+    def make_preprocessor():
+        return ColumnTransformer(
+            transformers=[
+                ("num", StandardScaler(), features_numeric),
+                (
+                    "cat",
+                    OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1),
+                    features_categorical,
+                ),
+            ],
+            remainder="drop",
+        )
+
+    print(f" -> Conjunto de Entrenamiento: {len(X_train_df):,} registros (transformadores ajustados solo en train)")
+    print(f" -> Conjunto de Prueba:        {len(X_test_df):,} registros")
     print(f" -> Numero de Variables (Features): {len(feature_names)}")
 
-    # Modelo 1: Random Forest Classifier
+    # Modelo 1: Random Forest Classifier (Pipeline leak-free)
     print("\n --- Entrenando Modelo 1: Random Forest Classifier ---")
-    rf_model = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=16,
-        min_samples_split=5,
-        min_samples_leaf=2,
-        random_state=42,
-        n_jobs=-1
+    rf_model = Pipeline(
+        steps=[
+            ("preprocessor", make_preprocessor()),
+            (
+                "classifier",
+                RandomForestClassifier(
+                    n_estimators=100,
+                    max_depth=16,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
     )
-    rf_model.fit(X_train, y_train)
-    y_pred_rf = rf_model.predict(X_test)
+    rf_model.fit(X_train_df, y_train)
+    y_pred_rf = rf_model.predict(X_test_df)
 
     acc_rf = accuracy_score(y_test, y_pred_rf)
     prec_rf = precision_score(y_test, y_pred_rf, average="weighted")
@@ -319,16 +332,24 @@ def run_crisp_dm_pipeline():
     print(f"  [Random Forest] F1-Score (Weighted):  {f1_rf:.4f}")
     print(f"  [Random Forest] F1-Score (Macro):     {f1_macro_rf:.4f}")
 
-    # Modelo 2: Decision Tree Classifier
+    # Modelo 2: Decision Tree Classifier (Pipeline leak-free)
     print("\n --- Entrenando Modelo 2: Decision Tree Classifier ---")
-    dt_model = DecisionTreeClassifier(
-        max_depth=12,
-        min_samples_split=10,
-        min_samples_leaf=5,
-        random_state=42
+    dt_model = Pipeline(
+        steps=[
+            ("preprocessor", make_preprocessor()),
+            (
+                "classifier",
+                DecisionTreeClassifier(
+                    max_depth=12,
+                    min_samples_split=10,
+                    min_samples_leaf=5,
+                    random_state=42,
+                ),
+            ),
+        ]
     )
-    dt_model.fit(X_train, y_train)
-    y_pred_dt = dt_model.predict(X_test)
+    dt_model.fit(X_train_df, y_train)
+    y_pred_dt = dt_model.predict(X_test_df)
 
     acc_dt = accuracy_score(y_test, y_pred_dt)
     prec_dt = precision_score(y_test, y_pred_dt, average="weighted")
@@ -358,9 +379,31 @@ def run_crisp_dm_pipeline():
 
     # Seleccion del mejor modelo
     best_model = rf_model if f1_rf >= f1_dt else dt_model
-    best_name = "Random Forest" if best_model == rf_model else "Decision Tree"
-    best_preds = y_pred_rf if best_model == rf_model else y_pred_dt
+    best_name = "Random Forest" if best_model is rf_model else "Decision Tree"
+    best_preds = y_pred_rf if best_model is rf_model else y_pred_dt
     print(f"\n -> [SELECCION] El mejor modelo es: {best_name} (F1: {max(f1_rf, f1_dt):.4f})")
+
+    # Evaluacion adicional en lote independiente (si existe)
+    extra_csv = os.path.join(data_dir, "aeroguard_lote_adicional_120000.csv")
+    lote2_metrics = {}
+    if os.path.exists(extra_csv):
+        df_extra_clean, _ = clean_telemetry(pd.read_csv(extra_csv, low_memory=False))
+        X_extra = df_extra_clean[features_numeric].copy()
+        for cat_col in features_categorical:
+            X_extra[cat_col] = df_extra_clean[cat_col].astype(str)
+        y_extra = df_extra_clean["threat_level"].values
+        for label_name, mdl in [("Random Forest", rf_model), ("Decision Tree", dt_model)]:
+            yp_extra = mdl.predict(X_extra)
+            lote2_metrics[label_name] = {
+                "n": int(len(df_extra_clean)),
+                "accuracy": float(accuracy_score(y_extra, yp_extra)),
+                "f1_weighted": float(f1_score(y_extra, yp_extra, average="weighted")),
+            }
+            print(
+                f"  [Lote 2 Independiente | {label_name}] "
+                f"n={len(df_extra_clean):,} | Accuracy={lote2_metrics[label_name]['accuracy']*100:.2f}% | "
+                f"F1={lote2_metrics[label_name]['f1_weighted']:.4f}"
+            )
 
     # Classification Report
     target_labels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
@@ -387,7 +430,7 @@ def run_crisp_dm_pipeline():
     print(f" -> [GRAFICO] Guardado: {fig5_path}")
 
     # FIGURA 06: Importancia de Variables (Feature Importance)
-    importances = best_model.feature_importances_
+    importances = best_model.named_steps["classifier"].feature_importances_
     feat_df = pd.DataFrame({
         "Feature": feature_names,
         "Importancia": importances
@@ -413,19 +456,24 @@ def run_crisp_dm_pipeline():
     # =========================================================================
     print("\n>>> [CRISP-DM FASE 6] Generacion de Conocimiento y Despliegue...")
 
-    # Empaquetado del modelo para despliegue
+    # Empaquetado del Pipeline completo (sin fuga de datos) para despliegue
+    preprocessor = best_model.named_steps["preprocessor"]
     model_bundle = {
-        "model": best_model,
+        "pipeline": best_model,
+        "model": best_model.named_steps["classifier"],
         "model_name": best_name,
         "feature_names": feature_names,
-        "scaler": scaler,
-        "encoders": encoders,
+        "features_numeric": features_numeric,
+        "features_categorical": features_categorical,
+        "scaler": preprocessor.named_transformers_["num"],
+        "ordinal_encoder": preprocessor.named_transformers_["cat"],
         "metrics": {
             "accuracy": float(max(acc_rf, acc_dt)),
             "f1_weighted": float(max(f1_rf, f1_dt)),
-            "f1_macro": float(max(f1_macro_rf, f1_macro_dt))
+            "f1_macro": float(max(f1_macro_rf, f1_macro_dt)),
+            "lote2": lote2_metrics,
         },
-        "version": "1.0.0-crisp-dm",
+        "version": "1.1.0-crisp-dm-leak-free",
         "target_mapping": target_labels
     }
 
