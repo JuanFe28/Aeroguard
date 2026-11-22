@@ -51,3 +51,27 @@ test('oculta la sección de objetivos si el dictamen no trae decisión',()=>{
   vm._renderAiVerdict();
   assert.equal(element('ai-goal-decision').hidden,true);
 });
+
+test('etiqueta claramente el laboratorio y no lo confunde con dictamen operativo',()=>{
+  const vm=new DashboardViewModel();
+  vm.state.aiVerdict={
+    incident_id:'SIM-123', ai_verdict:'MONITOREAR',threat_level:'LOW',
+    execution_source:'goal_based_simulation', goal_decision:{
+      action:'MONITOREAR',priority:'NORMAL',explanation:'Seguimiento',
+      evidence:['Altitud 80 m'],human_review_required:true,
+    },
+  };
+  vm._renderAiVerdict();
+  assert.equal(element('ai-goal-simulation-note').hidden,false);
+  assert.match(element('ai-verdict-badge').textContent,/SIMULACIÓN/);
+  assert.equal(element('ai-goal-action').textContent,'MONITOREAR');
+
+  vm.state.aiVerdict={
+    incident_id:'OP-123', ai_verdict:'Verificar',threat_level:'MEDIUM',
+    execution_source:'goal_based_local',
+    goal_decision:{action:'VERIFICAR_DETECCION',priority:'REVIEW',evidence:[]},
+  };
+  vm._renderAiVerdict();
+  assert.equal(element('ai-goal-simulation-note').hidden,true);
+  assert.equal(element('ai-verdict-badge').textContent,'MEDIUM');
+});
