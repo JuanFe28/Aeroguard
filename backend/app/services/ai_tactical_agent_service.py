@@ -63,10 +63,19 @@ class AITacticalAgentService:
                     error=str(exc)
                 )
 
-        # 2. Fallback: Generación determinística con el Agente IA Embebido
+        # 2. Sin respuesta externa, el agente basado en objetivos gobierna el dictamen.
+        # Esto evita presentar una alarma crítica cuando la propia decisión exige
+        # únicamente monitoreo, datos adicionales o verificación humana.
         if not ai_verdict:
-            ai_verdict, threat_level = self._generate_embedded_tactical_verdict(drone_data, zone_data)
-            execution_source = "embedded_rules"
+            level_by_priority = {
+                "CRITICAL": "CRITICAL",
+                "REVIEW": "MEDIUM",
+                "NORMAL": "LOW",
+                "INDETERMINATE": "UNKNOWN",
+            }
+            threat_level = level_by_priority[goal_decision.priority]
+            ai_verdict = f"{goal_decision.action.replace('_', ' ')}: {goal_decision.explanation}"
+            execution_source = "goal_based_local"
 
         result = {
             "incident_id": incident_id,
@@ -148,6 +157,9 @@ class AITacticalAgentService:
                 "ai_verdict": verdict_data["ai_verdict"],
                 "threat_level": verdict_data["threat_level"],
                 "drone_id": verdict_data["drone_id"],
+                "agent_model": verdict_data.get("agent_model"),
+                "goal_decision": verdict_data.get("goal_decision"),
+                "execution_source": verdict_data.get("execution_source"),
             }
         except Exception as error:
             logger.warning("No se pudo actualizar el estado local del dictamen", error=str(error))
