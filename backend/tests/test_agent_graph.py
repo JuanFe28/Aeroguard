@@ -4,7 +4,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.security import create_access_token
-from app.services.agent_rag_service import agent_rag_service
+from app.services.agent_graph_service import HAS_LANGGRAPH
+from app.services.agent_rag_service import HAS_QDRANT, agent_rag_service
+
+EXPECTED_VECTOR_BACKEND = "qdrant_embedded" if HAS_QDRANT else "numpy_fallback"
+EXPECTED_ENGINE = "langgraph" if HAS_LANGGRAPH else "sequential_fallback"
 
 ADMIN_AUTH = {"Authorization": "Bearer " + create_access_token({"sub": "admin", "role": "admin"})}
 ANALYST_AUTH = {"Authorization": "Bearer " + create_access_token({"sub": "analista", "role": "analyst"})}
@@ -20,7 +24,7 @@ def isolated_qdrant_memory():
 def test_agent_rag_embedded_qdrant_reindex_and_search():
     reindex = agent_rag_service.reindex_corpus()
     assert reindex["indexed_chunks"] >= 4
-    assert reindex["vector_backend"] == "qdrant_embedded"
+    assert reindex["vector_backend"] == EXPECTED_VECTOR_BACKEND
 
     hits = agent_rag_service.search("cota 120 metros jamming protocolo defensivo", top_k=3)
     assert len(hits) >= 1
@@ -49,8 +53,8 @@ def test_agent_langgraph_query_tools_rag_memory_and_traces(isolated_client: Test
     )
     assert res.status_code == 200
     data = res.json()["data"]
-    assert data["engine"] == "langgraph"
-    assert data["vector_backend"] == "qdrant_embedded"
+    assert data["engine"] == EXPECTED_ENGINE
+    assert data["vector_backend"] == EXPECTED_VECTOR_BACKEND
     assert data["status"] == "completed"
     assert data["guardrails"]["input_passed"] is True
     assert data["guardrails"]["output_passed"] is True
@@ -86,7 +90,7 @@ def test_agent_langgraph_query_tools_rag_memory_and_traces(isolated_client: Test
     llmops = isolated_client.get("/api/v1/agent/llmops/summary", headers=ADMIN_AUTH)
     assert llmops.status_code == 200
     assert llmops.json()["data"]["total_runs"] >= 2
-    assert llmops.json()["data"]["rag_status"]["vector_backend"] == "qdrant_embedded"
+    assert llmops.json()["data"]["rag_status"]["vector_backend"] == EXPECTED_VECTOR_BACKEND
 
     metrics_res = isolated_client.get("/metrics", headers=ADMIN_AUTH)
     assert metrics_res.status_code == 200

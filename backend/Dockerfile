@@ -55,6 +55,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY backend/app ./app
 COPY backend/tests ./tests
 COPY ai_service/detector.py /workspace/ai_service/detector.py
+COPY docs/conocimiento_cuas /workspace/docs/conocimiento_cuas
 COPY scripts/expo_local.py /workspace/scripts/expo_local.py
 COPY .env.example /workspace/.env.example
 COPY pyproject.toml /workspace/pyproject.toml
@@ -101,6 +102,7 @@ ENV PYTHONPATH=/workspace/backend
 COPY --chown=aeroguard:aeroguard backend/app ./app
 COPY --chown=aeroguard:aeroguard backend/init.sql ./init.sql
 COPY --chown=aeroguard:aeroguard ai_service/detector.py /workspace/ai_service/detector.py
+COPY --chown=aeroguard:aeroguard docs/conocimiento_cuas /workspace/docs/conocimiento_cuas
 
 USER aeroguard
 EXPOSE 8000
