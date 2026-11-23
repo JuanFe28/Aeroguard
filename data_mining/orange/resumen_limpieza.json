@@ -26,5 +26,15 @@
       "LOW": 21459,
       "CRITICAL": 8543
     }
+  },
+  "aeroguard_regresion_riesgo.csv.gz": {
+    "registros_brutos": 125000,
+    "duplicados_eliminados": 3750,
+    "celdas_corruptas": 1096,
+    "filas_fuera_de_rango_fisico": 12500,
+    "nulos_imputados": 8750,
+    "registros_limpios": 108750,
+    "risk_score_mean": 62.72,
+    "risk_score_std": 21.44
   }
 }

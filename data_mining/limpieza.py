@@ -68,3 +68,44 @@ def clean_telemetry(df_raw):
 
     summary["registros_limpios"] = int(len(df))
     return df, summary
+
+
+def compute_risk_score(df: pd.DataFrame, seed: int = 42) -> np.ndarray:
+    """Calcula un puntaje continuo y reproducible de riesgo cinematico (0-100) sin usar threat_level."""
+    class_base = {
+        "bird_false_pos": 4.0,
+        "quadcopter": 18.0,
+        "hexacopter": 24.0,
+        "fixed_wing": 30.0,
+        "diy_custom": 35.0,
+    }
+    pattern_score = {
+        "Estacionario": 2.0,
+        "Erratico": 7.0,
+        "Patrullaje": 10.0,
+        "Directo": 15.0,
+        "Evasivo": 19.0,
+    }
+
+    base = df["drone_class"].astype(str).map(class_base).fillna(18.0).to_numpy(dtype=float)
+    pat = df["flight_pattern"].astype(str).map(pattern_score).fillna(6.0).to_numpy(dtype=float)
+    dist = df["distance_to_zone_m"].to_numpy(dtype=float)
+    alt = df["altitude_m"].to_numpy(dtype=float)
+    spd = df["speed_ms"].to_numpy(dtype=float)
+    rf = df["rf_signal_dbm"].to_numpy(dtype=float)
+    conf = df["ai_confidence"].to_numpy(dtype=float)
+
+    prox_component = 36.0 * np.exp(-np.clip(dist, 0.0, None) / 480.0)
+    alt_component = np.clip((alt - 120.0) * 0.12, 0.0, 14.0) + 0.015 * np.clip(alt, 0.0, 350.0)
+    spd_component = 0.48 * np.clip(spd, 0.0, 40.0)
+    rf_component = np.clip((rf + 110.0) * 0.14, 0.0, 11.0)
+    conf_component = np.clip(conf, 0.0, 1.0) * 4.5
+
+    raw_score = base + pat + prox_component + alt_component + spd_component + rf_component + conf_component
+    is_bird = (df["drone_class"].astype(str) == "bird_false_pos").to_numpy()
+    raw_score = np.where(is_bird, 6.0 + 0.05 * spd + 2.0 * conf, raw_score)
+
+    rng = np.random.default_rng(seed)
+    noisy_score = raw_score + rng.normal(0.0, 2.5, size=len(df))
+    return np.round(np.clip(noisy_score, 0.0, 100.0), 2)
+

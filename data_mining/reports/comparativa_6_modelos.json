@@ -1,0 +1,287 @@
+{
+  "generated_at_utc": "2026-11-22T22:29:42.620027+00:00",
+  "dataset_stats": {
+    "raw_records": 125000,
+    "clean_records": 108750,
+    "train_records": 87000,
+    "test_records": 21750,
+    "lote2_clean_records": 104400
+  },
+  "models": {
+    "1_regresion_lineal": {
+      "modelo": "Regresión Lineal (LinearRegression)",
+      "pregunta_negocio": "¿Cuál es el puntaje continuo de riesgo cinemático (0–100) de un contacto según su telemetría?",
+      "target": "risk_score",
+      "test_r2": 0.9356,
+      "test_mae": 4.2361,
+      "test_rmse": 5.4916,
+      "lote2_r2": 0.935,
+      "lote2_mae": 4.21,
+      "lote2_rmse": 5.4656
+    },
+    "2_regresion_logistica": {
+      "modelo": "Regresión Logística (LogisticRegression)",
+      "pregunta_negocio": "¿Cuál es la probabilidad de violación crítica / alto riesgo de geocerca y qué umbral optimiza el F1?",
+      "target_binario": "high_risk_binary (HIGH | CRITICAL)",
+      "optimal_threshold": 0.4,
+      "test_roc_auc": 0.9689,
+      "test_f1_optimal": 0.8821,
+      "test_f1_050": 0.8803,
+      "test_precision_optimal": 0.8565,
+      "test_recall_optimal": 0.9094,
+      "test_accuracy_optimal": 0.8971,
+      "test_brier_score": 0.0702,
+      "multiclass_baseline_accuracy": 0.8064,
+      "multiclass_baseline_f1_weighted": 0.8067,
+      "lote2_roc_auc": 0.9691,
+      "lote2_f1_optimal": 0.882,
+      "lote2_multiclass_accuracy": 0.8042
+    },
+    "3_kmeans": {
+      "modelo": "K-Means (Clustering No Supervisado)",
+      "pregunta_negocio": "¿Qué perfiles operativos de vuelo existen sin etiquetas previas en el espacio aéreo?",
+      "selected_k": 4,
+      "inertia_k4": 124517.6,
+      "silhouette_k4": 0.2623,
+      "max_silhouette_k": 6,
+      "max_silhouette_score": 0.2794,
+      "elbow_curve": [
+        {
+          "k": 2,
+          "inertia": 195814.7,
+          "silhouette": 0.2399
+        },
+        {
+          "k": 3,
+          "inertia": 156176.7,
+          "silhouette": 0.2374
+        },
+        {
+          "k": 4,
+          "inertia": 124517.6,
+          "silhouette": 0.2623
+        },
+        {
+          "k": 5,
+          "inertia": 104562.9,
+          "silhouette": 0.2631
+        },
+        {
+          "k": 6,
+          "inertia": 87096.4,
+          "silhouette": 0.2794
+        },
+        {
+          "k": 7,
+          "inertia": 76179.7,
+          "silhouette": 0.2787
+        },
+        {
+          "k": 8,
+          "inertia": 66024.7,
+          "silhouette": 0.2787
+        }
+      ],
+      "cluster_profiles": [
+        {
+          "cluster_id": 0,
+          "label": "Tránsito Rápido Perimetral",
+          "description": "Desplazamiento horizontal veloz en zonas medias o aproximación.",
+          "high_risk_rate_pct": 43.57,
+          "centroid_physical": {
+            "distance_to_zone_m": 879.788,
+            "altitude_m": 72.181,
+            "speed_ms": 23.532
+          },
+          "test_count": 5359,
+          "test_pct": 24.64
+        },
+        {
+          "cluster_id": 1,
+          "label": "Sobrevuelo Elevado (Sobre Cota 120 m)",
+          "description": "Aeronaves operando por encima del techo civil de referencia.",
+          "high_risk_rate_pct": 61.52,
+          "centroid_physical": {
+            "distance_to_zone_m": 1067.308,
+            "altitude_m": 217.608,
+            "speed_ms": 23.737
+          },
+          "test_count": 5317,
+          "test_pct": 24.45
+        },
+        {
+          "cluster_id": 2,
+          "label": "Vuelo Distante / Baja Energía",
+          "description": "Contactos alejados del núcleo protegido y velocidad moderada/baja.",
+          "high_risk_rate_pct": 6.78,
+          "centroid_physical": {
+            "distance_to_zone_m": 1515.566,
+            "altitude_m": 132.136,
+            "speed_ms": 9.014
+          },
+          "test_count": 5490,
+          "test_pct": 25.24
+        },
+        {
+          "cluster_id": 3,
+          "label": "Aproximación Cercana al Perímetro",
+          "description": "Contactos con menor distancia radial hacia la zona protegida.",
+          "high_risk_rate_pct": 57.81,
+          "centroid_physical": {
+            "distance_to_zone_m": 469.862,
+            "altitude_m": 157.584,
+            "speed_ms": 8.813
+          },
+          "test_count": 5584,
+          "test_pct": 25.67
+        }
+      ]
+    },
+    "4_arbol_decision": {
+      "modelo": "Árbol de Decisión (DecisionTreeClassifier)",
+      "pregunta_negocio": "¿Qué reglas jerárquicas interpretables clasifican el nivel de amenaza (LOW/MEDIUM/HIGH/CRITICAL)?",
+      "test_accuracy": 0.9423,
+      "test_precision_weighted": 0.9427,
+      "test_recall_weighted": 0.9423,
+      "test_f1_weighted": 0.9422,
+      "test_f1_macro": 0.9376,
+      "lote2_accuracy": 0.9417,
+      "lote2_f1_weighted": 0.9417
+    },
+    "5_random_forest": {
+      "modelo": "Random Forest (RandomForestClassifier)",
+      "pregunta_negocio": "¿Qué ensamble logra la clasificación multiclase de threat_level más estable para producción?",
+      "test_accuracy": 0.9595,
+      "test_precision_weighted": 0.9596,
+      "test_recall_weighted": 0.9595,
+      "test_f1_weighted": 0.9595,
+      "test_f1_macro": 0.957,
+      "runtime_compact_accuracy": 0.9508,
+      "runtime_compact_f1_weighted": 0.9507,
+      "runtime_accuracy_diff_pp": -0.878,
+      "lote2_accuracy": 0.9595,
+      "lote2_f1_weighted": 0.9595,
+      "lote2_runtime_compact_accuracy": 0.9519
+    },
+    "6_arima": {
+      "modelo": "ARIMA(1, 1, 1)",
+      "pregunta_negocio": "¿Cuántas incursiones diarias de alto riesgo (HIGH/CRITICAL) se pronostican en las próximas 2 semanas?",
+      "order": [
+        1,
+        1,
+        1
+      ],
+      "days_total": 304,
+      "days_train": 243,
+      "days_test": 61,
+      "aic": 1897.79,
+      "test_mae": 10.086,
+      "test_rmse": 12.896,
+      "test_mape_pct": 6.77,
+      "candidates": [
+        {
+          "order": [
+            1,
+            0,
+            1
+          ],
+          "aic": 1900.14
+        },
+        {
+          "order": [
+            2,
+            0,
+            1
+          ],
+          "aic": 1901.34
+        },
+        {
+          "order": [
+            1,
+            1,
+            1
+          ],
+          "aic": 1897.79
+        },
+        {
+          "order": [
+            2,
+            1,
+            1
+          ],
+          "aic": 1899.05
+        },
+        {
+          "order": [
+            3,
+            0,
+            2
+          ],
+          "aic": 1905.27
+        }
+      ],
+      "peak_forecast_14d": {
+        "date": "2026-11-01",
+        "predicted_high_risk": 151.77,
+        "lower_95": 128.02,
+        "upper_95": 175.51
+      }
+    }
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.25,
+      "val_f1": 0.8708
+    },
+    {
+      "threshold": 0.3,
+      "val_f1": 0.8773
+    },
+    {
+      "threshold": 0.35,
+      "val_f1": 0.8798
+    },
+    {
+      "threshold": 0.4,
+      "val_f1": 0.8811
+    },
+    {
+      "threshold": 0.45,
+      "val_f1": 0.8811
+    },
+    {
+      "threshold": 0.5,
+      "val_f1": 0.8806
+    },
+    {
+      "threshold": 0.55,
+      "val_f1": 0.8792
+    },
+    {
+      "threshold": 0.6,
+      "val_f1": 0.875
+    },
+    {
+      "threshold": 0.65,
+      "val_f1": 0.8697
+    },
+    {
+      "threshold": 0.7,
+      "val_f1": 0.8616
+    },
+    {
+      "threshold": 0.75,
+      "val_f1": 0.8452
+    }
+  ],
+  "runtime_artifact_kb": 862.4,
+  "runtime_rf_parity_pct": 100.0,
+  "production_decision": {
+    "primary_classifier": "Random Forest (compacto 12 árboles en runtime: 95.08% Acc, F1=0.9507)",
+    "interpretable_companion": "Árbol de Decisión (reglas auditables)",
+    "continuous_risk_model": "Regresión Lineal (risk_score 0-100)",
+    "probability_breach_model": "Regresión Logística binaria (umbral óptimo=0.40, ROC-AUC=0.9689)",
+    "unsupervised_profiling": "K-Means (k=4, Silhouette=0.2623)",
+    "time_series_forecast": "ARIMA(1, 1, 1) (horizonte 14 días, MAPE=6.77%)"
+  }
+}

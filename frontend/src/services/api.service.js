@@ -300,6 +300,149 @@ export const AlertService = {
 };
 
 // ============================================================
+// Predictive Analytics Service (CRISP-DM 6 Modelos)
+// ============================================================
+
+export const PredictionService = {
+  async getSummary() {
+    if (MockService.enabled) {
+      return {
+        status: 'success',
+        data: {
+          version: '1.2.0-predictive-6models',
+          data_origin: 'synthetic_crisp_dm_dataset',
+          production_decision: {
+            primary_classifier: 'Random Forest (compacto 12 árboles en runtime: 95.08% Acc)',
+          },
+          models: {
+            random_forest: { test_accuracy: 0.9595, runtime_compact_accuracy: 0.9508, test_f1_weighted: 0.9595 },
+            regresion_lineal: { test_r2: 0.9356, test_mae: 4.24 },
+            regresion_logistica: { test_roc_auc: 0.9689, optimal_threshold: 0.4 },
+            kmeans: { selected_k: 4, silhouette_k4: 0.2623 },
+            arbol_decision: { test_accuracy: 0.9423 },
+            arima: { order: [1, 1, 1], test_mape_pct: 6.77 },
+          },
+        },
+      };
+    }
+    return http.get('/predictions/summary');
+  },
+  async getForecast() {
+    if (MockService.enabled) {
+      const days = Array.from({ length: 14 }, (_, i) => ({
+        date: `2026-11-${String(i + 1).padStart(2, '0')}`,
+        predicted_high_risk: 151.77,
+        lower_95: 128.0,
+        upper_95: 175.5,
+      }));
+      return {
+        status: 'success',
+        data: {
+          model: 'ARIMA(1, 1, 1)',
+          order: [1, 1, 1],
+          metrics: { test_mae: 10.09, test_rmse: 12.9, test_mape_pct: 6.77 },
+          forecast_14d: days,
+          peak_forecast_14d: days[0],
+          data_origin: 'synthetic_crisp_dm_dataset',
+        },
+      };
+    }
+    return http.get('/predictions/forecast');
+  },
+  async evaluate(payload) {
+    if (MockService.enabled) {
+      const dist = Number(payload.distance_to_zone_m ?? 300);
+      const alt = Number(payload.altitude_m ?? 120);
+      const isHigh = dist < 250 || alt > 120;
+      return {
+        status: 'success',
+        simulation: true,
+        drone_id: payload.drone_id || 'UAV-DEMO',
+        data: {
+          threat_level: isHigh ? 'HIGH' : 'LOW',
+          confidence: 0.91,
+          risk_score: isHigh ? 74.5 : 22.0,
+          geofence_breach_probability: isHigh ? 0.84 : 0.14,
+          high_risk_threshold: 0.4,
+          high_risk_flag: isHigh,
+          cluster_id: isHigh ? 0 : 3,
+          flight_profile: isHigh ? 'Aproximación Cercana al Perímetro' : 'Vuelo Distante / Baja Energía',
+          key_factors: [
+            `Distancia al perímetro: ${dist} m`,
+            `Altitud observada: ${alt} m`,
+            'Recomendación sintética sujeta a verificación humana',
+          ],
+          simulation: true,
+          human_review_required: true,
+        },
+      };
+    }
+    return http.post('/predictions/evaluate', payload);
+  },
+};
+
+// ============================================================
+// Agentic AI Service (LangGraph + RAG Qdrant + Guardrails + LLMOps)
+// ============================================================
+
+export const AgentService = {
+  async query(payload) {
+    if (MockService.enabled) {
+      const q = String(payload?.query || '');
+      const isInj = /ignora|system\s*prompt|jailbreak/i.test(q);
+      return {
+        status: 'success',
+        data: {
+          session_id: payload?.session_id || 'demo-agent-session',
+          status: isInj ? 'blocked_input' : 'completed',
+          engine: 'langgraph',
+          provider: isInj ? 'guardrail_policy' : 'deterministic',
+          vector_backend: 'qdrant_embedded',
+          guardrails: {
+            input_passed: !isInj,
+            input_category: isInj ? 'prompt_injection' : 'ok',
+            output_passed: true,
+          },
+          output: {
+            summary: isInj
+              ? 'Consulta bloqueada por Guardrail de Entrada (prompt injection).'
+              : 'Evaluación demo completada con respaldo RAG C-UAS y herramientas verificables.',
+            recommended_action: isInj ? 'BLOQUEADO_POR_GUARDRAIL' : 'VERIFICAR_DETECCION',
+            priority: isInj ? 'BLOCKED' : 'MEDIUM',
+            human_review_required: true,
+          },
+          rag_citations: isInj ? [] : [{ doc_id: '01_protocolos_operativos_cuas.md#1', source: '01_protocolos_operativos_cuas.md', score: 0.91 }],
+          tools_called: isInj ? [] : ['get_operational_snapshot', 'predict_telemetry_ml'],
+          telemetry_trace: { total_latency_ms: 12.4, estimated_tokens: 95 },
+        },
+      };
+    }
+    return http.post('/agent/query', payload);
+  },
+  async getLlmOpsSummary() {
+    if (MockService.enabled) {
+      return {
+        status: 'success',
+        data: {
+          total_runs: 1,
+          blocked_input_count: 0,
+          blocked_output_count: 0,
+          avg_latency_ms: 12.4,
+          rag_status: { vector_backend: 'qdrant_embedded', indexed_chunks: 8 },
+        },
+      };
+    }
+    return http.get('/agent/llmops/summary');
+  },
+  async listTraces(limit = 10) {
+    return http.get('/agent/traces', { limit });
+  },
+  async mcpListTools() {
+    return http.post('/agent/mcp', { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+  },
+};
+
+// ============================================================
 // Zones Service
 // ============================================================
 

@@ -408,3 +408,56 @@ class SensorTrack(Base):
     sensor_id = Column(UUID(as_uuid=False), ForeignKey("sensors.id", ondelete="CASCADE"), primary_key=True)
     object_key = Column(String(128), primary_key=True)
     detection_id = Column(UUID(as_uuid=False), ForeignKey("detections.id", ondelete="CASCADE"), nullable=False)
+
+
+# ============================================================
+# Agente IA (Memoria Persistente y Trazas LLMOps)
+# ============================================================
+
+class AgentSession(Base):
+    __tablename__ = "agent_sessions"
+
+    id         = Column(UUID(as_uuid=False), primary_key=True, default=new_uuid)
+    user_id    = Column(String(128), nullable=False, index=True)
+    username   = Column(String(64), nullable=False, index=True)
+    role       = Column(String(32), nullable=False)
+    title      = Column(String(255), default="Consulta Operativa C-UAS")
+    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+    messages = relationship("AgentMessage", back_populates="session", cascade="all, delete-orphan", lazy="select")
+
+
+class AgentMessage(Base):
+    __tablename__ = "agent_messages"
+
+    id            = Column(UUID(as_uuid=False), primary_key=True, default=new_uuid)
+    session_id    = Column(UUID(as_uuid=False), ForeignKey("agent_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    sender        = Column(String(32), nullable=False)  # operator | agent | guardrail
+    content       = Column(Text, nullable=False)
+    metadata_json = Column(JSON, default=dict)
+    created_at    = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+    session = relationship("AgentSession", back_populates="messages")
+
+
+class AgentTrace(Base):
+    __tablename__ = "agent_traces"
+
+    id                   = Column(UUID(as_uuid=False), primary_key=True, default=new_uuid)
+    session_id           = Column(UUID(as_uuid=False), nullable=True, index=True)
+    username             = Column(String(64), nullable=False, index=True)
+    role                 = Column(String(32), nullable=False)
+    provider             = Column(String(64), nullable=False)
+    engine               = Column(String(64), nullable=False, default="langgraph")
+    guardrail_in_passed  = Column(Boolean, nullable=False, default=True)
+    guardrail_out_passed = Column(Boolean, nullable=False, default=True)
+    blocked_reason       = Column(Text, nullable=True)
+    rag_hits             = Column(Integer, nullable=False, default=0)
+    tools_called         = Column(JSON, default=list)
+    node_latencies_ms    = Column(JSON, default=dict)
+    total_latency_ms     = Column(Float, nullable=False, default=0.0)
+    estimated_tokens     = Column(Integer, nullable=False, default=0)
+    status               = Column(String(32), nullable=False, default="completed")
+    created_at           = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+

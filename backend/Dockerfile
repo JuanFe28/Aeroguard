@@ -33,11 +33,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Solo requirements primero → la capa de dependencias se cachea
 # mientras requirements.txt no cambie.
+ARG INSTALL_AGENT_DEPS=false
 COPY backend/requirements.txt .
+COPY backend/requirements-agent.txt .
 COPY constraints.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip wheel setuptools==84.1.0 \
-    && pip install -c constraints.txt -r requirements.txt
+    && pip install -c constraints.txt -r requirements.txt \
+    && if [ "$INSTALL_AGENT_DEPS" = "true" ]; then pip install -r requirements-agent.txt; fi
 
 # ------------------------------------------------------------
 # Stage 2: test (quality gate — no se publica)
@@ -52,6 +55,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY backend/app ./app
 COPY backend/tests ./tests
 COPY ai_service/detector.py /workspace/ai_service/detector.py
+COPY docs/conocimiento_cuas /workspace/docs/conocimiento_cuas
 COPY scripts/expo_local.py /workspace/scripts/expo_local.py
 COPY .env.example /workspace/.env.example
 COPY pyproject.toml /workspace/pyproject.toml
@@ -88,7 +92,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgomp1 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 1000 --shell /usr/sbin/nologin aeroguard \
-    && mkdir -p /tmp/aeroguard/reports \
+    && mkdir -p /tmp/aeroguard/reports /tmp/aeroguard/qdrant \
     && chown -R aeroguard:aeroguard /tmp/aeroguard
 
 COPY --from=builder /opt/venv /opt/venv
@@ -98,6 +102,7 @@ ENV PYTHONPATH=/workspace/backend
 COPY --chown=aeroguard:aeroguard backend/app ./app
 COPY --chown=aeroguard:aeroguard backend/init.sql ./init.sql
 COPY --chown=aeroguard:aeroguard ai_service/detector.py /workspace/ai_service/detector.py
+COPY --chown=aeroguard:aeroguard docs/conocimiento_cuas /workspace/docs/conocimiento_cuas
 
 USER aeroguard
 EXPOSE 8000

@@ -14,5 +14,8 @@
 !constraints.txt
 !scripts/
 !scripts/expo_local.py
+!docs/
+!docs/conocimiento_cuas/
+!docs/conocimiento_cuas/**
 **/__pycache__/
 **/*.pyc

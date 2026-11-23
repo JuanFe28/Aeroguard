@@ -4,7 +4,7 @@ import { escapeHtml } from '../utils/html.js';
  * Gestiona estado, datos y comunicación del Dashboard en tiempo real.
  */
 
-import { DetectionService, AlertService, SensorService, ZoneService, WebSocketService, MockService } from '../services/api.service.js';
+import { DetectionService, AlertService, SensorService, ZoneService, WebSocketService, MockService, PredictionService, AgentService } from '../services/api.service.js';
 import { DetectionModel, AlertModel, SensorModel, RestrictedZoneModel } from '../models/models.js';
 import { Toast } from '../app.js';
 import { tacticalAudio } from '../services/audio.service.js';
@@ -23,6 +23,12 @@ export class DashboardViewModel {
       selectedDetection: null,
       lastUpdate: null,
       aiVerdict: null,
+      predictiveSummary: null,
+      predictiveForecast: null,
+      predictiveResult: null,
+      agentSessionId: null,
+      agentResult: null,
+      agentLlmOps: null,
       previousAltitudes: new Map(),
     };
 
@@ -53,6 +59,8 @@ export class DashboardViewModel {
           this._loadSensors(),
           this._loadZones(),
           this._loadAiVerdict(),
+          this._loadPredictiveAnalytics(),
+          this._loadAgentMonitor(),
         ]);
       }
       this._computeStats();
@@ -91,6 +99,36 @@ export class DashboardViewModel {
       }
     } catch (e) {
       console.warn('Error loading AI verdict:', e);
+    }
+  }
+
+  async _loadPredictiveAnalytics() {
+    if (typeof PredictionService === 'undefined') return;
+    try {
+      const [summaryRes, forecastRes] = await Promise.allSettled([
+        PredictionService.getSummary(),
+        PredictionService.getForecast(),
+      ]);
+      if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
+        this.state.predictiveSummary = summaryRes.value.data;
+      }
+      if (forecastRes.status === 'fulfilled' && forecastRes.value?.data) {
+        this.state.predictiveForecast = forecastRes.value.data;
+      }
+    } catch (e) {
+      console.warn('Error loading predictive analytics:', e);
+    }
+  }
+
+  async _loadAgentMonitor() {
+    if (typeof AgentService === 'undefined') return;
+    try {
+      const res = await AgentService.getLlmOpsSummary();
+      if (res?.data) {
+        this.state.agentLlmOps = res.data;
+      }
+    } catch (e) {
+      console.warn('Error loading agent LLMOps summary:', e);
     }
   }
 
@@ -738,6 +776,128 @@ export class DashboardViewModel {
         }
       }
     });
+
+    document.getElementById('btn-predict-ml')?.addEventListener('click', async () => {
+      if (typeof PredictionService === 'undefined') return;
+      const preset = document.getElementById('ml-eval-preset')?.value || 'selected';
+      const activeDet = this.state.selectedDetection || this.state.detections.find(d => d.status === 'active');
+      let payload;
+      if (preset === 'bird') {
+        payload = {
+          drone_id: 'AVE-CONTACTO-01',
+          altitude_m: 45,
+          speed_ms: 5,
+          distance_to_zone_m: 1600,
+          rf_signal_dbm: -95,
+          ai_confidence: 0.65,
+          drone_class: 'bird_false_pos',
+          flight_pattern: 'Estacionario',
+        };
+      } else if (preset === 'critical') {
+        payload = {
+          drone_id: 'UAV-DIY-CRIT',
+          altitude_m: 195,
+          speed_ms: 28,
+          distance_to_zone_m: 60,
+          rf_signal_dbm: -40,
+          ai_confidence: 0.95,
+          drone_class: 'diy_custom',
+          flight_pattern: 'Evasivo',
+        };
+      } else if (activeDet) {
+        payload = {
+          drone_id: String(activeDet.id || 'UAV-ACTIVO'),
+          altitude_m: Number.isFinite(activeDet.altitude) ? Math.min(1500, Math.max(0, activeDet.altitude)) : 120,
+          speed_ms: Number.isFinite(activeDet.speed) ? Math.min(100, Math.max(0, activeDet.speed / 3.6)) : 15,
+          distance_to_zone_m: 180,
+          ai_confidence: Number.isFinite(activeDet.aiConfidence) ? Math.min(1, Math.max(0, activeDet.aiConfidence)) : 0.85,
+          drone_class: 'quadcopter',
+          flight_pattern: 'Directo',
+        };
+      } else {
+        payload = {
+          drone_id: 'UAV-DEMO-145',
+          altitude_m: 145,
+          speed_ms: 19,
+          distance_to_zone_m: 110,
+          rf_signal_dbm: -48,
+          ai_confidence: 0.91,
+          drone_class: 'fixed_wing',
+          flight_pattern: 'Directo',
+        };
+      }
+
+      const btn = document.getElementById('btn-predict-ml');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Evaluando...';
+      }
+      try {
+        const res = await PredictionService.evaluate(payload);
+        if (res?.data) {
+          this.state.predictiveResult = res.data;
+          this._renderPredictivePanel();
+          Toast.success(`Predicción ML: ${res.data.threat_level} (Riesgo ${res.data.risk_score}/100)`);
+        }
+      } catch (err) {
+        console.error('Error evaluando telemetría ML:', err);
+        Toast.error('No se pudo evaluar el modelo predictivo.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Evaluar ML';
+        }
+      }
+    });
+
+    const agentBtn = document.getElementById('btn-agent-query');
+    const agentInput = document.getElementById('agent-query-input');
+    if (agentBtn) {
+      agentBtn.addEventListener('click', async () => {
+        if (typeof AgentService === 'undefined') return;
+        const query = (agentInput?.value || '').trim() || 'Evaluar detección activa y protocolo cota 120 m.';
+        const selectedDet = this.state.selectedDetection || (this.state.detections || [])[0] || null;
+        const payload = {
+          query,
+          session_id: this.state.agentSessionId || undefined,
+          telemetry: selectedDet
+            ? {
+                drone_id: String(selectedDet.id || 'UAV-ACTIVO'),
+                altitude_m: Number.isFinite(selectedDet.altitude) ? Math.min(1500, Math.max(0, selectedDet.altitude)) : 120,
+                speed_ms: Number.isFinite(selectedDet.speed) ? Math.min(100, Math.max(0, selectedDet.speed / 3.6)) : 15,
+                distance_to_zone_m: 180,
+                ai_confidence: Number.isFinite(selectedDet.aiConfidence) ? Math.min(1, Math.max(0, selectedDet.aiConfidence)) : 0.85,
+                drone_class: 'quadcopter',
+                flight_pattern: 'Directo',
+              }
+            : undefined,
+        };
+        agentBtn.disabled = true;
+        agentBtn.textContent = 'Consultando...';
+        try {
+          const res = await AgentService.query(payload);
+          if (res?.data) {
+            this.state.agentResult = res.data;
+            if (res.data.session_id) {
+              this.state.agentSessionId = res.data.session_id;
+            }
+            await this._loadAgentMonitor();
+            this._renderAgentMonitor();
+            if (res.data.guardrails?.input_passed === false || res.data.guardrails?.output_passed === false) {
+              Toast.error('Guardrail activado en consulta agéntica.');
+            } else {
+              Toast.success(`Agente IA: ${String(res.data.output?.recommended_action || 'OK').replaceAll('_', ' ')}`);
+            }
+          }
+        } catch (err) {
+          console.error('Error consultando Agente IA:', err);
+          Toast.error('No se pudo ejecutar la consulta agéntica.');
+        } finally {
+          agentBtn.disabled = false;
+          agentBtn.textContent = 'Consultar Agente';
+        }
+      });
+    }
   }
 
   _renderAiVerdict() {
@@ -806,6 +966,210 @@ export class DashboardViewModel {
           });
         }
       }
+    }
+  }
+
+  _renderPredictivePanel() {
+    const summary = this.state.predictiveSummary;
+    const forecast = this.state.predictiveForecast;
+    const result = this.state.predictiveResult;
+
+    const badge = document.getElementById('ml-active-model-badge');
+    const subtitle = document.getElementById('ml-model-subtitle');
+    const peakEl = document.getElementById('arima-peak-summary');
+
+    if (badge && summary?.models?.random_forest) {
+      const rfAcc = summary.models.random_forest.runtime_compact_accuracy ?? summary.models.random_forest.test_accuracy;
+      badge.textContent = Number.isFinite(rfAcc) ? `RF ${(rfAcc * 100).toFixed(1)}%` : 'RANDOM FOREST';
+    }
+    if (subtitle && summary?.models?.regresion_lineal && summary?.models?.regresion_logistica) {
+      const r2 = summary.models.regresion_lineal.test_r2;
+      const auc = summary.models.regresion_logistica.test_roc_auc;
+      subtitle.textContent = `R² ${Number(r2 || 0).toFixed(2)} · AUC ${Number(auc || 0).toFixed(2)} · K-Means k=4 · ARIMA`;
+    }
+    if (peakEl && forecast?.peak_forecast_14d) {
+      const pk = forecast.peak_forecast_14d;
+      peakEl.textContent = `${forecast.model || 'ARIMA'} pico esperado (${pk.date}): ~${pk.predicted_high_risk} eventos/día [IC95: ${pk.lower_95}–${pk.upper_95}]`;
+    }
+
+    const resSection = document.getElementById('ml-prediction-result');
+    if (resSection) {
+      resSection.hidden = !result || typeof result !== 'object';
+      if (!resSection.hidden) {
+        const threatEl = document.getElementById('ml-pred-threat');
+        const riskEl = document.getElementById('ml-pred-risk');
+        const breachEl = document.getElementById('ml-pred-breach');
+        const profEl = document.getElementById('ml-pred-profile');
+        const factorsEl = document.getElementById('ml-pred-factors');
+
+        if (threatEl) threatEl.textContent = `Amenaza RF: ${String(result.threat_level || 'SIN DATOS')}`;
+        if (riskEl) riskEl.textContent = `Risk Score: ${Number(result.risk_score ?? 0).toFixed(1)}/100`;
+        if (breachEl) {
+          const pct = (Number(result.geofence_breach_probability ?? 0) * 100).toFixed(1);
+          breachEl.textContent = `Prob. alto riesgo (Reg. Logística): ${pct}% (umbral ${(Number(result.high_risk_threshold ?? 0.4) * 100).toFixed(0)}%)`;
+        }
+        if (profEl) profEl.textContent = `Perfil K-Means: ${String(result.flight_profile || 'N/A')}`;
+        if (factorsEl) {
+          factorsEl.replaceChildren();
+          (Array.isArray(result.key_factors) ? result.key_factors : []).forEach(f => {
+            const li = document.createElement('li');
+            li.textContent = String(f);
+            factorsEl.appendChild(li);
+          });
+        }
+      }
+    }
+  }
+
+  _renderArimaForecast() {
+    const canvas = document.getElementById('arima-forecast-canvas');
+    if (!canvas || typeof canvas.getContext !== 'function') return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const forecast = this.state.predictiveForecast;
+    const points = Array.isArray(forecast?.forecast_14d) ? forecast.forecast_14d : [];
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { width: 340, height: 110 };
+    const width = rect.width || 340;
+    const height = rect.height || 110;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, width, height);
+
+    if (points.length === 0) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px monospace';
+      ctx.fillText('Serie ARIMA disponible al conectar API', 14, height / 2);
+      return;
+    }
+
+    const padX = 16;
+    const padY = 16;
+    const vals = points.map(p => Number(p.predicted_high_risk || 0));
+    const maxV = Math.max(...points.map(p => Number(p.upper_95 || p.predicted_high_risk || 1)), 1);
+    const minV = Math.max(0, Math.min(...points.map(p => Number(p.lower_95 || p.predicted_high_risk || 0))) * 0.9);
+    const span = Math.max(maxV - minV, 1);
+
+    const xOf = i => padX + (i / Math.max(points.length - 1, 1)) * (width - padX * 2);
+    const yOf = v => height - padY - ((v - minV) / span) * (height - padY * 2);
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = xOf(i);
+      const y = yOf(Number(p.upper_95 || p.predicted_high_risk || 0));
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    for (let i = points.length - 1; i >= 0; i--) {
+      ctx.lineTo(xOf(i), yOf(Number(points[i].lower_95 || points[i].predicted_high_risk || 0)));
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.14)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2;
+    vals.forEach((v, i) => {
+      const x = xOf(i);
+      const y = yOf(v);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '10px monospace';
+    ctx.fillText(`Horizonte ARIMA ${points.length}d`, padX, 11);
+  }
+
+  _renderAgentMonitor() {
+    const summaryEl = document.getElementById('agent-llmops-summary');
+    const ops = this.state.agentLlmOps;
+    if (summaryEl && ops) {
+      const blocked = (ops.blocked_input_count || 0) + (ops.blocked_output_count || 0);
+      const backend = ops.rag_status?.vector_backend || 'qdrant';
+      summaryEl.textContent = `${ops.total_runs || 0} ejecuciones · ${blocked} bloqueos · ${backend}`;
+    }
+
+    const badge = document.getElementById('agent-guardrail-badge');
+    const resultBox = document.getElementById('agent-monitor-result');
+    const res = this.state.agentResult;
+    if (!res) {
+      if (badge) {
+        badge.textContent = 'LISTO';
+        badge.className = 'badge badge-info';
+      }
+      if (resultBox) resultBox.hidden = true;
+      return;
+    }
+
+    const inputOk = res.guardrails?.input_passed !== false;
+    const outputOk = res.guardrails?.output_passed !== false;
+    if (badge) {
+      if (!inputOk) {
+        badge.textContent = 'BLOQUEADO IN';
+        badge.className = 'badge badge-danger';
+      } else if (!outputOk) {
+        badge.textContent = 'BLOQUEADO OUT';
+        badge.className = 'badge badge-danger';
+      } else {
+        badge.textContent = 'GUARDRAIL OK';
+        badge.className = 'badge badge-success';
+      }
+    }
+
+    if (resultBox) resultBox.hidden = false;
+
+    const actionEl = document.getElementById('agent-res-action');
+    const prioEl = document.getElementById('agent-res-priority');
+    const summaryTextEl = document.getElementById('agent-res-summary');
+    const traceEl = document.getElementById('agent-res-trace');
+    const toolsEl = document.getElementById('agent-res-tools');
+    const citationsEl = document.getElementById('agent-res-citations');
+
+    if (actionEl) {
+      actionEl.textContent = String(res.output?.recommended_action || 'SIN_ACCION').replaceAll('_', ' ');
+    }
+    if (prioEl) {
+      const prio = String(res.output?.priority || 'INFO').toUpperCase();
+      prioEl.textContent = prio;
+      if (!inputOk || !outputOk || prio === 'BLOCKED' || prio === 'CRITICAL') {
+        prioEl.className = 'badge badge-danger';
+      } else if (prio === 'HIGH') {
+        prioEl.className = 'badge badge-warning';
+      } else {
+        prioEl.className = 'badge badge-info';
+      }
+    }
+    if (summaryTextEl) {
+      summaryTextEl.textContent = String(res.output?.summary || '');
+    }
+    if (traceEl) {
+      const lat = res.telemetry_trace?.total_latency_ms ?? 0;
+      const tok = res.telemetry_trace?.estimated_tokens ?? 0;
+      traceEl.textContent = `${res.engine || 'langgraph'} · ${res.provider || 'deterministic'} · ${lat} ms · ${tok} tok`;
+    }
+    if (toolsEl) {
+      const tools = Array.isArray(res.tools_called) ? res.tools_called : [];
+      toolsEl.textContent = tools.length
+        ? `Herramientas: ${tools.join(', ')}`
+        : 'Herramientas: ninguna (respuesta directa / guardrail)';
+    }
+    if (citationsEl) {
+      if (typeof citationsEl.replaceChildren === 'function') {
+        citationsEl.replaceChildren();
+      } else {
+        citationsEl.textContent = '';
+      }
+      const citations = Array.isArray(res.rag_citations) ? res.rag_citations : [];
+      citations.forEach((cit) => {
+        const li = document.createElement('li');
+        const scoreTxt = typeof cit.score === 'number' ? ` (${cit.score.toFixed(2)})` : '';
+        li.textContent = `[${cit.source || 'doc'}] ${cit.section || ''}${scoreTxt}`;
+        citationsEl.appendChild(li);
+      });
     }
   }
 

@@ -24,6 +24,8 @@ export class DashboardView {
     this.vm._renderAlerts();
     this.vm._renderSensorStatus();
     this.vm._renderAiVerdict();
+    this.vm._renderPredictivePanel();
+    this.vm._renderAgentMonitor();
 
     // Init map and interactive components (after DOM is ready)
     requestAnimationFrame(() => {
@@ -31,6 +33,7 @@ export class DashboardView {
       this.vm.bindMapControls();
       this.vm.bindTacticalControls();
       this.vm.renderAltimetry();
+      this.vm._renderArimaForecast();
       this.vm.startRealtime();
     });
   }
@@ -235,6 +238,79 @@ export class DashboardView {
             </span>
             <span id="altimetry-status-text" style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary)">Escaneo en curso</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Predictive ML & ARIMA Forecast Widget (CRISP-DM) -->
+      <div class="card" style="flex-shrink:0;border:1px solid rgba(0,212,255,0.16)" role="region" aria-label="Analítica Predictiva ML (CRISP-DM)">
+        <div class="card-header" style="padding-bottom:var(--spacing-xs)">
+          <div>
+            <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px">
+              <span>📊</span> Analítica Predictiva (ML)
+            </div>
+            <div class="card-subtitle" style="font-size:11px" id="ml-model-subtitle">Random Forest · Regresión · K-Means · ARIMA</div>
+          </div>
+          <span class="badge badge-info" id="ml-active-model-badge" style="font-size:10px">CRISP-DM</span>
+        </div>
+        <div style="padding:var(--spacing-xs) var(--spacing-md) var(--spacing-md);display:flex;flex-direction:column;gap:8px">
+          <div style="position:relative;width:100%;height:110px;">
+            <canvas id="arima-forecast-canvas" width="340" height="110" style="width:100%;height:110px;display:block;border-radius:var(--radius-sm);background:rgba(10,14,26,0.85);border:1px solid rgba(0,212,255,0.15)"></canvas>
+          </div>
+          <div id="arima-peak-summary" style="font-size:10px;color:var(--text-secondary);font-family:var(--font-mono)">
+            Pronóstico ARIMA (14 días): cargando serie temporal...
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+            <label for="ml-eval-preset" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Perfil de telemetría ML</label>
+            <select id="ml-eval-preset" style="flex:1;min-width:165px;padding:6px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);border-radius:var(--radius-sm);font-size:11px">
+              <option value="selected">Detección activa o caso intrusión</option>
+              <option value="critical">Intrusion DIY alta velocidad (60 m)</option>
+              <option value="bird">Falso positivo ave (1600 m)</option>
+            </select>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-predict-ml" style="font-size:11px" title="Evaluar riesgo continuo, probabilidad y clúster sin crear alertas">Evaluar ML</button>
+          </div>
+          <section id="ml-prediction-result" hidden aria-label="Resultado de evaluación predictiva ML"
+            style="border:1px solid rgba(0,212,255,0.2);background:rgba(0,212,255,0.04);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+              <strong id="ml-pred-threat" style="color:var(--text-primary)"></strong>
+              <span id="ml-pred-risk" class="badge badge-info" style="font-size:10px"></span>
+            </div>
+            <div id="ml-pred-breach" style="color:var(--text-secondary);font-size:10px"></div>
+            <div id="ml-pred-profile" style="color:var(--text-accent);font-size:10px;font-weight:600"></div>
+            <ul id="ml-pred-factors" style="font-size:10px;color:var(--text-muted);padding-left:16px;margin:2px 0 0"></ul>
+          </section>
+        </div>
+      </div>
+
+      <!-- Agentic AI Monitor Widget (LangGraph + RAG + Guardrails + LLMOps) -->
+      <div class="card" style="flex-shrink:0;border:1px solid rgba(0,212,255,0.22)" role="region" aria-label="Asistente y Monitor Agéntico IA (LangGraph)">
+        <div class="card-header" style="padding-bottom:var(--spacing-xs)">
+          <div>
+            <div class="card-title" style="display:flex;align-items:center;gap:6px;font-size:13px">
+              <span>🧠</span> Agente IA (LangGraph + RAG)
+            </div>
+            <div class="card-subtitle" style="font-size:11px" id="agent-llmops-summary">Qdrant RAG · Guardrails IN/OUT · LLMOps</div>
+          </div>
+          <span class="badge badge-info" id="agent-guardrail-badge" style="font-size:10px">LISTO</span>
+        </div>
+        <div style="padding:var(--spacing-xs) var(--spacing-md) var(--spacing-md);display:flex;flex-direction:column;gap:7px">
+          <label for="agent-query-input" style="font-size:11px;color:var(--text-secondary)">Consulta operativa o táctica (verificada por Guardrails)</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="text" id="agent-query-input" maxlength="500"
+              placeholder="Ej: Protocolo cota 120 m y pico ARIMA en Bucaramanga"
+              style="flex:1;min-width:170px;padding:6px 8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);border-radius:var(--radius-sm);font-size:11px" />
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-agent-query" style="font-size:11px" title="Ejecutar grafo LangGraph con RAG, herramientas y guardrails">Consultar Agente</button>
+          </div>
+          <section id="agent-monitor-result" hidden aria-label="Respuesta y traza del Agente IA"
+            style="border:1px solid rgba(0,212,255,0.2);background:rgba(0,212,255,0.04);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+              <strong id="agent-res-action" style="color:var(--text-primary)"></strong>
+              <span id="agent-res-priority" class="badge badge-info" style="font-size:10px"></span>
+            </div>
+            <p id="agent-res-summary" style="color:var(--text-secondary);margin:0;line-height:1.45"></p>
+            <div id="agent-res-trace" style="font-family:var(--font-mono);font-size:10px;color:var(--text-accent)"></div>
+            <div id="agent-res-tools" style="font-size:10px;color:var(--text-muted)"></div>
+            <ul id="agent-res-citations" style="font-size:10px;color:var(--text-muted);padding-left:16px;margin:2px 0 0"></ul>
+          </section>
         </div>
       </div>
 
