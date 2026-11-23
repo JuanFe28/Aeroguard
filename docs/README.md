@@ -58,6 +58,7 @@ Actualizado: 22-11-2026. Este índice ordena toda la documentación del reposito
 | [Especificación OpenAPI](AeroGuard_OpenAPI.json) | Contrato de la API | Vigente |
 | [Colección Postman](AeroGuard_Postman_Collection.json) y carpeta `postman/` | Peticiones de ejemplo | Vigente |
 | [Minería de datos CRISP-DM](MINERIA_DATOS_CRISP_DM.md) | 6 modelos predictivos (sin *data leakage*), Transformación de Datos, Matriz de Madurez IA (6×5) y Manual de Orange con guía de capturas; **datos sintéticos** | Vigente (académico) |
+| [Informe Word: Minería de datos y Orange (.docx)](AeroGuard_Mineria_Datos_Orange_CRISP_DM.docx) | Documento Word compilado con el análisis CRISP-DM, tablas comparativas, 2 figuras ARIMA/resumen y las 7 capturas reales de Orange 3.41 | Vigente (académico) |
 | [Flujo de Orange Data Mining](../data_mining/orange/README.md) | Flujo `.ows` listo y 3 datasets `.csv.gz` (clasificación + regresión continua `risk_score` + K-Means) | Vigente (académico) |
 | [Arquitectura de Agentes de IA, RAG, Guardrails y LLMOps](ARQUITECTURA_AGENTES_IA.md) | Grafo LangGraph, Qdrant embebido (`conocimiento_cuas/`), Guardrails IN/OUT, MCP, 7 propiedades y 9 tipos de agentes | Vigente |
 | [Base de conocimiento RAG C-UAS](conocimiento_cuas/01_protocolos_operativos_cuas.md) | Corpus Markdown indexado en Qdrant (protocolos C-UAS, geocercas Colombia, CRISP-DM y guía operativa) | Vigente |

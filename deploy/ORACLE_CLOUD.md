@@ -20,6 +20,7 @@ El perfil base en `deploy/compose.oracle.yml` evita levantar un contenedor vecto
 | **Total base + monitoreo LLMOps** | **Observabilidad** | **`2816 MiB` (~2.75 GiB)** | **`2.30` nominal (`< 2 vCPU` reales en reposo)** | Bajo techo 4 GiB |
 | `qdrant` (`--profile qdrant-external`) | Opcional escalado | `256 MiB` | `0.25` | `default` (interna) |
 | `ai-worker` (`--profile ai`) | Opcional detección | `512 MiB` | `0.50` | `default` |
+| `tunnel` (`--profile tunnel`) | Opcional enlace HTTPS público | `96 MiB` | `0.15` | `default`, `egress` |
 
 > [!NOTE]
 > El almacenamiento vectorial local de `qdrant_data:/tmp/aeroguard/qdrant` comparte el contenedor `backend` y permite escalar sin cambios de código activando `--profile qdrant-external` y definiendo `QDRANT_URL=http://qdrant:6333` en `deploy/.env`.
@@ -88,5 +89,30 @@ En `deploy/.env` (basado en `.env.example`):
 ## 5. Seguridad de Red en Oracle Cloud
 
 - `postgres`, `rabbitmq` y `qdrant` (opcional) viven exclusivamente en la red `default` (`internal: true`), sin puertos publicados ni salida a Internet.
-- `frontend` publica únicamente `127.0.0.1:${HTTP_PORT:-8080}:80`; expón el puerto público en Oracle mediante Caddy/Nginx TLS en el host o Security Lists restringidas + túnel SSH.
+- `frontend` publica únicamente `127.0.0.1:${HTTP_PORT:-8080}:80`; expón el puerto público en Oracle mediante el perfil `--profile tunnel` (Cloudflare Quick Tunnel HTTPS), Caddy/Nginx TLS en el host o Security Lists restringidas + túnel SSH.
 - `backend` usa `read_only: true`, `cap_drop: [ALL]`, `no-new-privileges:true` y solo escribe en `/tmp` (`tmpfs`), `reports_data` (`/tmp/aeroguard/reports`) y `qdrant_data` (`/tmp/aeroguard/qdrant`).
+
+### 5.1 Enlace Público HTTPS sin Comandos desde el PC (`--profile tunnel`)
+
+Para acceder a AeroGuard directamente desde cualquier navegador sin abrir puertos del firewall ni ejecutar túneles SSH desde el PC:
+
+1. **Activar el perfil `tunnel` (`cloudflare/cloudflared:latest`):**
+   ```bash
+   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml --profile tunnel up -d
+   ```
+   *(Con monitoreo incluido, añade `--env-file deploy/.env.monitoring -f deploy/compose.monitoring.yml`.)* El contenedor `tunnel` se conecta tanto a la red interna `default` (para alcanzar `http://frontend:80`) como a `egress` (para publicar el túnel cifrado hacia Cloudflare).
+2. **Obtener la URL pública generada:**
+   ```bash
+   docker logs aeroguard-oracle-tunnel-1 | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' | tail -n 1
+   ```
+3. **Autorizar la URL en `PUBLIC_FRONTEND_URL` y `BACKEND_CORS_ORIGINS` (`deploy/.env`) y recargar `backend`:**
+   ```env
+   PUBLIC_FRONTEND_URL=https://<subdominio>.trycloudflare.com
+   BACKEND_CORS_ORIGINS=["http://localhost:8080","https://<subdominio>.trycloudflare.com"]
+   ```
+   ```bash
+   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml --profile tunnel up -d --force-recreate --no-deps backend
+   ```
+
+> [!IMPORTANT]
+> Un Cloudflare Quick Tunnel (`*.trycloudflare.com`) mantiene la URL activa mientras el contenedor permanezca encendido, pero asigna un subdominio aleatorio distinto si el contenedor `tunnel` se recrea o reinicia desde cero. Para una URL fija permanente, sustituye el comando por un Cloudflare Named Tunnel (`tunnel run --token ...`) asociado a un dominio propio.

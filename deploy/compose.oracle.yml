@@ -3,6 +3,8 @@
 #   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml up -d --build
 # Con monitoreo LLMOps (Prometheus + Grafana):
 #   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml -f deploy/compose.monitoring.yml up -d --build
+# Con enlace HTTPS público automático (Cloudflare Quick Tunnel *.trycloudflare.com sin abrir puertos en firewall):
+#   docker compose --env-file deploy/.env -f deploy/compose.oracle.yml --profile tunnel up -d
 # Con Qdrant externo opcional: agregar `--profile qdrant-external` y definir QDRANT_URL=http://qdrant:6333
 
 name: ${COMPOSE_PROJECT_NAME:-aeroguard-oracle}
@@ -135,6 +137,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+
+  tunnel:
+    profiles: [tunnel]
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    mem_limit: 96m
+    cpus: 0.15
+    security_opt: [no-new-privileges:true]
+    command: ["tunnel", "--no-autoupdate", "--url", "http://frontend:80"]
+    networks: [default, egress]
+    depends_on:
+      frontend: {condition: service_healthy}
 
   qdrant:
     profiles: [qdrant-external]
