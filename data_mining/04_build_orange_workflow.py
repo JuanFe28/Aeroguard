@@ -120,8 +120,6 @@ def build_xml_scheme(extended: bool, workflow_path: str) -> None:
         ("2", "0", "4", "Data", "Data", "data", "data"),
         ("3", "0", "5", "Data", "Data", "data", "data"),
         ("4", "0", "6", "Data", "Data", "data", "data"),
-        ("5", "0", "7", "Data", "Data", "data", "data"),
-        ("6", "0", "8", "Data", "Data", "data", "data"),
         ("7", "0", "9", "Data", "Data", "data", "train_data"),
         ("8", "1", "9", "Data", "Test Data", "data", "test_data"),
         ("9", "6", "9", "Learner", "Learner", "learner", "learner"),
@@ -130,12 +128,15 @@ def build_xml_scheme(extended: bool, workflow_path: str) -> None:
         ("12", "9", "10", "Evaluation Results", "Evaluation Results", "evaluations_results", "evaluation_results"),
         ("13", "6", "11", "Model", "Tree", "model", "tree"),
     ]
+    if not extended:
+        links.insert(5, ("5", "0", "7", "Data", "Data", "data", "data"))
+        links.insert(6, ("6", "0", "8", "Data", "Data", "data", "data"))
     props = [
         ("0", "pickle", _make_recent_path_pickle_b64(TRAIN)),
         ("1", "pickle", _make_recent_path_pickle_b64(TEST)),
         ("6", "literal", "{'max_depth': 12, 'limit_depth': True, 'min_internal': 10, 'limit_min_internal': True, 'min_leaf': 5, 'limit_min_leaf': True}"),
         ("7", "literal", "{'n_estimators': 100, 'max_depth': 16, 'use_max_depth': True, 'min_samples_split': 5, 'use_min_samples_split': True, 'use_random_state': True}"),
-        ("9", "literal", "{'resampling': 5}"),
+        ("9", "literal", "{'__version__': 4, 'resampling': 5}"),
     ]
 
     if extended:
@@ -146,22 +147,28 @@ def build_xml_scheme(extended: bool, workflow_path: str) -> None:
                 ("14", "File", "Orange.widgets.data.owfile.OWFile", "Orange3", "Regresión riesgo (dataset)", "(80, 620)"),
                 ("15", "Linear Regression", "Orange.widgets.model.owlinearregression.OWLinearRegression", "Orange3", "Regresión lineal", "(520, 620)"),
                 ("16", "Test and Score", "Orange.widgets.evaluate.owtestandscore.OWTestAndScore", "Orange3", "Test and Score (Regresión)", "(760, 620)"),
+                ("17", "Preprocess", "Orange.widgets.data.owpreprocess.OWPreprocess", "Orange3", "Normalizar (LogReg)", "(300, 380)"),
             ]
         )
         links.extend(
             [
                 ("14", "0", "12", "Data", "Data", "data", "data"),
-                ("15", "12", "13", "Annotated Data", "Data", "annotated_data", "data"),
-                ("16", "14", "15", "Data", "Data", "data", "data"),
-                ("17", "14", "16", "Data", "Data", "data", "train_data"),
-                ("18", "15", "16", "Learner", "Learner", "learner", "learner"),
+                ("15", "12", "13", "Data", "Data", "annotated_data", "data"),
+                ("16", "14", "16", "Data", "Data", "data", "train_data"),
+                ("17", "15", "16", "Learner", "Learner", "learner", "learner"),
+                ("18", "17", "8", "Preprocessor", "Preprocessor", "preprocessor", "preprocessor"),
             ]
         )
         props.extend(
             [
                 ("12", "literal", "{'k': 4}"),
                 ("14", "pickle", _make_recent_path_pickle_b64(REGRESSION_DATA)),
-                ("16", "literal", "{'resampling': 0}"),
+                ("16", "literal", "{'__version__': 4, 'resampling': 0, 'n_folds': 2}"),
+                (
+                    "17",
+                    "literal",
+                    "{'__version__': 2, 'storedsettings': {'preprocessors': [('orange.preprocess.continuize', {}), ('orange.preprocess.impute', {}), ('orange.preprocess.scale', {})]}}",
+                ),
             ]
         )
 
@@ -281,11 +288,12 @@ def main():
                    "min_samples_split": 5, "use_min_samples_split": True, "use_random_state": True})
     logreg = node("Orange.widgets.model.owlogisticregression.OWLogisticRegression", "Regresión logística", 520, 380)
     score = node("Orange.widgets.evaluate.owtestandscore.OWTestAndScore", "Test and Score", 760, 300,
-                 {"resampling": TEST_ON_TEST_DATA})
+                 {"__version__": 4, "resampling": TEST_ON_TEST_DATA})
     confusion = node("Orange.widgets.evaluate.owconfusionmatrix.OWConfusionMatrix", "Matriz de confusión", 960, 300)
     viewer = node("Orange.widgets.visualize.owtreeviewer.OWTreeGraph", "Visor del árbol", 760, 140)
 
-    for sink in (table, stats, boxplot, rank, tree, forest, logreg):
+    data_sinks = (table, stats, boxplot, rank, tree) if args.extended else (table, stats, boxplot, rank, tree, forest, logreg)
+    for sink in data_sinks:
         link(train, "Data", sink, "Data")
     link(train, "Data", score, "Data")
     link(test, "Data", score, "Test Data")
@@ -295,16 +303,33 @@ def main():
     link(tree, "Model", viewer, "Tree")
 
     if args.extended:
+        preprocess = node(
+            "Orange.widgets.data.owpreprocess.OWPreprocess",
+            "Normalizar (LogReg)",
+            300,
+            380,
+            {
+                "__version__": 2,
+                "storedsettings": {
+                    "preprocessors": [
+                        ("orange.preprocess.continuize", {}),
+                        ("orange.preprocess.impute", {}),
+                        ("orange.preprocess.scale", {}),
+                    ]
+                },
+            },
+        )
+        link(preprocess, "Preprocessor", logreg, "Preprocessor")
+
         kmeans = node("Orange.widgets.unsupervised.owkmeans.OWKMeans", "K-Means (k=4)", 520, 500, {"k": 4})
         scatter = node("Orange.widgets.visualize.owscatterplot.OWScatterPlot", "Scatter Plot (Perfiles)", 760, 500)
         link(train, "Data", kmeans, "Data")
-        link(kmeans, "Annotated Data", scatter, "Data")
+        link(kmeans, "Data", scatter, "Data")
 
         reg_file = node("Orange.widgets.data.owfile.OWFile", "Regresión riesgo (dataset)", 80, 620, file_settings(REGRESSION_DATA))
         linreg = node("Orange.widgets.model.owlinearregression.OWLinearRegression", "Regresión lineal", 520, 620)
         score_reg = node("Orange.widgets.evaluate.owtestandscore.OWTestAndScore", "Test and Score (Regresión)",
-                         760, 620, {"resampling": CROSS_VALIDATION})
-        link(reg_file, "Data", linreg, "Data")
+                         760, 620, {"__version__": 4, "resampling": CROSS_VALIDATION, "n_folds": 2})
         link(reg_file, "Data", score_reg, "Data")
         link(linreg, "Learner", score_reg, "Learner")
 

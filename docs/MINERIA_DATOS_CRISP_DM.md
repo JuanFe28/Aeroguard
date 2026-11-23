@@ -196,50 +196,42 @@ Antes de abrir Orange, asegúrate de haber generado los tres archivos `.csv.gz` 
 ```
 
 #### Flujo Completo Listo para Abrir (`AeroGuard_CRISP_DM_6Modelos.ows` y `AeroGuard_CRISP_DM.ows`)
-1. Inicia **Orange** y selecciona en el menú superior **File $\rightarrow$ Open...** $\rightarrow$ abre [`data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`](../data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows) *(flujo extendido de **17 widgets** que ya incluye K-Means y Regresión Lineal pre-conectados; también se conserva el flujo base de 12 widgets [`AeroGuard_CRISP_DM.ows`](../data_mining/orange/AeroGuard_CRISP_DM.ows))*.
+1. Inicia **Orange** y selecciona en el menú superior **File $\rightarrow$ Open...** $\rightarrow$ abre [`data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`](../data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows) *(flujo extendido de **18 widgets** en Orange 3.41 que incluye el preprocesador `Normalizar (LogReg)` para convergencia rápida de Regresión Logística, **K-Means (`k=4`) $\rightarrow$ `Scatter Plot`** y **`Regresión lineal` $\rightarrow$ `Test and Score (Regresión)`** pre-conectados; también se conserva el flujo base de 12 widgets [`AeroGuard_CRISP_DM.ows`](../data_mining/orange/AeroGuard_CRISP_DM.ows))*.
 2. Verifica que los tres widgets **File** de la izquierda cargaron automáticamente `aeroguard_entrenamiento.csv.gz` (108,750 filas), `aeroguard_prueba_lote2.csv.gz` (104,400 filas) y `aeroguard_regresion_riesgo.csv.gz` (108,750 filas). *(Si alguno aparece con signo de advertencia porque moviste la carpeta, haz doble clic en él, pulsa el icono de carpeta y selecciona el `.csv.gz` correspondiente dentro de `data_mining/orange/`).*
 
-> **[INSERTAR CAPTURA 1]**  
-> * **Archivo abierto:** `data_mining/orange/AeroGuard_CRISP_DM_6Modelos.ows`  
-> * **Acción:** Vista principal del lienzo completo (canvas de Orange) sin ventanas encima.  
-> * **Qué debe verse:** Los 17 widgets conectados desde los 3 nodos `File` hasta EDA, los 3 modelos de clasificación + `Test and Score`, `Matriz de confusión`, `Visor del árbol`, **`K-Means (k=4)` $\rightarrow$ `Scatter Plot`** y **`Regresión lineal` $\rightarrow$ `Test and Score (Regresión)`**.
+![Captura 1: Lienzo completo de 18 widgets en Orange Data Mining 3.41](../data_mining/orange/capturas/captura_01_canvas_completo.png)
+*Captura 1 — Vista principal del flujo `AeroGuard_CRISP_DM_6Modelos.ows` en Orange 3.41 (18 widgets y 17 conexiones desde los 3 datasets hasta EDA, modelos de clasificación, `Test and Score`, `Matriz de confusión`, `Visor del árbol`, `K-Means (k=4) -> Scatter Plot` y `Regresión lineal -> Test and Score (Regresión)`).*
 
 3. **Inspección de columnas y variable objetivo:** Haz doble clic en el widget **`Entrenamiento (dataset principal)`** (`File`). Observa la tabla inferior donde `threat_level` tiene el rol **Target**, las 13 variables operativas tienen el rol **Feature** y los IDs/coordenadas figuran como **Meta**.
 
-> **[INSERTAR CAPTURA 2]**  
-> * **Widget (doble clic):** `Entrenamiento (dataset principal)` (widget `File` superior).  
-> * **Qué capturar:** Ventana de configuración del archivo mostrando `108750 instances`, `13 features`, `threat_level` como `Target` (categorical) y las columnas `Meta`.
+![Captura 2: Carga y tipado de aeroguard_entrenamiento.csv.gz en widget File](../data_mining/orange/capturas/captura_02_archivo_entrenamiento.png)
+*Captura 2 — Configuración del archivo principal mostrando `108750 instances`, `13 features`, clase discreta de 4 valores (`threat_level`) y 6 atributos `Meta`.*
 
-4. **Comprensión y Ranking de Variables (Fase 2 CRISP-DM):** Haz doble clic en **`Box Plot`** y luego en **`Ranking de variables`** (`Rank`). En *Box Plot*, selecciona `distance_to_zone_m` agrupado por `threat_level` para observar cómo la cercanía dispara la severidad. En *Rank*, observa las métricas *Gain Ratio* y *Gini* ordenando `distance_to_zone_m`, `flight_pattern`, `speed_ms` y `drone_class`.
+4. **Comprensión y Ranking de Variables (Fase 2 CRISP-DM):** Haz doble clic en **`Box Plot`** y luego en **`Ranking de variables`** (`Rank`). En *Box Plot*, selecciona `distance_to_zone_m` agrupado por `threat_level` para observar cómo la cercanía dispara la severidad (`CRITICAL: 261.3 ± 227.1 m` frente a `LOW: 1291.5 ± 498.7 m`, `ANOVA = 18067.773, p = 0.000`). En *Rank*, observa *Gain Ratio* y *Gini* encabezados por `distance_to_zone_m`, `drone_class`, `speed_ms` y `flight_pattern`.
 
-> **[INSERTAR CAPTURA 3]**  
-> * **Widgets (doble clic):** `Box Plot` (variable `distance_to_zone_m` agrupada por `threat_level`) y/o `Ranking de variables`.  
-> * **Qué capturar:** Gráfica comparativa por categoría de amenaza junto con el ranking de variables más influyentes.
+![Captura 3: Box Plot (distance_to_zone_m por threat_level) y Ranking de variables](../data_mining/orange/capturas/captura_03_eda_boxplot_ranking.png)
+*Captura 3 — Comparación EDA en `Box Plot` (izquierda) y ranking de importancia de variables en `Rank` (derecha) sobre los 108,750 registros limpios.*
 
-5. **Evaluación Comparativa en Lote Independiente (Fase 5):** Haz doble clic en **`Test and Score`**. Verifica en la columna izquierda que esté marcado **`Test on test data`** (evaluación ciega contra Lote 2). Observa la tabla central con las métricas `CA`, `F1`, `Precision`, `Recall` y `AUC` de **Random Forest**, **Árbol de decisión** y **Regresión logística**.
+5. **Evaluación Comparativa en Lote Independiente (Fase 5):** Haz doble clic en **`Test and Score`**. Verifica en la columna izquierda que esté marcado **`Test on test data`** (evaluación ciega contra Lote 2 de 104,400 registros). En Orange 3.41 se obtuvieron: **Random Forest** (`AUC = 0.995`, `CA = 0.954`, `F1 = 0.954`), **Árbol de decisión** (`AUC = 0.991`, `CA = 0.953`, `F1 = 0.953`) y **Regresión logística** preprocesada con *Normalizar* (`AUC = 0.947`, `CA = 0.804`, `F1 = 0.804`, ~15 puntos porcentuales por debajo frente a fronteras no lineales).
 
-> **[INSERTAR CAPTURA 4]**  
-> * **Widget (doble clic):** `Test and Score` (conectado a `Prueba independiente (lote 2)`).  
-> * **Qué capturar:** Ventana de `Test and Score` mostrando la tabla comparativa completa (`Random Forest ~0.954`, `Árbol ~0.948`, `Regresión logística ~0.583`) con `Test on test data` seleccionado.
+![Captura 4: Test and Score en evaluación ciega sobre Lote 2](../data_mining/orange/capturas/captura_04_test_and_score_lote2.png)
+*Captura 4 — Ventana de `Test and Score` con `Test on test data` activo comparando Árbol de decisión, Random Forest y Regresión logística sobre Lote 2.*
 
-6. **Matriz de Confusión y Reglas del Árbol:** Haz doble clic en **`Matriz de confusión`** (cambia el selector inferior *Show* a *Proportion of predicted* o *Number of instances* con `Random Forest` seleccionado) y luego abre **`Visor del árbol`** para explorar las ramas de decisión explicables.
+6. **Matriz de Confusión y Reglas del Árbol:** Haz doble clic en **`Matriz de confusión`** con `Random Forest` seleccionado y abre **`Visor del árbol`** (`1,205` nodos, `603` hojas) para explorar las particiones jerárquicas (`distance_to_zone_m`, `flight_pattern`, `ai_confidence`).
 
-> **[INSERTAR CAPTURA 5]**  
-> * **Widgets (doble clic):** `Matriz de confusión` (con modelo `Random Forest` seleccionado) y `Visor del árbol`.  
-> * **Qué capturar:** La matriz 4×4 (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) y los primeros niveles jerárquicos del árbol (`distance_to_zone_m`, `drone_class`, `speed_ms`).
+![Captura 5: Matriz de confusión de Random Forest y Visor del árbol de decisión](../data_mining/orange/capturas/captura_05_matriz_confusion_y_arbol.png)
+*Captura 5 — Matriz de confusión 4×4 de Random Forest sobre 104,400 casos del Lote 2 (izquierda) y primeros niveles jerárquicos en `Visor del árbol` (derecha).*
 
 #### Ramas Adicionales Ya Conectadas en `AeroGuard_CRISP_DM_6Modelos.ows` (K-Means + Regresión Lineal)
-7. **Clustering K-Means (Perfiles de Vuelo):** En el mismo lienzo de `AeroGuard_CRISP_DM_6Modelos.ows`, ya están conectados **`K-Means (k=4)`** y **`Scatter Plot (Perfiles)`**. Haz doble clic en **k-Means** (para confirmar `4` clústeres usando `distance_to_zone_m`, `altitude_m`, `speed_ms`) y luego doble clic en **Scatter Plot (Perfiles)** configurando eje X = `distance_to_zone_m`, eje Y = `altitude_m` (o `speed_ms`) y *Color* = `Cluster`.
+7. **Clustering K-Means (Perfiles de Vuelo):** En el mismo lienzo de `AeroGuard_CRISP_DM_6Modelos.ows`, ya están conectados **`K-Means (k=4)`** y **`Scatter Plot (Perfiles)`** con eje `X = distance_to_zone_m`, eje `Y = altitude_m` y `Color = Cluster` (`C1..C4`).
 
-> **[INSERTAR CAPTURA 6]**  
-> * **Widgets (doble clic):** `K-Means (k=4)` y `Scatter Plot (Perfiles)` en `AeroGuard_CRISP_DM_6Modelos.ows`.  
-> * **Qué capturar:** Ventana de `Scatter Plot` mostrando la segmentación por colores de los 4 clústeres sobre `distance_to_zone_m` vs `altitude_m`.
+![Captura 6: K-Means (k=4) y Scatter Plot de perfiles (distance_to_zone_m vs altitude_m)](../data_mining/orange/capturas/captura_06_kmeans_scatter.png)
+*Captura 6 — Configuración de `K-Means (k=4)` normalizado con KMeans++ (izquierda) y proyección `Scatter Plot` por `Cluster` sobre `distance_to_zone_m` vs `altitude_m` (derecha).*
 
-8. **Regresión Lineal sobre `risk_score`:** En la fila inferior de `AeroGuard_CRISP_DM_6Modelos.ows` ya figuran **`Regresión riesgo (dataset)`** (`aeroguard_regresion_riesgo.csv.gz`), **`Regresión lineal`** y **`Test and Score (Regresión)`** pre-conectados. Haz doble clic en **`Test and Score (Regresión)`** (validación cruzada 5 folds) para ver las métricas continuas.
+8. **Regresión Lineal sobre `risk_score`:** En la fila inferior de `AeroGuard_CRISP_DM_6Modelos.ows` figuran **`Regresión riesgo (dataset)`** (`aeroguard_regresion_riesgo.csv.gz`), **`Regresión lineal`** y **`Test and Score (Regresión)`** (validación cruzada 5 folds), obteniendo **`MSE = 33.732`, `RMSE = 5.808`, `MAE = 4.384` y `R2 = 0.927`**.
 
-> **[INSERTAR CAPTURA 7]**  
-> * **Widgets (doble clic):** `Test and Score (Regresión)` conectado a `Regresión lineal` sobre `aeroguard_regresion_riesgo.csv.gz` en `AeroGuard_CRISP_DM_6Modelos.ows`.  
-> * **Qué capturar:** Tabla de evaluación de regresión mostrando `MSE`, `RMSE`, `MAE` y **`R2` (~0.935)** sobre el puntaje continuo `risk_score`.
+![Captura 7: Test and Score de Regresión Lineal (CV 5 folds sobre risk_score)](../data_mining/orange/capturas/captura_07_regresion_lineal.png)
+*Captura 7 — Evaluación en `Test and Score (Regresión)` (CV 5 folds) mostrando `MSE`, `RMSE`, `MAE` y `R2 = 0.927` sobre `risk_score`.*
 
 *(Nota sobre ARIMA: Orange 3 base está orientado a análisis tabular; las series temporales ARIMA(1,1,1) se ejecutan en `data_mining/05_predictive_models_benchmark.py` con `statsmodels`, generando `09_arima_pronostico_incursiones.png` y alimentando el endpoint `/api/v1/predictions/forecast` en tiempo real.)*
 
