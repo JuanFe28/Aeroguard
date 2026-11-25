@@ -10,6 +10,8 @@ La API y el frontend usan datos persistidos por defecto. La exposición local pu
 
 Toda la documentación está ordenada por propósito en el [mapa de documentación](docs/README.md). Accesos rápidos:
 
+- [Tablero, hitos y fichas de trabajo](docs/proyecto/07_TABLERO_Y_FICHAS_DE_TRABAJO.md).
+- [Revisión integral y ruta de validación](docs/proyecto/08_REVISION_INTEGRAL_Y_RUTA_DE_VALIDACION.md).
 - [Resumen ejecutivo](docs/proyecto/01_RESUMEN_EJECUTIVO.md): qué es AeroGuard, propósito, estado y límites.
 - [Propuesta del proyecto](docs/proyecto/02_PROPUESTA_PROYECTO.md) y [guía de postulación](docs/proyecto/06_GUIA_DE_POSTULACION.md): para convocatorias, fondos y becas.
 - [Arquitectura técnica](docs/tecnica/ARQUITECTURA.md) y [manual de usuario](docs/tecnica/MANUAL_DE_USUARIO.md).
